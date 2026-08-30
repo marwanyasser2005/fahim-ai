@@ -1,0 +1,195 @@
+[
+  {
+    "id": "moe-platforms",
+    "title": {
+      "ar": "منصات التعليم الرسمية",
+      "en": "Official education platforms"
+    },
+    "description": {
+      "ar": "بوابة وزارة التربية والتعليم المصرية للمنصات التعليمية والبث والمراجعات والنماذج الاسترشادية.",
+      "en": "The Egyptian Ministry of Education gateway to learning platforms, broadcasts, reviews, and model assessments."
+    },
+    "owner": {
+      "ar": "وزارة التربية والتعليم والتعليم الفني",
+      "en": "Ministry of Education and Technical Education"
+    },
+    "url": "https://moe.gov.eg/educationalplatform/",
+    "authority": "official",
+    "category": "curriculum",
+    "subjects": ["all"],
+    "stages": ["primary", "preparatory", "secondary"],
+    "keywords": ["وزارة", "منهج", "امتحان", "نماذج", "مدرسة", "ثانوي", "إعدادي", "ابتدائي", "curriculum", "exam", "school"],
+    "verifiedAt": "2026-08-07"
+  },
+  {
+    "id": "moe-student-books",
+    "title": {
+      "ar": "الكتب الدراسية الرقمية",
+      "en": "Digital student books"
+    },
+    "description": {
+      "ar": "المدخل الرسمي للكتب الدراسية الرقمية المنشورة للطلاب في مصر؛ المرجع الأول لمطابقة موضوعات المنهج.",
+      "en": "The official entry point for Egyptian digital student books and the primary reference for curriculum alignment."
+    },
+    "owner": {
+      "ar": "وزارة التربية والتعليم والتعليم الفني",
+      "en": "Ministry of Education and Technical Education"
+    },
+    "url": "https://studentbooks.moe.gov.eg/",
+    "authority": "official",
+    "category": "curriculum",
+    "subjects": ["arabic", "english", "mathematics", "science", "physics", "chemistry", "biology", "history", "geography"],
+    "stages": ["primary", "preparatory", "secondary"],
+    "keywords": ["كتاب", "كتب", "منهج", "درس", "الصف", "الترم", "book", "textbook", "curriculum", "lesson"],
+    "verifiedAt": "2026-08-07"
+  },
+  {
+    "id": "ekb",
+    "title": {
+      "ar": "بنك المعرفة المصري",
+      "en": "Egyptian Knowledge Bank"
+    },
+    "description": {
+      "ar": "بوابة مصرية لمكتبات ومصادر بحثية وتعليمية رقمية، وقد يختلف الوصول باختلاف نوع المستخدم والخدمة.",
+      "en": "Egypt's portal to digital research and educational libraries; access varies by user and service."
+    },
+    "owner": {
+      "ar": "بنك المعرفة المصري",
+      "en": "Egyptian Knowledge Bank"
+    },
+    "url": "https://www.ekb.eg/",
+    "authority": "official",
+    "category": "research",
+    "subjects": ["all"],
+    "stages": ["secondary", "university", "professional"],
+    "keywords": ["بحث", "مصدر", "مقال", "جامعة", "علوم", "research", "journal", "university", "science"],
+    "verifiedAt": "2026-08-07"
+  },
+  {
+    "id": "moe-online-learning",
+    "title": {
+      "ar": "بوابة التعلّم الإلكتروني للوزارة",
+      "en": "Ministry online learning portal"
+    },
+    "description": {
+      "ar": "بوابة تدريب وتعلّم إلكتروني تابعة لوزارة التربية والتعليم، تضم فيديوهات قصيرة وملفات واختبارات وشهادات إتمام وفق ما تتيحه البرامج المنشورة.",
+      "en": "A Ministry of Education learning and training portal with short videos, files, quizzes, and completion certificates where offered by published programs."
+    },
+    "owner": {
+      "ar": "وزارة التربية والتعليم والتعليم الفني",
+      "en": "Ministry of Education and Technical Education"
+    },
+    "url": "https://developandchange.moe.gov.eg/",
+    "authority": "official",
+    "category": "platform",
+    "subjects": [
+      "all"
+    ],
+    "stages": [
+      "secondary",
+      "university",
+      "professional"
+    ],
+    "keywords": [
+      "تدريب",
+      "اختبار",
+      "شهادة",
+      "معلم",
+      "تعلم إلكتروني",
+      "training",
+      "quiz",
+      "certificate",
+      "teacher",
+      "e-learning"
+    ],
+    "verifiedAt": "2026-08-07"
+  },
+  {
+    "id": "maharatech",
+    "title": {
+      "ar": "مهارة تك — معهد تكنولوجيا المعلومات",
+      "en": "Mahara-Tech — Information Technology Institute"
+    },
+    "description": {
+      "ar": "مسارات ودورات تقنية مرتبطة بالوظائف، مع شهادات أو شارات إتمام من معهد تكنولوجيا المعلومات وشركائه.",
+      "en": "Job-related technology paths and courses with completion certificates or badges from ITI and its partners."
+    },
+    "owner": {
+      "ar": "معهد تكنولوجيا المعلومات — وزارة الاتصالات",
+      "en": "Information Technology Institute — MCIT"
+    },
+    "url": "https://maharatech.gov.eg/",
+    "authority": "institutional",
+    "category": "career",
+    "subjects": ["programming", "artificial-intelligence", "cybersecurity", "data-science", "freelancing"],
+    "stages": ["secondary", "university", "professional"],
+    "keywords": ["برمجة", "ذكاء اصطناعي", "أمن سيبراني", "بيانات", "وظيفة", "عمل حر", "programming", "ai", "cybersecurity", "data", "career"],
+    "verifiedAt": "2026-08-07"
+  },
+  {
+    "id": "edraak",
+    "title": {
+      "ar": "إدراك",
+      "en": "Edraak"
+    },
+    "description": {
+      "ar": "منصة عربية مجانية للتعليم المدرسي والمهارات، تقدم فيديوهات وأسئلة ومساقات وشهادات إتمام.",
+      "en": "A free Arabic K–12 and skills platform offering videos, questions, courses, and completion certificates."
+    },
+    "owner": {
+      "ar": "مؤسسة الملكة رانيا للتعليم والتنمية",
+      "en": "Queen Rania Foundation"
+    },
+    "url": "https://www.edraak.org/",
+    "authority": "institutional",
+    "category": "platform",
+    "subjects": ["all"],
+    "stages": ["primary", "preparatory", "secondary", "university", "professional"],
+    "keywords": ["تعليم عربي", "دورة", "شهادة", "مدرسة", "مهارات", "arabic", "course", "certificate", "school", "skills"],
+    "verifiedAt": "2026-08-07"
+  },
+  {
+    "id": "nagwa-egypt",
+    "title": {
+      "ar": "نجوى مصر",
+      "en": "Nagwa Egypt"
+    },
+    "description": {
+      "ar": "محتوى منظم حسب الصف والمنهج المصري، يشمل دروسًا وشوارح وفيديوهات وأوراق عمل وخطط دروس.",
+      "en": "Egyptian curriculum content organized by grade, including lessons, explainers, videos, worksheets, and lesson plans."
+    },
+    "owner": {
+      "ar": "نجوى",
+      "en": "Nagwa"
+    },
+    "url": "https://www.nagwa.com/ar/eg/",
+    "authority": "publisher",
+    "category": "curriculum",
+    "subjects": ["arabic", "english", "mathematics", "science", "physics", "chemistry", "biology", "history", "geography"],
+    "stages": ["primary", "preparatory", "secondary"],
+    "keywords": ["شرح", "ورقة عمل", "أسئلة", "درس", "منهج مصري", "explanation", "worksheet", "questions", "lesson", "egypt"],
+    "verifiedAt": "2026-08-07"
+  },
+  {
+    "id": "khan-academy",
+    "title": {
+      "ar": "أكاديمية خان",
+      "en": "Khan Academy"
+    },
+    "description": {
+      "ar": "محتوى تعليمي مجاني وتمارين متدرجة في الرياضيات والعلوم والحوسبة، مفيد للفهم والتدريب مع مراجعة مطابقته للمنهج.",
+      "en": "Free lessons and mastery practice in mathematics, science, and computing; verify alignment with the local curriculum."
+    },
+    "owner": {
+      "ar": "Khan Academy",
+      "en": "Khan Academy"
+    },
+    "url": "https://www.khanacademy.org/",
+    "authority": "open-education",
+    "category": "platform",
+    "subjects": ["mathematics", "science", "physics", "chemistry", "biology", "programming"],
+    "stages": ["primary", "preparatory", "secondary", "university"],
+    "keywords": ["رياضيات", "علوم", "فيزياء", "كيمياء", "أحياء", "تمارين", "math", "science", "physics", "chemistry", "biology", "practice"],
+    "verifiedAt": "2026-08-07"
+  }
+]

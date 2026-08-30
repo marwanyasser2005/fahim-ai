@@ -1,0 +1,25 @@
+name: Product proposal
+description: Propose a measurable learning or operational improvement.
+title: "[Proposal]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: User and problem
+      description: Who experiences what problem, in which moment, with what current alternative?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired evidence
+      description: What observable learning or operational signal should change?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Smallest complete workflow
+    validations:
+      required: true

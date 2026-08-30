@@ -1,0 +1,25 @@
+{
+  "id": "/",
+  "name": "فَهيم — نظام تشغيل للفهم الموثق",
+  "short_name": "فَهيم",
+  "description": "من المصدر والمحاولة إلى المراجعة ودليل التعلّم في رحلة عربية واحدة.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/dashboard?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#F4F1E9",
+  "theme_color": "#14213D",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "/brand/fahim-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "/brand/fahim-icon-transparent.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "مهمة اليوم", "short_name": "اليوم", "url": "/dashboard?source=shortcut", "icons": [{ "src": "/brand/fahim-icon-transparent.png", "sizes": "512x512" }] },
+    { "name": "اسأل فَهيم", "short_name": "اسأل", "url": "/ask-fahim?source=shortcut", "icons": [{ "src": "/brand/fahim-icon-transparent.png", "sizes": "512x512" }] },
+    { "name": "المراجعة", "short_name": "راجع", "url": "/review?source=shortcut", "icons": [{ "src": "/brand/fahim-icon-transparent.png", "sizes": "512x512" }] }
+  ]
+}

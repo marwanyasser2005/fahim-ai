@@ -1,0 +1,25 @@
+{
+  "name": "فَهيم — نظام تشغيل للفهم الموثق",
+  "short_name": "فَهيم",
+  "description": "من المصدر والمحاولة إلى المراجعة والدليل في رحلة تعلم عربية واحدة.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F4F1E9",
+  "theme_color": "#14213D",
+  "icons": [
+    {
+      "src": "/brand/fahim-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/brand/fahim-icon-transparent.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

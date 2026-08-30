@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /dashboard
+Disallow: /onboarding
+Disallow: /profile
+Disallow: /admin
+Disallow: /workspace
+Disallow: /ask-fahim
+Disallow: /knowledge-vault
+Disallow: /review
+Disallow: /studio
+Disallow: /quiz-lab
+
+Sitemap: https://fahim-ai-egypt.vercel.app/sitemap.xml

@@ -1,0 +1,48 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Path alias */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": [
+    "src/vite-env.d.ts",
+    "src/main.tsx",
+    "src/App.tsx",
+    "src/components/Navbar.tsx",
+    "src/components/Footer.tsx",
+    "src/pages/Home.tsx",
+    "src/pages/Learning.tsx",
+    "src/pages/Workspace.tsx",
+    "src/pages/Videos.tsx",
+    "src/pages/Library.tsx",
+    "src/pages/Resources.tsx",
+    "src/pages/AiTutor.tsx",
+    "src/lib/aiTutor.ts",
+    "src/lib/videoSearch.ts",
+    "src/lib/knowledgeSearch.ts",
+    "src/lib/studyProgress.ts"
+  ]
+}

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 76" role="img" aria-labelledby="title desc">
+  <title id="title">فَهيم — FAHIM</title><desc id="desc">نظام تشغيل للفهم الموثق</desc>
+  <defs>
+    <linearGradient id="n" x1="6" y1="25" x2="42" y2="70"><stop stop-color="#17396C"/><stop offset="1" stop-color="#0A234E"/></linearGradient>
+    <linearGradient id="t" x1="43" y1="25" x2="68" y2="66"><stop stop-color="#07918B"/><stop offset="1" stop-color="#086E76"/></linearGradient>
+    <linearGradient id="g" x1="28" y1="5" x2="55" y2="29"><stop stop-color="#FFC653"/><stop offset="1" stop-color="#F2A91E"/></linearGradient>
+  </defs>
+  <g transform="translate(2 1) scale(.14)">
+    <path fill="url(#g)" d="M256 28 352 124l-48 48c-18-20-34-32-33-51 1-18 19-33 43-47-39 8-70 23-79 46-9 22 11 39-2 61l-73-73Z"/>
+    <path fill="url(#n)" d="M38 190c74-5 132 11 184 43-47 25-71 54-68 86 4 39 63 55 96 90 18 20 23 41 6 75-56-58-126-92-218-91Z"/>
+    <path fill="url(#t)" d="M474 190c-76-5-136 12-187 48 26 16 45 33 57 54 18 33 11 64-25 97-30 28-51 56-63 95 57-59 126-92 218-91Z"/>
+    <path fill="url(#t)" d="M225 285c-18 19-18 41 6 61 11 10 28 19 45 29 28 17 39 34 31 55-7 19-30 38-51 54 16-29 17-52 3-68-14-17-41-29-59-45-28-25-26-55 25-86Z"/>
+    <circle cx="178" cy="307" r="12" fill="#ED5425"/><circle cx="227" cy="258" r="16" fill="#FDB52C"/><circle cx="261" cy="203" r="19" fill="#07877F"/>
+  </g>
+  <text x="82" y="45" fill="#14213D" font-family="'Noto Kufi Arabic',Cairo,Tahoma,sans-serif" font-size="31" font-weight="800">فَهيم</text>
+  <path d="M185 14v44" stroke="#F2B84B" stroke-width="2"/>
+  <text x="202" y="30" fill="#14213D" font-family="'Segoe UI',Arial,sans-serif" font-size="14" font-weight="900" letter-spacing="2.8">FAHIM</text>
+  <text x="202" y="48" fill="#536273" font-family="'Segoe UI',Arial,sans-serif" font-size="7.5" font-weight="800" letter-spacing=".65">VERIFIED LEARNING OS</text>
+</svg>

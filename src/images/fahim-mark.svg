@@ -1,0 +1,8 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title">
+  <title id="title">فَهيم</title>
+  <defs><linearGradient id="g" x1="18" y1="12" x2="112" y2="118" gradientUnits="userSpaceOnUse"><stop stop-color="#7C3AED"/><stop offset="1" stop-color="#0D9488"/></linearGradient></defs>
+  <rect width="128" height="128" rx="34" fill="url(#g)"/>
+  <circle cx="99" cy="28" r="7" fill="#C4B5FD"/>
+  <path d="M35 91c12 8 37 8 49-2 9-8 11-25 2-35-8-9-26-9-36-1-8 6-10 18-5 27 5 8 17 10 26 5 7-4 10-12 7-19-3-6-10-8-16-5-4 2-6 7-4 11" fill="none" stroke="white" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M48 37h36" stroke="white" stroke-width="8" stroke-linecap="round" opacity=".95"/>
+</svg>

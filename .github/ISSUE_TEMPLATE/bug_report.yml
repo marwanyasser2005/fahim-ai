@@ -1,0 +1,32 @@
+name: Bug report
+description: Report reproducible product behavior without private learner data.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [Learning loop, AI tutor, Assessment, Teacher, Credentials, Authentication, Payments, Accessibility, Performance, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Include route, role, language, device and exact steps. Never include credentials or learner data.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      options:
+        - label: I removed credentials, tokens and personal learner data.
+          required: true

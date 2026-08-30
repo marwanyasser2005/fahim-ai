@@ -1,0 +1,71 @@
+{
+  "name": "fahim-ai-platform",
+  "private": true,
+  "version": "0.9.0",
+  "description": "Arabic-first verified learning operating system for the GenAI for Education Hackathon 2026.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --config vite.config.mjs",
+    "build": "vite build --config vite.config.mjs",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "brand:render": "node scripts/render-brand-assets.mjs",
+    "test": "vitest run",
+    "load:test": "node scripts/load-test.mjs",
+    "smoke:production": "node scripts/production-smoke.mjs",
+    "security:check": "node scripts/security-check.mjs",
+    "audit:production": "npm audit --omit=dev --audit-level=high",
+    "check": "npm run brand:render && tsc -p tsconfig.app.json --noEmit && npm run lint && npm run test && npm run build && npm run security:check"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marwanyasser2005/fahim-ai.git"
+  },
+  "homepage": "https://fahim-ai-egypt.vercel.app",
+  "dependencies": {
+    "@supabase/auth-ui-react": "^0.4.7",
+    "@supabase/auth-ui-shared": "^0.1.8",
+    "@supabase/supabase-js": "^2.57.4",
+    "framer-motion": "^13.0.0",
+    "katex": "^0.18.1",
+    "lucide-react": "^0.344.0",
+    "pdfjs-dist": "^5.4.296",
+    "qrcode": "^1.5.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-markdown": "^10.1.0",
+    "react-router": "7.18.2",
+    "react-router-dom": "7.18.2",
+    "rehype-katex": "^7.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
+    "stripe": "^22.4.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.9.1",
+    "@resvg/resvg-js": "^2.6.2",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.8.1",
+    "@typescript-eslint/parser": "^8.8.1",
+    "@vitejs/plugin-react": "^4.7.0",
+    "autoprefixer": "^10.4.21",
+    "baseline-browser-mapping": "^2.11.12",
+    "caniuse-lite": "^1.0.30001809",
+    "eslint": "^9.35.0",
+    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
+    "eslint-plugin-react-refresh": "^0.4.11",
+    "globals": "^15.9.0",
+    "postcss": "^8.5.6",
+    "prettier": "^3.6.2",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^8.3.0",
+    "vite": "^6.4.3",
+    "vitest": "^3.2.6"
+  }
+}

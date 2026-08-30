@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="فَهيم — نظام تشغيل للفهم الموثق">
+  <defs>
+    <linearGradient id="navy" x1="50" y1="170" x2="270" y2="470" gradientUnits="userSpaceOnUse"><stop stop-color="#17396C"/><stop offset="1" stop-color="#0A234E"/></linearGradient>
+    <linearGradient id="teal" x1="286" y1="184" x2="460" y2="420" gradientUnits="userSpaceOnUse"><stop stop-color="#07918B"/><stop offset="1" stop-color="#086E76"/></linearGradient>
+    <linearGradient id="gold" x1="196" y1="54" x2="330" y2="177" gradientUnits="userSpaceOnUse"><stop stop-color="#FFC653"/><stop offset="1" stop-color="#F2A91E"/></linearGradient>
+    <linearGradient id="backdrop" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse"><stop stop-color="#FFFDF8"/><stop offset="1" stop-color="#EAF3F1"/></linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#backdrop)"/>
+  <g opacity=".075" stroke="#14213D"><path d="M0 90h1200M0 180h1200M0 270h1200M0 360h1200M0 450h1200"/><path d="M90 0v502M180 0v502M270 0v502M360 0v502M450 0v502M540 0v502M630 0v502M720 0v502M810 0v502M900 0v502M990 0v502M1080 0v502"/></g>
+  <path d="M0 502h1200v128H0z" fill="#14213D"/>
+  <g transform="translate(75 28) scale(.38)">
+    <path fill="url(#gold)" d="M256 28 352 124l-48 48c-18-20-34-32-33-51 1-18 19-33 43-47-39 8-70 23-79 46-9 22 11 39-2 61l-73-73Z"/>
+    <path fill="url(#navy)" d="M38 190c74-5 132 11 184 43-47 25-71 54-68 86 4 39 63 55 96 90 18 20 23 41 6 75-56-58-126-92-218-91Z"/>
+    <path fill="url(#teal)" d="M474 190c-76-5-136 12-187 48 26 16 45 33 57 54 18 33 11 64-25 97-30 28-51 56-63 95 57-59 126-92 218-91Z"/>
+    <path fill="url(#teal)" d="M225 285c-18 19-18 41 6 61 11 10 28 19 45 29 28 17 39 34 31 55-7 19-30 38-51 54 16-29 17-52 3-68-14-17-41-29-59-45-28-25-26-55 25-86Z"/>
+    <circle cx="178" cy="307" r="12" fill="#ED5425"/><circle cx="227" cy="258" r="16" fill="#FDB52C"/><circle cx="261" cy="203" r="19" fill="#07877F"/>
+  </g>
+  <text x="292" y="176" fill="#D95D39" font-family="Cairo,'Segoe UI',sans-serif" font-size="22" font-weight="800" letter-spacing="4">VERIFIED LEARNING OS</text>
+  <text x="292" y="292" fill="#14213D" font-family="'Segoe UI',Arial,sans-serif" font-size="94" font-weight="900" letter-spacing="2">FAHIM</text>
+  <text x="292" y="372" fill="#14213D" font-family="'Noto Kufi Arabic',Cairo,'Segoe UI',sans-serif" font-size="38" font-weight="760">تعلّم. حاول. افهم خطأك. وأثبت تقدّمك.</text>
+  <text x="292" y="426" fill="#536273" font-family="Cairo,'Segoe UI',sans-serif" font-size="24" font-weight="700">مصدر ← محاولة ← تشخيص ← تدخل ← مراجعة ← دليل</text>
+  <text x="76" y="576" fill="#F4EBDD" font-family="Cairo,'Segoe UI',sans-serif" font-size="24" font-weight="800">FAHIM · ARABIC-FIRST · EVIDENCE-BACKED · BUILT IN EGYPT</text>
+</svg>
