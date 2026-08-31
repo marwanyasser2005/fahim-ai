@@ -36,6 +36,7 @@ const GenerationDetail = lazy(() => import('@/pages/GenerationDetail'));
 const Support = lazy(() => import('@/pages/Support'));
 const MobileApp = lazy(() => import('@/pages/MobileApp'));
 const Showcase = lazy(() => import('@/pages/Showcase'));
+const EvidenceRoom = lazy(() => import('@/pages/EvidenceRoom'));
 const LearningPassport = lazy(() => import('@/pages/LearningPassport'));
 const CertificateCenter = lazy(() => import('@/pages/CertificateCenter'));
 const TeacherCockpit = lazy(() => import('@/pages/TeacherCockpit'));
@@ -96,6 +97,7 @@ function AppShell({ language, setLanguage, theme, setTheme, lowBandwidth, setLow
               <Route path="/pricing" element={<Pricing language={language} />} />
               <Route path="/about" element={<About language={language} />} />
               <Route path="/showcase" element={<Showcase language={language} />} />
+              <Route path="/evidence" element={<EvidenceRoom language={language} />} />
               <Route path="/demo" element={<Navigate to="/showcase" replace />} />
               <Route path="/verify/:certificateId" element={<CertificateVerify language={language} />} />
               <Route path="/certificates" element={<ProtectedRoute><CertificateCenter language={language} /></ProtectedRoute>} />
@@ -150,6 +152,7 @@ const routeTitles: Record<string, { ar: string; en: string }> = {
   '/pricing': { ar: 'أسعار فَهيم | 30 يومًا دون بطاقة', en: 'Fahim pricing | 30 days, no card' },
   '/about': { ar: 'عن فَهيم والمؤسس مروان عبد الغفار', en: 'About Fahim and founder Marwan Abdelghaffar' },
   '/showcase': { ar: 'عرض فَهيم | افهمها، اثبتها، افتكرها', en: 'Fahim Showcase | Learn it. Prove it. Remember it.' },
+  '/evidence': { ar: 'غرفة أدلة فَهيم | ما يعمل وما لم يُقَس بعد', en: 'Fahim Evidence Room | What works and what is not measured yet' },
   '/passport': { ar: 'جواز التعلّم | فَهيم', en: 'Learning Passport | Fahim' },
   '/certificates': { ar: 'شهاداتي القابلة للتحقق | فَهيم', en: 'My verifiable credentials | Fahim' },
   '/dashboard': { ar: 'مهمة اليوم | فَهيم', en: 'Today | Fahim' },

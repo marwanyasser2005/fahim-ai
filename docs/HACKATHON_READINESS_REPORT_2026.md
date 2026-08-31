@@ -1,6 +1,6 @@
 # Fahim — GenAI for Education Hackathon 2026 Readiness Report
 
-**Assessment date:** 30 August 2026  
+**Assessment date:** 1 September 2026
 **Basis:** submitted hackathon slides, FAQ, education landscape workshop, persona/JTBD material, business-model guide, pitch template, storytelling workshop, live product inventory, migrations, tests, production smoke evidence and design review.  
 **Scoring rule:** only demonstrable product evidence is scored. No pilot result, accuracy claim, partnership, commitment or accreditation is inferred.
 
@@ -8,17 +8,17 @@
 
 Fahim is a strong working product with a differentiated learning model and unusually mature trust architecture for a hackathon. Its competitive weakness is no longer missing features. The bottleneck is **external evidence**: real learner change, real teacher adoption, willingness to pay, cost per verified learning cycle, and a rehearsed four-minute story.
 
-**Current evidence-backed score: 79/100.**  
+**Current evidence-backed internal estimate: 85/100.** This is not a jury score.
 **Competitive potential after the critical evidence sprint: 90–93/100, not guaranteed.**
 
 | Criterion | Weight | Current | Why |
 |---|---:|---:|---|
-| Innovation & Creativity | 25 | **22** | The Evidence Graph, Evidence Contract, Misconception Atlas, Memory Queue and bilingual concept bridge form a coherent system. Defensibility has not yet been validated with usage data. |
-| Impact on Education | 25 | **14** | The product measures pre/post/delayed/transfer evidence and addresses a real problem, but no real pilot outcome or independent learner evidence is available yet. |
-| Technical Execution | 20 | **18** | Production deployment, RLS, server grading, local-first sync, provider failover, deterministic demo and 94 tests are strong. Formal AI evaluation, sustained load evidence and multi-role end-to-end security tests remain. |
-| Feasibility & Scalability | 15 | **12** | Architecture, PWA, low-bandwidth mode, teacher workflow and business hypotheses are credible. Unit economics, buyer commitments and field operations are unproven. |
-| Presentation & Demo | 15 | **13** | A no-login deterministic judge path and visual identity exist. The final eight-slide deck, team proof, backup video and timed Q&A need completion. |
-| **Total** | **100** | **79** | Strong finalist-level artifact; winning case depends on proof, focus and delivery. |
+| Innovation & Creativity | 25 | **23** | The Evidence Graph, Evidence Contract, Misconception Atlas, Memory Queue, bilingual bridge, and inspectable evidence room now form one coherent operating system. Defensibility still needs usage data. |
+| Impact on Education | 25 | **16** | The pre/post/delayed/transfer workflow, privacy threshold, and transparent evidence ladder make impact testable. No real learner outcome or independent evidence is claimed. |
+| Technical Execution | 20 | **19** | Production deployment, RLS, authenticated AI/quiz APIs, signed grading, provider failover, deterministic demo, and a CI-enforced 12-control guard suite are strong. Human-reviewed model evaluation and sustained load evidence remain. |
+| Feasibility & Scalability | 15 | **13** | Architecture, PWA, low-bandwidth mode, teacher workflow, and pilot operations are credible. Unit economics, buyer commitments, and field operations are unproven. |
+| Presentation & Demo | 15 | **14** | The no-login story now links directly to an evidence room that distinguishes proof, readiness, and missing evidence. The final deck, team proof, backup video, and timed Q&A remain. |
+| **Total** | **100** | **85** | Competition-ready working artifact; a 90+ case still depends on real impact, evaluation, and delivery. |
 
 ## Best competition position
 
@@ -56,7 +56,7 @@ Avoid positioning Fahim as an all-in-one replacement for Coursera, ChatGPT, YouT
 
 - Interview 10–12 learners and at least 3–5 teachers/parents; record repeated pains, current alternatives and exact language.
 - Run a 12–20 learner pilot on one concept with pre-test, post-test, delayed recall and one transfer question.
-- Build a 30-case Arabic/English golden evaluation set covering citations, misconception classification, unsafe certainty and pedagogical quality.
+- Run and human-review the documented 30-case Arabic/English golden evaluation set covering citations, misconception classification, unsafe certainty and pedagogical quality. The deterministic guard suite is complete but is not a model-accuracy test.
 - Record cost and latency per complete verified-learning cycle, not per isolated AI call.
 - Prepare an eight-slide deck and a 90-second backup video of the exact demo path.
 - Confirm team eligibility, role ownership and the single named ask for Demo Day.
@@ -124,4 +124,4 @@ Only levels actually achieved should appear in the pitch.
 
 ## Final recommendation
 
-Freeze net-new feature scope until the evidence sprint is complete. Every remaining hour should improve one of four artifacts: real learner evidence, AI evaluation, a reliable four-minute demo, or a credible pilot commitment. That is the shortest path from a polished product to a competition-winning submission.
+Freeze broad net-new feature scope until the evidence sprint is complete. The product now exposes its own proof through `/evidence`; every remaining hour should improve one of four external artifacts: real learner evidence, human-reviewed AI evaluation, a reliable four-minute delivery package, or a credible pilot commitment. That is the shortest path from a strong **85/100 internal readiness estimate** to a competition-winning submission.

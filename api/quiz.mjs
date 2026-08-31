@@ -1,6 +1,7 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
 import { getAIStatus, readLearningAIResponse, requestLearningAI } from './_lib/ai-routing.mjs';
 import { rankVerifiedSources } from './_lib/source-ranking.mjs';
+import { AuthenticationError, requireAuthenticatedUser, ServerConfigurationError } from './_lib/supabase-auth.mjs';
 import {
   applyApiHeaders,
   consumeRateLimit,
@@ -248,6 +249,12 @@ export default async function handler(request, response) {
     return send(response, 405, { error: 'Method not allowed' });
   }
   if (!isSameOrigin(request)) return send(response, 403, { error: 'Origin not allowed' });
+  try {
+    await requireAuthenticatedUser(request);
+  } catch (error) {
+    if (error instanceof AuthenticationError || error instanceof ServerConfigurationError) return send(response, error.status, { error: error.message });
+    return send(response, 500, { error: 'Authentication could not be verified.' });
+  }
   let body;
   try { body = parseJsonBody(request, { maxBytes: 16_000 }); }
   catch (error) {

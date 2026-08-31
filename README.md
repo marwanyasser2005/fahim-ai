@@ -6,12 +6,13 @@
   <p>
     <a href="https://fahim-ai-egypt.vercel.app">Live product</a> ·
     <a href="https://fahim-ai-egypt.vercel.app/showcase">90-second judge path</a> ·
+    <a href="https://fahim-ai-egypt.vercel.app/evidence">Evidence room</a> ·
     <a href="docs/HACKATHON_READINESS_REPORT_2026.md">Hackathon readiness</a> ·
     <a href="docs/ARCHITECTURE.md">Architecture</a>
   </p>
 </div>
 
-![CI](https://img.shields.io/badge/quality%20gate-94%20tests-0f766e)
+![CI](https://img.shields.io/badge/quality%20gate-98%20tests-0f766e)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-173f5f)
 ![Supabase](https://img.shields.io/badge/Supabase-RLS-3ecf8e)
 ![Arabic first](https://img.shields.io/badge/UX-Arabic--first-f2b84b)
@@ -45,6 +46,8 @@ Open [`/showcase`](https://fahim-ai-egypt.vercel.app/showcase). It is determinis
 6. See the privacy-preserving teacher signal.
 
 All showcase outcomes are visibly labelled **illustrative demo data** and never enter a learner account. Fahim does not claim pilot outcomes, institutional accreditation, or partnerships that do not yet exist.
+
+Open [`/evidence`](https://fahim-ai-egypt.vercel.app/evidence) to inspect the weighted readiness estimate, the reproducible 12-control guard suite, the evidence ladder, and every boundary that still requires real learners or partners.
 
 ## Product capabilities
 
@@ -118,12 +121,13 @@ The complete names-only template is [.env.example](.env.example).
 
 ```bash
 npm run check              # brand render + types + lint + tests + build + secret scan
+npm run evaluation:check   # regenerate and verify deterministic learning guards
 npm run audit:production   # production dependency audit
 npm run smoke:production   # public route/API smoke test
 npm run load:test          # controlled API load probe
 ```
 
-The repository currently contains 94 automated tests across 25 files, 22 Supabase migrations, 37 routed screens, and 12 top-level server API modules. Counts are implementation inventory—not claims of user impact.
+The repository currently contains 98 automated tests across 26 files, 22 Supabase migrations, 38 routed screens, and 12 top-level server API modules. Counts are implementation inventory—not claims of user impact.
 
 ## Repository map
 
@@ -148,7 +152,7 @@ The recommended narrative is not “chat + videos + quizzes.” It is:
 
 > Fahim is the Arabic-first operating system that converts learning into evidence a learner, teacher, and parent can inspect—without exposing private conversations or pretending that completion equals mastery.
 
-Current evidence-backed readiness is scored at **79/100** against the supplied judging weights. The product can reach a competitive 90+ range only after real pilot evidence, a focused pitch, and operational performance proof. See the full [Hackathon Readiness Report](docs/HACKATHON_READINESS_REPORT_2026.md).
+Current evidence-backed readiness is scored internally at **85/100** against the supplied judging weights. This is not a jury result. The product can reach a competitive 90+ range only after real pilot evidence, human-reviewed AI evaluation, and operational performance proof. See the full [Hackathon Readiness Report](docs/HACKATHON_READINESS_REPORT_2026.md).
 
 ## Evidence policy
 
@@ -162,6 +166,8 @@ Current evidence-backed readiness is scored at **79/100** against the supplied j
 ## Documentation
 
 - [Hackathon Readiness Report](docs/HACKATHON_READINESS_REPORT_2026.md)
+- [AI evaluation protocol](docs/AI_EVALUATION_PROTOCOL.md)
+- [Judge evidence index](docs/JUDGE_EVIDENCE_INDEX.md)
 - [Architecture and trust boundaries](docs/ARCHITECTURE.md)
 - [Four-minute demo runbook](docs/DEMO_RUNBOOK.md)
 - [Pilot and measurement protocol](docs/PILOT_PROTOCOL.md)

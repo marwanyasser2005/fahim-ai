@@ -94,6 +94,7 @@ export default function Showcase({ language }: Props) {
                   {step === 6 ? (rtl ? 'أعد القصة' : 'Replay story') : (rtl ? 'تابع القصة' : 'Continue story')}<Arrow className="h-4 w-4" />
                 </button>
                 <Link to="/register" className="atlas-secondary">{rtl ? 'ابدأ مسارك الحقيقي' : 'Start your learning path'}</Link>
+                <Link to="/evidence" className="atlas-secondary">{rtl ? 'افتح غرفة الأدلة' : 'Open the evidence room'}</Link>
               </div>
             </div>
             <div className="showcase-hero-card" aria-label={rtl ? 'نظرة سريعة على جلسة مريم' : "Mariam's learning session at a glance"}>
@@ -181,7 +182,7 @@ export default function Showcase({ language }: Props) {
             <Trust icon={UsersRound} title={rtl ? 'حدود خصوصية واضحة' : 'Clear privacy boundary'} body={rtl ? 'لوحات المعلمين تجمع الأنماط ولا تعرض محادثات الطالب الخاصة افتراضيًا.' : 'Teacher views aggregate patterns and do not expose private student chats by default.'} />
             <Trust icon={BadgeCheck} title={rtl ? 'شهادة إتمام بلا ادعاء اعتماد' : 'Completion without fake accreditation'} body={rtl ? 'يمكن لفَهيم إصدار شهادة إتمام بسجل تحقق عام بعد مراجعة الشروط. الاعتماد الأكاديمي لا يظهر إلا بعد شراكة موثقة.' : 'Fahim can issue a completion credential with a public registry after eligibility review. Academic accreditation appears only after a documented partnership.'} />
             <Trust icon={RotateCcw} title={rtl ? 'قابل للتراجع والتصحيح' : 'Revisable by design'} body={rtl ? 'تشخيص الخطأ ودرجة الإتقان فرضيات تتغير بعد كل محاولة جديدة.' : 'Misconception and mastery are hypotheses that update after every new attempt.'} />
-            <div className="showcase-trust-actions"><Link to="/trust" className="atlas-secondary">{rtl ? 'اقرأ عقد الثقة' : 'Read the trust contract'}</Link><Link to="/teacher" className="atlas-primary">{rtl ? 'افتح غرفة قيادة المعلم' : 'Open teacher command room'}<Arrow className="h-4 w-4" /></Link></div>
+            <div className="showcase-trust-actions"><Link to="/trust" className="atlas-secondary">{rtl ? 'اقرأ عقد الثقة' : 'Read the trust contract'}</Link><Link to="/evidence" className="atlas-secondary">{rtl ? 'راجع الدليل القابل للفحص' : 'Inspect reproducible evidence'}</Link><Link to="/teacher" className="atlas-primary">{rtl ? 'افتح غرفة قيادة المعلم' : 'Open teacher command room'}<Arrow className="h-4 w-4" /></Link></div>
           </div>
         </div>
       </section>

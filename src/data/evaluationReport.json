@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "suiteId": "fahim-learning-guard-suite",
+  "evaluationKind": "deterministic-contract-coverage",
+  "passed": 12,
+  "total": 12,
+  "score": 100,
+  "controls": [
+    {
+      "id": "authenticated-ai",
+      "area": "access",
+      "titleAr": "الوصول إلى محرك التعلّم موثّق",
+      "titleEn": "Learning-engine access is authenticated",
+      "evidence": "api/chat.mjs · api/quiz.mjs",
+      "status": "passed"
+    },
+    {
+      "id": "same-origin",
+      "area": "security",
+      "titleAr": "حماية الطلبات من المصادر الخارجية",
+      "titleEn": "Cross-origin requests are rejected",
+      "evidence": "api/_lib/security.mjs",
+      "status": "passed"
+    },
+    {
+      "id": "distributed-rate-limit",
+      "area": "reliability",
+      "titleAr": "حدود استخدام موزّعة مع بديل آمن",
+      "titleEn": "Distributed rate limits with a safe fallback",
+      "evidence": "api/_lib/security.mjs",
+      "status": "passed"
+    },
+    {
+      "id": "provider-failover",
+      "area": "reliability",
+      "titleAr": "تحويل مزوّد الذكاء الاصطناعي عند التعطل",
+      "titleEn": "AI provider failover is implemented",
+      "evidence": "api/_lib/ai-routing.mjs",
+      "status": "passed"
+    },
+    {
+      "id": "evidence-contract",
+      "area": "trust",
+      "titleAr": "عقد دليل يميّز المصدر والاستنتاج والشك",
+      "titleEn": "Evidence contract separates sources, inference, and uncertainty",
+      "evidence": "api/chat.mjs",
+      "status": "passed"
+    },
+    {
+      "id": "prompt-injection-boundary",
+      "area": "safety",
+      "titleAr": "المصادر المرفوعة بيانات غير موثوقة وليست تعليمات",
+      "titleEn": "Uploaded sources are untrusted data, never instructions",
+      "evidence": "api/chat.mjs",
+      "status": "passed"
+    },
+    {
+      "id": "signed-grading",
+      "area": "assessment",
+      "titleAr": "التصحيح موقّع على الخادم",
+      "titleEn": "Quiz grading uses server-signed tokens",
+      "evidence": "api/quiz.mjs",
+      "status": "passed"
+    },
+    {
+      "id": "reasoning-first",
+      "area": "pedagogy",
+      "titleAr": "المتعلم يشرح منطقه قبل التصحيح",
+      "titleEn": "Learner reasoning is required before grading",
+      "evidence": "src/pages/QuizLab.tsx",
+      "status": "passed"
+    },
+    {
+      "id": "answer-withheld",
+      "area": "assessment",
+      "titleAr": "الإجابة لا تظهر قبل محاولة جديدة",
+      "titleEn": "Correct answers stay hidden before a new attempt",
+      "evidence": "src/pages/QuizLab.tsx",
+      "status": "passed"
+    },
+    {
+      "id": "owner-rls",
+      "area": "privacy",
+      "titleAr": "سجل التعلّم معزول بسياسات ملكية",
+      "titleEn": "Learning records are owner-scoped by RLS",
+      "evidence": "20260825000000_learning_event_spine.sql",
+      "status": "passed"
+    },
+    {
+      "id": "cohort-privacy-gate",
+      "area": "privacy",
+      "titleAr": "إشارات الفصل تُحجب تحت حد الخصوصية",
+      "titleEn": "Cohort signals are suppressed below the privacy gate",
+      "evidence": "20260830010000_competition_evidence_teacher_cockpit.sql",
+      "status": "passed"
+    },
+    {
+      "id": "credential-boundary",
+      "area": "integrity",
+      "titleAr": "الشهادة مرتبطة بأهلية فعلية دون ادعاء اعتماد",
+      "titleEn": "Credentials require eligibility without claiming accreditation",
+      "evidence": "credential SQL · Showcase trust boundary",
+      "status": "passed"
+    }
+  ],
+  "exclusions": [
+    "model accuracy",
+    "learning outcome or retention improvement",
+    "pilot traction or willingness to pay",
+    "institutional accreditation"
+  ]
+}

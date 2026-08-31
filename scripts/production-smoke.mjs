@@ -5,6 +5,7 @@ const pages = [
   '/',
   '/about',
   '/showcase',
+  '/evidence',
   '/trust',
   '/privacy',
   '/ai-policy',
@@ -84,7 +85,7 @@ const deniedResponse = await fetch(`${base}/api/chat`, {
 
 const invalidTypeResponse = await fetch(`${base}/api/chat`, {
   method: 'POST',
-  headers: { 'content-type': 'text/plain', origin: base },
+  headers: { 'content-type': 'text/plain', origin: base, ...(authToken ? { authorization: `Bearer ${authToken}` } : {}) },
   body: JSON.stringify({ question: 'test request' }),
 });
 
@@ -103,6 +104,7 @@ const quizResponse = await fetch(`${base}/api/quiz`, {
   headers: {
     'content-type': 'application/json',
     origin: base,
+    ...(authToken ? { authorization: `Bearer ${authToken}` } : {}),
   },
   body: JSON.stringify({
     action: 'generate',
@@ -122,6 +124,7 @@ const gradeResponse = firstQuizQuestion?.token
       headers: {
         'content-type': 'application/json',
         origin: base,
+        ...(authToken ? { authorization: `Bearer ${authToken}` } : {}),
       },
       body: JSON.stringify({ action: 'grade', token: firstQuizQuestion.token, answerIndex: 0 }),
     })
@@ -194,6 +197,7 @@ const result = {
     providers: knowledge.providers || [],
   },
   quiz: {
+    authenticated: Boolean(authToken),
     status: quizResponse.status,
     count: Array.isArray(quiz.questions) ? quiz.questions.length : 0,
     answerHidden: Boolean(
@@ -259,13 +263,13 @@ const failures = [
   knowledgeResponse.status !== 200 || result.knowledge.count === 0
     ? 'multi-source knowledge search'
     : null,
-  quizResponse.status !== 200 ||
-  result.quiz.count !== 3 ||
-  !result.quiz.answerHidden ||
-  gradeResponse?.status !== 200 ||
-  !result.quiz.graded
-    ? 'structured quiz and grading'
-    : null,
+  authToken
+    ? quizResponse.status !== 200 || result.quiz.count !== 3 || !result.quiz.answerHidden || gradeResponse?.status !== 200 || !result.quiz.graded
+      ? 'authenticated structured quiz and grading'
+      : null
+    : quizResponse.status !== 401
+      ? 'unauthenticated quiz access control'
+      : null,
   deniedResponse.status !== 403 ? 'cross-origin protection' : null,
   invalidTypeResponse.status !== (authToken ? 415 : 401) ? 'request validation order' : null,
   health.billingProvider === 'manual-review' && checkoutResponse.status !== 410

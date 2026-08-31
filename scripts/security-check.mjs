@@ -51,7 +51,7 @@ for (const directive of ["default-src 'self'", "frame-ancestors 'none'", "object
 const packageJson = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf8'));
 if (packageJson.private !== true) failures.push('package.json must remain private.');
 const gitignore = await readFile(path.join(root, '.gitignore'), 'utf8');
-if (!/(^|\n)\.env\.\*($|\n)/.test(gitignore) || !/(^|\n)\.vercel($|\n)/.test(gitignore)) failures.push('.gitignore does not protect environment or Vercel metadata.');
+if (!/(^|\r?\n)\.env\.\*(\r?\n|$)/.test(gitignore) || !/(^|\r?\n)\.vercel(\r?\n|$)/.test(gitignore)) failures.push('.gitignore does not protect environment or Vercel metadata.');
 
 const totalBytes = (await Promise.all(files.map(async (file) => (await stat(file)).size))).reduce((sum, size) => sum + size, 0);
 const result = {

@@ -19,6 +19,7 @@ import {
   Menu,
   Moon,
   Route,
+  ShieldCheck,
   Sun,
   Tag,
   X,
@@ -47,6 +48,7 @@ const copy = {
     pricing: "الأسعار",
     about: "عن فَهيم",
     showcase: "العرض التفاعلي",
+    evidence: "غرفة الأدلة",
     passport: "جواز التعلّم",
     certificates: "شهاداتي",
     dashboard: "اليوم",
@@ -72,6 +74,7 @@ const copy = {
     pricing: "Pricing",
     about: "About",
     showcase: "Showcase",
+    evidence: "Evidence",
     passport: "Passport",
     certificates: "Certificates",
     dashboard: "Today",
@@ -108,6 +111,7 @@ export default function Navbar({
   const appReady = Boolean(user && access.onboardingComplete);
   const publicItems = [
     { to: "/showcase", label: t.showcase, icon: Presentation },
+    { to: "/evidence", label: t.evidence, icon: ShieldCheck },
     { to: "/how-it-works", label: t.how, icon: Route },
     { to: "/courses", label: t.courses, icon: GraduationCap },
     { to: "/pricing", label: t.pricing, icon: Tag },
