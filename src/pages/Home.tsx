@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import {
   AlertTriangle as TriangleAlert,
   ArrowLeft,
@@ -17,11 +18,11 @@ import {
   RefreshCcw,
   Search,
   ShieldCheck,
+  Sparkles,
   Target,
 } from "lucide-react";
 import { courseCatalog } from "@/data/courseCatalog";
 import { publicPlans } from "@/config/plans";
-import { displayLabel } from "@/lib/displayLabels";
 
 type Language = "ar" | "en";
 
@@ -40,7 +41,7 @@ const featureCards = [
     titleAr: "منهجك وملفاتك أولًا",
     titleEn: "Your curriculum and files first",
     bodyAr:
-      "خزانة محلية وSource Registry يفصلان محتواك عن الويب العام ويحتفظان بنسخة المصدر.",
+      "احتفظ بملفاتك ومراجعك في مكان واحد، مع تمييز مصادر تعلّمك عن نتائج الويب العام.",
     bodyEn:
       "A local vault and Source Registry separate your material from the open web and preserve source versions.",
     href: "/knowledge-vault",
@@ -169,8 +170,8 @@ export default function Home({ language }: { language: Language }) {
               </p>
               <h1 className="atlas-display mt-7 max-w-4xl text-[clamp(3rem,6.2vw,5.6rem)]">
                 {rtl
-                  ? "فَهيم لا يكتفي بتصحيح إجابتك. يفهم طريقة تفكيرك."
-                  : "Fahim does more than mark an answer. It understands how you reason."}
+                  ? "الإجابة صحيحة. لكن هل تغيّر الفهم فعلًا؟"
+                  : "The answer is right. Has understanding really changed?"}
               </h1>
               <p className="mt-7 max-w-2xl text-base leading-9 text-[var(--muted)] sm:text-lg">
                 {rtl
@@ -183,13 +184,12 @@ export default function Home({ language }: { language: Language }) {
                   state={{ from: "/dashboard" }}
                   className="atlas-primary justify-center"
                 >
-                  {rtl ? "ابدأ أول تقييم — 30 يومًا مجانًا" : "Start your first assessment — 30 days free"}
+                  {rtl
+                    ? "ابدأ أول تقييم — 30 يومًا مجانًا"
+                    : "Start your first assessment — 30 days free"}
                   <Arrow className="h-4 w-4" />
                 </Link>
-                <Link
-                  to="/showcase"
-                  className="atlas-secondary justify-center"
-                >
+                <Link to="/showcase" className="atlas-secondary justify-center">
                   <PlaySquare className="h-4 w-4" />
                   {rtl ? "شاهد القصة التفاعلية" : "Open the interactive story"}
                 </Link>
@@ -610,72 +610,114 @@ function SectionHeader({
 }
 
 function ProductPreview({ language }: { language: Language }) {
-  const rtl = language === "ar";
+  const ar = language === "ar";
+  const [step, setStep] = useState(0);
+  const steps = [
+    {
+      ar: "المحاولة",
+      en: "Attempt",
+      bodyAr:
+        "«القوة الأكبر تعني سرعة أكبر دائمًا». هذه محاولة أولى في مثال توضيحي.",
+      bodyEn:
+        "“A larger force always means greater speed.” An initial attempt in this illustrative scenario.",
+    },
+    {
+      ar: "فرضية التشخيص",
+      en: "Hypothesis",
+      bodyAr: "قد يكون هناك خلط بين السرعة والعجلة، مع إغفال تأثير الكتلة.",
+      bodyEn:
+        "Velocity and acceleration may be conflated, while the role of mass is overlooked.",
+    },
+    {
+      ar: "تدخل فَهيم",
+      en: "Intervention",
+      bodyAr:
+        "ماذا يحدث للعجلة إذا زادت القوة والكتلة بالنسبة نفسها؟ فكّر في العلاقة بينهما.",
+      bodyEn:
+        "What happens to acceleration if force and mass increase by the same proportion? Think about their relationship.",
+    },
+    {
+      ar: "إعادة المحاولة",
+      en: "Retry",
+      bodyAr: "طبّق العلاقة على حالة جديدة، ثم اشرح لماذا اخترت إجابتك.",
+      bodyEn:
+        "Apply the relationship to a new case, then explain why you chose your answer.",
+    },
+    {
+      ar: "دليل الفهم",
+      en: "Evidence",
+      bodyAr:
+        "المحاولة والتفسير والمصدر أدلة منفصلة. إجابة صحيحة وحدها لا تكفي لإثبات بقاء الفهم.",
+      bodyEn:
+        "The attempt, explanation, and source are separate evidence. One right answer does not establish durable understanding.",
+    },
+    {
+      ar: "اختبار الذاكرة",
+      en: "Recall",
+      bodyAr:
+        "ما زال الاسترجاع المؤجل ونقل الفكرة إلى سياق جديد يحتاجان دليلًا.",
+      bodyEn:
+        "Delayed recall and transfer to a new context still need evidence.",
+    },
+  ];
   return (
-    <div className="w-full overflow-hidden rounded-[1.5rem] border border-[#14213D] bg-[var(--panel)] shadow-[10px_10px_0_#D95D39]">
-      <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-4">
-        <span className="text-xs font-black text-[#D95D39]">
-          {rtl ? "معاينة حقيقية للتجربة" : "Real product preview"}
+    <section
+      className="hero-learning-story"
+      aria-label={ar ? "رحلة توضيحية للفهم" : "Illustrative learning journey"}
+    >
+      <header>
+        <span className="os-eyebrow">
+          {ar ? "من المحاولة إلى الفهم" : "From an attempt to understanding"}
         </span>
-        <span className="flex items-center gap-2 text-xs font-bold text-[var(--muted)]">
-          <span className="h-2.5 w-2.5 rounded-full bg-[#0F766E]" />
-          {rtl ? "عينة توضيحية" : "Guided sample"}
+        <small>
+          {ar
+            ? "مثال تفاعلي · ليس نتيجة طالب"
+            : "Interactive example · not a learner result"}
+        </small>
+      </header>
+      <div className="hero-story-steps">
+        {steps.map((item, i) => (
+          <button
+            key={item.en}
+            type="button"
+            aria-pressed={step === i}
+            onClick={() => setStep(i)}
+          >
+            <span>{String(i + 1).padStart(2, "0")}</span>
+            {ar ? item.ar : item.en}
+          </button>
+        ))}
+      </div>
+      <div className="hero-story-content" aria-live="polite">
+        <span className="os-ai-mark">
+          <Sparkles size={20} />
         </span>
+        <h2>{ar ? steps[step].ar : steps[step].en}</h2>
+        <p>{ar ? steps[step].bodyAr : steps[step].bodyEn}</p>
       </div>
-      <div className="p-5 sm:p-7">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="text-xs font-black text-[var(--muted)]">
-              {rtl ? "مهمة اليوم" : "Today’s mission"}
-            </p>
-            <h2 className="mt-2 text-xl font-black leading-8 text-[var(--text)]">
-              {rtl
-                ? "افهم قانون نيوتن الثاني من المحاولة"
-                : "Understand Newton’s second law through an attempt"}
-            </h2>
-          </div>
-          <span className="fahim-icon-tile !bg-[#F2B84B] !text-[#14213D]">
-            <Target className="h-5 w-5" />
-          </span>
-        </div>
-        <div className="mt-6 grid gap-3 sm:grid-cols-3">
-          {[
-            [
-              rtl ? "الهدف" : "Goal",
-              rtl ? "حل مسألة دون تلميح" : "Solve without a hint",
-            ],
-            [
-              rtl ? "نقطة الضعف" : "Weakness",
-              rtl ? "اتجاه القوة المحصلة" : "Net force direction",
-            ],
-            [
-              rtl ? "الخطوة التالية" : "Next",
-              rtl ? "مراجعة بعد 3 أيام" : "Review in 3 days",
-            ],
-          ].map(([title, body]) => (
-            <div
-              key={title}
-              className="rounded-xl border border-[var(--border)] bg-[var(--paper)] p-3"
-            >
-              <p className="text-xs font-black text-[#D95D39]">{title}</p>
-              <p className="mt-2 text-xs font-bold leading-6 text-[var(--text)]">
-                {body}
-              </p>
-            </div>
-          ))}
-        </div>
-        <div className="mt-5 rounded-2xl border border-[#0F766E]/30 bg-[#DCEDE9] p-4 text-[#14213D]">
-          <div className="fahim-source-badge">
-            <BadgeCheck className="h-4 w-4" />
-            {displayLabel("verified_source", language)}
-          </div>
-          <p className="mt-3 text-sm font-bold leading-7">
-            {rtl
-              ? "الدليل مرتبط بالمصدر والنسخة والموضع؛ هذه عينة واجهة وليست نتيجة ذكاء اصطناعي حيّة."
-              : "Evidence links to source, version, and location; this is a UI sample, not a live AI result."}
-          </p>
-        </div>
-      </div>
-    </div>
+      <footer>
+        <button
+          type="button"
+          className="atlas-secondary"
+          disabled={step === 0}
+          onClick={() => setStep((s) => s - 1)}
+        >
+          {ar ? "السابق" : "Previous"}
+        </button>
+        {step < steps.length - 1 ? (
+          <button
+            type="button"
+            className="atlas-primary"
+            onClick={() => setStep((s) => s + 1)}
+          >
+            {ar ? "الدليل التالي" : "Next evidence"}
+          </button>
+        ) : (
+          <Link className="atlas-primary" to="/showcase">
+            {ar ? "شاهد الرحلة كاملة" : "Explore the full journey"}
+          </Link>
+        )}
+      </footer>
+    </section>
   );
 }

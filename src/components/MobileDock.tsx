@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { ClipboardCheck, Compass, Home, Search, UserRound } from 'lucide-react';
+import { ClipboardCheck, Sparkles, Home, Search, UserRound } from 'lucide-react';
 import type { Language } from '@/App';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -9,7 +9,7 @@ export default function MobileDock({ language, immersive }: { language: Language
   if (!user || immersive) return null;
   const items = [
     { to: '/dashboard', ar: 'اليوم', en: 'Today', icon: Home },
-    { to: '/learning', ar: 'تعلّم', en: 'Learn', icon: Compass },
+    { to: '/ask-fahim', ar: 'اسأل فَهيم', en: 'Ask Fahim', icon: Sparkles },
     { to: '/quiz-lab', ar: 'قيّم فهمك', en: 'Assess', icon: ClipboardCheck, primary: true },
     { to: '/resources', ar: 'ابحث', en: 'Search', icon: Search },
     { to: '/profile', ar: 'حسابي', en: 'Account', icon: UserRound },

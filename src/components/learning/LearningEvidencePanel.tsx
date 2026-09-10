@@ -10,6 +10,9 @@ import { Link } from 'react-router-dom';
 import type { Language } from '@/App';
 import { calculateEvidenceScore, type LearningEventType, type LearningSession } from '@/lib/learningEvidence';
 import { displayLabel } from '@/lib/displayLabels';
+import UnderstandingMap from './UnderstandingMap';
+import SourceDrawer from './SourceDrawer';
+import MisconceptionLens from './MisconceptionLens';
 
 const eventIcons: Record<LearningEventType, typeof BrainCircuit> = {
   diagnostic_started: BrainCircuit,
@@ -83,6 +86,9 @@ export default function LearningEvidencePanel({ session, language }: { session?:
       </div>
 
       <h3 className="evidence-subheading">{t.timeline}</h3>
+      <SourceDrawer session={session} language={language}/>
+      <MisconceptionLens session={session} language={language}/>
+      <UnderstandingMap session={session} language={language} />
       <ol className="evidence-timeline">
         {session.events.map((event) => {
           const Icon = eventIcons[event.type];

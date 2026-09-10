@@ -2,6 +2,8 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
+import './styles/tokens.css';
+import './styles/learning-os.css';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ProductAccessProvider } from '@/contexts/ProductAccessContext';
 

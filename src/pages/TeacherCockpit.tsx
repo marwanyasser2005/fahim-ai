@@ -20,6 +20,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import ClassSignalCard from '@/components/teacher/ClassSignalCard';
 import PilotEvidenceCard from '@/components/teacher/PilotEvidenceCard';
+import PrivacyInsightPanel from '@/components/teacher/PrivacyInsightPanel';
 import {
   createClassAssignment,
   createImpactPilot,
@@ -119,6 +120,7 @@ export default function TeacherCockpit({ language }: { language: 'ar' | 'en' }) 
     </section>
 
     <div className="mx-auto max-w-[96rem] px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+      <PrivacyInsightPanel language={language} />
       {error ? <div role="alert" className="mb-6 border border-rose-300 bg-rose-50 p-4 text-sm font-bold text-rose-900">{error}</div> : null}
       {success ? <div role="status" className="mb-6 flex items-center gap-2 border border-emerald-300 bg-emerald-50 p-4 text-sm font-bold text-emerald-900"><Check className="h-4 w-4" />{success}</div> : null}
       {loading ? <div className="grid min-h-96 place-items-center"><Loader2 className="h-7 w-7 animate-spin text-[#0F766E]" /></div> : <motion.div key={tab} initial={reduceMotion ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .22 }}>

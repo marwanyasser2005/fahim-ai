@@ -6,6 +6,8 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import TrialBanner from '@/components/TrialBanner';
 import MobileDock from '@/components/MobileDock';
 import Home from '@/pages/Home';
+import ProductSidebar from '@/components/ProductSidebar';
+import { useAuth } from '@/contexts/AuthContext';
 
 export type Language = 'ar' | 'en';
 export type Theme = 'light' | 'dark' | 'system';
@@ -80,12 +82,15 @@ export default function App() {
 
 function AppShell({ language, setLanguage, theme, setTheme, lowBandwidth, setLowBandwidth }: { language: Language; setLanguage: (language: Language) => void; theme: Theme; setTheme: (theme: Theme) => void; lowBandwidth: boolean; setLowBandwidth: (value: boolean) => void }) {
   const location = useLocation();
+  const { user } = useAuth();
+  const product = Boolean(user && /^\/(dashboard|workspace|ask-fahim|review|passport|knowledge-vault|library|teacher|admin|profile|support|quiz-lab|learning|course\/|certificates|videos|studio|generation\/)/.test(location.pathname));
   const immersive = location.pathname === '/ask-fahim';
   useEffect(() => { if (!immersive) window.scrollTo({ top: 0, behavior: 'auto' }); }, [immersive, location.pathname]);
 
-  return <div className="flex min-h-screen flex-col bg-[var(--surface)] text-[var(--text)] transition-colors">
+  return <div className={`fahim-os flex min-h-screen flex-col bg-[var(--surface)] text-[var(--text)] transition-colors ${product ? 'has-product-sidebar' : ''}`}>
     <RouteMetadata language={language} pathname={location.pathname} />
     <a href="#main-content" className="skip-link">{language === 'ar' ? 'انتقل إلى المحتوى' : 'Skip to content'}</a>
+    {product && <ProductSidebar language={language} />}
     <Navbar language={language} setLanguage={setLanguage} theme={theme} setTheme={setTheme} lowBandwidth={lowBandwidth} setLowBandwidth={setLowBandwidth} />
     <TrialBanner language={language} />
     <div id="main-content" className="min-w-0 flex-1">

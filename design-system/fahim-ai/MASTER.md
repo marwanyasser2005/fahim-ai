@@ -1,4 +1,22 @@
-# Fahim Human Learning Atlas — Design System 2.0
+# Fahim Verified Learning OS — Design System 3.0
+
+## Active specification — 10 September 2026
+
+The current user-requested UI overhaul supersedes the historical 2.0 palette below. Use `src/styles/tokens.css` as the source of truth and `src/styles/learning-os.css` for shared product surfaces. The older sections are retained as migration context, not instructions to restore the previous cream/navy interface.
+
+- App: `#F7F8FC` light / `#0C0D12` dark.
+- Surface: white light / `#12141B` dark.
+- Primary action: `#5B5CE2` light / `#818CF8` dark.
+- Controls 8px, inputs 10px, cards 14px, panels 18px radius.
+- Arabic currently uses Cairo with calm heading weights and increased line height; IBM Plex Arabic remains an unimplemented font migration option.
+- Assessment stays the primary mobile action; Ask Fahim remains directly accessible.
+- Recorded activity is not automatically verified learning. Unknown evidence must remain explicitly untested or not recorded.
+- Avoid decorative fog overlays, high-opacity gradients over content, and excessive offset shadows.
+- Product navigation and responsive content must use logical properties for Arabic RTL and English LTR.
+
+See `UPDATED_PRODUCT_REVIEW_2026-09-10.md` for implementation scope and verification limits.
+
+## Historical 2.0 reference
 
 **Product:** Fahim AI  
 **Positioning:** An operating system for evidence-based learning  

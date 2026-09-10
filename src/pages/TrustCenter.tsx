@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import PrivacyInsightPanel from '@/components/teacher/PrivacyInsightPanel';
 import { BadgeCheck, Bot, Database, FileCheck2, KeyRound, LockKeyhole, Scale, ShieldCheck, UserRoundCheck } from 'lucide-react';
 
 type PolicyKey = 'overview' | 'privacy' | 'terms' | 'ai' | 'credentials';
@@ -17,6 +18,7 @@ export default function TrustCenter({ language, focus = 'overview' }: { language
     <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[17rem_1fr] lg:px-8 lg:py-14">
       <aside className="trust-nav"><p className="atlas-section-number">POLICY INDEX</p>{Object.entries(sections).map(([key, item]) => { const Icon = item.icon; return <Link key={key} to={key === 'privacy' ? '/privacy' : key === 'terms' ? '/terms' : key === 'ai' ? '/ai-policy' : '/credentials-policy'} aria-current={focus === key ? 'page' : undefined} className={focus === key ? 'active' : ''}><Icon className="h-4 w-4" />{item[language]}</Link>; })}<Link to="/support" className="trust-support-link"><UserRoundCheck className="h-4 w-4" />{rtl ? 'اطلب دعمًا أو حذف بيانات' : 'Request support or data deletion'}</Link></aside>
       <article className="trust-policy">
+        {focus==='overview' && <><section className="privacy-insight"><h2>{rtl?'كيف يمر سياق التعلّم؟':'How does learning context flow?'}</h2><ol className="trust-data-flow">{(rtl?['محاولة المتعلّم','سياق الدرس','تدخل فَهيم','تصنيف الدليل','استجابة للمتعلّم']:['Learner attempt','Lesson context','Fahim intervention','Evidence classification','Learner response']).map((label,i)=><li key={label}><span>{i+1}</span>{label}</li>)}</ol></section><PrivacyInsightPanel language={language}/></>}
         {focus === 'overview' ? <TrustOverview language={language} /> : null}
         {focus === 'privacy' ? <PrivacyPolicy language={language} /> : null}
         {focus === 'terms' ? <TermsPolicy language={language} /> : null}

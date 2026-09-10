@@ -22,7 +22,8 @@ import {
 } from 'lucide-react';
 import type { Language } from '@/App';
 import EvidenceGraph from '@/components/learning/EvidenceGraph';
-import MasteryRadar from '@/components/learning/MasteryRadar';
+import UnderstandingMap from '@/components/learning/UnderstandingMap';
+import MisconceptionLens from '@/components/learning/MisconceptionLens';
 import MasteryJourney from '@/components/learning/MasteryJourney';
 import { calculateEvidenceScore } from '@/lib/learningEvidence';
 import { showcaseSession, showcaseTeacherInsight } from '@/data/showcaseScenario';
@@ -129,7 +130,8 @@ export default function Showcase({ language }: Props) {
                   <div className="showcase-signal"><span>{rtl ? 'إشارة مسجلة' : 'Recorded signal'}</span><strong>{content.signal}</strong></div>
                   {step === 0 && <div className="showcase-source"><ShieldCheck /><div><b>{rtl ? 'موثّق بمصدر' : 'Verified source'}</b><span>{showcaseSession.sourceTitle} · {showcaseSession.sourceLocation}</span></div></div>}
                   {step === 2 && <div className="showcase-misconception"><b>{rtl ? 'النمط المفاهيمي' : 'Conceptual pattern'}</b><span>{rtl ? 'الخلط بين السرعة والتسارع' : 'Confusing velocity with acceleration'}</span><small>{rtl ? 'التشخيص فرضية، ويُعاد تقييمه بعد كل محاولة.' : 'The diagnosis is a hypothesis and is re-evaluated after each attempt.'}</small></div>}
-                  {step === 5 && <MasteryRadar dimensions={showcaseSession.mastery} language={language} />}
+                  {step === 2 && <MisconceptionLens session={showcaseSession} language={language} />}
+                  {step === 5 && <UnderstandingMap session={showcaseSession} language={language} />}
                   {step === 6 && <TeacherInsight language={language} />}
                 </div>
                 <aside className="showcase-ledger">

@@ -1,276 +1,232 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Bot,
-  Check,
-  Compass,
-  LibraryBig,
-  PlaySquare,
-  Sparkles,
-  Target,
-} from "lucide-react";
+import { FormEvent, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, ArrowRight, Sparkles, Clock3 } from "lucide-react";
 import { getStudyStats, recordStudyAction } from "@/lib/studyProgress";
+import { loadLearningSessions } from "@/lib/learningEvidence";
 import { displayLabel } from "@/lib/displayLabels";
+import FahimTutorSidecar from "@/components/learning/FahimTutorSidecar";
+import LearningEvidencePanel from "@/components/learning/LearningEvidencePanel";
 
-interface WorkspaceProps {
-  language: "ar" | "en";
-}
-const copy = {
-  ar: {
-    tag: "مساحة العمل الذكية",
-    title: "موضوع واحد. رحلة تعلم كاملة.",
-    body: "اكتب ما تريد فهمه مرة واحدة، وسيحمله فَهيم معك بين الشرح والفيديو والمصدر والاختبار بدل بدء البحث من الصفر كل مرة.",
-    grade: "المرحلة",
-    subject: "المادة",
-    topic: "الموضوع أو السؤال",
-    gradeHint: "مثال: ثالث ثانوي",
-    subjectHint: "مثال: فيزياء",
-    topicHint: "مثال: الحث الكهرومغناطيسي وقاعدة لنز",
-    start: "ابدأ جلسة الشرح",
-    today: "أنشطة اليوم",
-    topics: "موضوعات راجعتها",
-    coverage: "مراحل مكتملة اليوم",
-    steps: [
-      ["اشرح", "شرح متدرج يناسب مرحلتك ويحتفظ بسياق الجلسة."],
-      ["شاهد", "نتائج فيديو عربية مفلترة ومناسبة للموضوع."],
-      ["تحقق", "مفاهيم ومصادر أصلية وروابط مصرية موثوقة."],
-      ["اختبر", "سؤال واحد في كل مرة مع تغذية راجعة."],
-    ],
-    recent: "آخر نشاط",
-    noRecent: "ابدأ أول جلسة لتظهر أنشطتك هنا.",
-  },
-  en: {
-    tag: "Smart workspace",
-    title: "One topic. A complete learning journey.",
-    body: "Describe what you need once. Fahim carries it across explanation, video, source, and quiz instead of making you restart every search.",
-    grade: "Level",
-    subject: "Subject",
-    topic: "Topic or question",
-    gradeHint: "Example: Grade 12",
-    subjectHint: "Example: Physics",
-    topicHint: "Example: electromagnetic induction and Lenz’s law",
-    start: "Start explanation session",
-    today: "Actions today",
-    topics: "Topics reviewed",
-    coverage: "Stages completed today",
-    steps: [
-      ["Explain", "A level-aware explanation that keeps session context."],
-      ["Watch", "Filtered Arabic learning videos matched to the topic."],
-      ["Verify", "Original concept sources and trusted Egypt links."],
-      ["Quiz", "One question at a time with feedback."],
-    ],
-    recent: "Recent activity",
-    noRecent: "Start your first session to see activity here.",
-  },
-} as const;
-const icons = [Bot, PlaySquare, LibraryBig, Target];
-
-export default function Workspace({ language }: WorkspaceProps) {
-  const t = copy[language];
+export default function Workspace({ language }: { language: "ar" | "en" }) {
+  const ar = language === "ar";
   const navigate = useNavigate();
-  const Arrow = language === "ar" ? ArrowLeft : ArrowRight;
-  const stored = useMemo(() => {
+  const Arrow = ar ? ArrowLeft : ArrowRight;
+  const [profile, setProfile] = useState<{
+    grade: string;
+    subject: string;
+    topic: string;
+  }>(() => {
     try {
-      return JSON.parse(
-        localStorage.getItem("fahim-study-profile") || "{}",
-      ) as Record<string, string>;
+      return {
+        grade: "",
+        subject: "",
+        topic: "",
+        ...JSON.parse(localStorage.getItem("fahim-study-profile") || "{}"),
+      };
     } catch {
-      return {};
+      return { grade: "", subject: "", topic: "" };
     }
-  }, []);
-  const [grade, setGrade] = useState(stored.grade || "");
-  const [subject, setSubject] = useState(stored.subject || "");
-  const [topic, setTopic] = useState(stored.topic || "");
-  const [stats, setStats] = useState(() => getStudyStats());
+  });
+  const [stats, setStats] = useState(getStudyStats);
+  const [sessions, setSessions] = useState(loadLearningSessions);
+  const [view, setView] = useState("content");
   useEffect(() => {
-    const refresh = () => setStats(getStudyStats());
+    const refresh = () => {
+      setStats(getStudyStats());
+      setSessions(loadLearningSessions());
+    };
     window.addEventListener("fahim-progress", refresh);
-    return () => window.removeEventListener("fahim-progress", refresh);
+    window.addEventListener("fahim-evidence", refresh);
+    return () => {
+      window.removeEventListener("fahim-progress", refresh);
+      window.removeEventListener("fahim-evidence", refresh);
+    };
   }, []);
+  const session = sessions.find(
+    (s) => s.conceptAr === profile.topic || s.conceptEn === profile.topic,
+  );
+  const params = new URLSearchParams({
+    q: profile.topic,
+    grade: profile.grade,
+    subject: profile.subject,
+    mode: "explain",
+  });
   const start = (event: FormEvent) => {
     event.preventDefault();
-    if (topic.trim().length < 3) return;
-    localStorage.setItem(
-      "fahim-study-profile",
-      JSON.stringify({ grade, subject, topic }),
-    );
-    recordStudyAction("session", topic);
-    const params = new URLSearchParams({
-      q: topic,
-      grade,
-      subject,
-      mode: "explain",
-    });
-    navigate(`/ask-fahim?${params.toString()}`);
+    if (profile.topic.trim().length < 3) return;
+    localStorage.setItem("fahim-study-profile", JSON.stringify(profile));
+    recordStudyAction("session", profile.topic);
+    navigate(`/ask-fahim?${params}`);
   };
-  const destinations = ["/ask-fahim", "/videos", "/library", "/ask-fahim"];
+  const map = [
+    ["المفهوم", "Concept", "/workspace"],
+    ["المصدر", "Source", `/library?${params}`],
+    ["المحاولة", "Attempt", `/quiz-lab?${params}`],
+    ["التشخيص", "Diagnosis", `/quiz-lab?${params}`],
+    ["التدخل", "Intervention", `/ask-fahim?${params}`],
+    ["إعادة المحاولة", "Retry", `/quiz-lab?${params}`],
+    ["الدليل", "Evidence", "/passport"],
+    ["الاسترجاع", "Recall", "/review"],
+  ];
   return (
-    <main className="workspace-page min-h-[75vh] pb-20">
-      <section className="workspace-hero">
-        <div className="workspace-shell">
-          <div className="workspace-grid">
-            <div className="workspace-copy">
-              <p className="workspace-kicker">
-                <Sparkles className="h-4 w-4" />
-                {t.tag}
-              </p>
-              <h1 className="workspace-title">
-                {t.title}
-              </h1>
-              <p className="workspace-lead">
-                {t.body}
-              </p>
-              <form onSubmit={start} className="workspace-form">
-                <div className="workspace-field-grid">
-                  <label className="workspace-label">
+    <main className="workspace-page pb-20">
+      <div
+        className="workspace-mobile-tabs"
+        aria-label={ar ? "أقسام مساحة التعلّم" : "Learning workspace sections"}
+      >
+        {[
+          ["content", "المحتوى", "Content"],
+          ["tutor", "فَهيم", "Fahim"],
+          ["evidence", "الدليل", "Evidence"],
+        ].map(([id, arabic, english]) => (
+          <button
+            key={id}
+            type="button"
+            aria-pressed={view === id}
+            onClick={() => setView(id)}
+          >
+            {ar ? arabic : english}
+          </button>
+        ))}
+      </div>
+      <div className="workspace-os-shell" data-view={view}>
+        <nav
+          className="workspace-map"
+          aria-label={ar ? "خريطة التعلّم" : "Learning map"}
+        >
+          <span className="os-eyebrow">
+            {ar ? "رحلة الفهم" : "Understanding journey"}
+          </span>
+          {map.map(([arabic, english, to], i) => (
+            <Link
+              key={english}
+              to={to}
+              aria-current={i === 0 ? "step" : undefined}
+            >
+              <span>{String(i + 1).padStart(2, "0")}</span>
+              {ar ? arabic : english}
+            </Link>
+          ))}
+        </nav>
+        <div className="workspace-os-canvas">
+          <div className="workspace-content">
+            <p className="atlas-kicker">
+              <Sparkles size={16} />
+              {ar ? "مساحة التعلّم" : "Learning workspace"}
+            </p>
+            <h1 className="workspace-title">
+              {ar
+                ? "فكرة واحدة. نفهمها بعمق."
+                : "One idea. Understand it deeply."}
+            </h1>
+            <p className="workspace-lead">
+              {ar
+                ? "ابدأ بما يشغلك. انتقل من المصدر إلى محاولتك، ثم اختبر ما تغيّر في فهمك."
+                : "Start with your question. Move from a source to your own attempt, then test what changed in your understanding."}
+            </p>
+            <form onSubmit={start} className="workspace-form">
+              <div className="workspace-field-grid">
+                {(["grade", "subject"] as const).map((key) => (
+                  <label key={key} className="workspace-label">
                     <span>
-                      {t.grade}
+                      {key === "grade"
+                        ? ar
+                          ? "المرحلة"
+                          : "Level"
+                        : ar
+                          ? "المادة"
+                          : "Subject"}
                     </span>
                     <input
-                      value={grade}
-                      onChange={(event) => setGrade(event.target.value)}
+                      value={profile[key]}
                       maxLength={80}
-                      placeholder={t.gradeHint}
+                      onChange={(e) =>
+                        setProfile({ ...profile, [key]: e.target.value })
+                      }
                       className="workspace-field"
                     />
                   </label>
-                  <label className="workspace-label">
-                    <span>
-                      {t.subject}
-                    </span>
-                    <input
-                      value={subject}
-                      onChange={(event) => setSubject(event.target.value)}
-                      maxLength={80}
-                      placeholder={t.subjectHint}
-                      className="workspace-field"
-                    />
-                  </label>
-                </div>
-                <label className="workspace-label workspace-topic-label">
-                  <span>
-                    {t.topic}
-                  </span>
-                  <textarea
-                    value={topic}
-                    onChange={(event) => setTopic(event.target.value)}
-                    maxLength={500}
-                    rows={3}
-                    placeholder={t.topicHint}
-                    className="workspace-field workspace-textarea"
-                  />
-                </label>
-                <button
-                  disabled={topic.trim().length < 3}
-                  className="workspace-start"
-                >
-                  {t.start}
-                  <Arrow className="h-4 w-4" />
-                </button>
-              </form>
-            </div>
-            <aside className="workspace-progress-card">
-              <div className="workspace-progress-heading">
-                <span className="workspace-progress-icon">
-                  <Compass className="h-5 w-5" />
-                </span>
-                <div>
-                  <p>
-                    {language === "ar" ? "لوحة التقدم" : "Progress board"}
-                  </p>
-                  <h2>
-                    {language === "ar"
-                      ? "تقدم محفوظ على جهازك"
-                      : "Progress saved on this device"}
-                  </h2>
-                </div>
-              </div>
-              <div className="workspace-progress-stats">
-                {[
-                  [t.today, stats.today],
-                  [t.topics, stats.topics],
-                  [t.coverage, `${stats.actions}/5`],
-                ].map(([label, value]) => (
-                  <div
-                    key={String(label)}
-                    className="workspace-progress-stat"
-                  >
-                    <strong>{value}</strong>
-                    <span>
-                      {label}
-                    </span>
-                  </div>
                 ))}
               </div>
-              <p className="workspace-recent-title">
-                {t.recent}
-              </p>
-              <div className="workspace-recent-list">
-                {stats.recent.length ? (
-                  stats.recent.map((item) => (
-                    <div
-                      key={item.id}
-                      className="workspace-recent-item"
-                    >
-                      <span className="workspace-recent-check">
-                        <Check className="h-4 w-4" />
-                      </span>
-                      <div className="min-w-0">
-                        <p>
-                          {item.topic}
-                        </p>
-                        <small>
-                          {displayLabel(item.action, language)}
-                        </small>
-                      </div>
+              <label className="workspace-label workspace-topic-label">
+                <span>
+                  {ar
+                    ? "ما الذي تريد فهمه؟"
+                    : "What would you like to understand?"}
+                </span>
+                <textarea
+                  value={profile.topic}
+                  onChange={(e) =>
+                    setProfile({ ...profile, topic: e.target.value })
+                  }
+                  rows={4}
+                  maxLength={500}
+                  className="workspace-field"
+                  placeholder={
+                    ar
+                      ? "اكتب المفهوم أو السؤال بطريقتك…"
+                      : "Describe the concept or question in your own words…"
+                  }
+                />
+              </label>
+              <button
+                className="workspace-start"
+                disabled={profile.topic.trim().length < 3}
+              >
+                {ar ? "ابدأ رحلة الفهم" : "Start learning"}
+                <Arrow size={17} />
+              </button>
+            </form>
+            <div className="workspace-step-grid mt-6">
+              {[
+                ["/videos", "شاهد شرحًا", "Watch a lesson"],
+                ["/library", "افحص المصدر", "Inspect the source"],
+                ["/quiz-lab", "اختبر فهمك", "Test understanding"],
+              ].map(([to, arabic, english]) => (
+                <Link
+                  key={to}
+                  to={`${to}?${params}`}
+                  className="sidecar-action"
+                >
+                  {ar ? arabic : english}
+                  <Arrow size={16} />
+                </Link>
+              ))}
+            </div>
+            <section className="workspace-progress-card">
+              <span className="os-eyebrow">
+                <Clock3 size={16} />
+                {ar
+                  ? "نشاطك الأخير · محفوظ على هذا الجهاز"
+                  : "Recent activity · saved on this device"}
+              </span>
+              {stats.recent.length ? (
+                stats.recent.slice(0, 4).map((item) => (
+                  <div className="workspace-recent-item" key={item.id}>
+                    <div>
+                      <p>{item.topic}</p>
+                      <small>{displayLabel(item.action, language)}</small>
                     </div>
-                  ))
-                ) : (
-                  <p className="workspace-recent-empty">
-                    {t.noRecent}
-                  </p>
-                )}
-              </div>
-            </aside>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-[var(--muted)]">
+                  {ar
+                    ? "ستظهر هنا محاولاتك بعد أول جلسة."
+                    : "Your attempts will appear here after your first session."}
+                </p>
+              )}
+            </section>
+          </div>
+          <div className="workspace-evidence">
+            <LearningEvidencePanel session={session} language={language} />
           </div>
         </div>
-      </section>
-      <div className="workspace-shell">
-        <section className="workspace-steps">
-          <div className="workspace-step-grid">
-            {t.steps.map(([title, body], index) => {
-              const Icon = icons[index];
-              const params = new URLSearchParams({
-                q: topic,
-                grade,
-                subject,
-                mode: index === 3 ? "quiz" : "explain",
-              });
-              return (
-                <button
-                  type="button"
-                  key={title}
-                  onClick={() =>
-                    navigate(`${destinations[index]}?${params.toString()}`)
-                  }
-                  className="workspace-step-card"
-                  data-step={index + 1}
-                >
-                  <span className="workspace-step-icon">
-                    <Icon className="h-5 w-5" />
-                  </span>
-                  <span className="workspace-step-number">0{index + 1}</span>
-                  <h2>{title}</h2>
-                  <p>
-                    {body}
-                  </p>
-                </button>
-              );
-            })}
-          </div>
-        </section>
+        <FahimTutorSidecar
+          session={session}
+          topic={profile.topic}
+          language={language}
+        />
       </div>
     </main>
   );

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { BadgeCheck, BookOpenCheck, BrainCircuit, Clock3, ExternalLink, FileCheck2, ShieldCheck } from 'lucide-react';
 import type { Language } from '@/App';
 import EvidenceGraph from '@/components/learning/EvidenceGraph';
-import MasteryRadar from '@/components/learning/MasteryRadar';
+import UnderstandingMap from '@/components/learning/UnderstandingMap';
 import MasteryJourney from '@/components/learning/MasteryJourney';
 import { calculateEvidenceScore, learningEvidenceStats, loadLearningSessions, type LearningSession } from '@/lib/learningEvidence';
 import { displayLabel } from '@/lib/displayLabels';
@@ -34,7 +34,7 @@ export default function LearningPassport({ language }: { language: Language }) {
         {sessions.map((session) => <article key={session.id} className="rounded-[1.5rem] border border-[var(--border)] bg-[var(--panel)] p-5 shadow-[var(--shadow-sm)] sm:p-7">
           <div className="flex items-start justify-between gap-4"><div><p className="atlas-section-number">{displayLabel(session.classification, language)}</p><h2 className="mt-2 text-2xl font-black text-[var(--text)]">{language === 'ar' ? session.conceptAr : session.conceptEn}</h2><p className="mt-2 text-xs leading-6 text-[var(--muted)]">{session.sourceTitle || (rtl ? 'لا يوجد مصدر مربوط بعد' : 'No source attached yet')}</p></div><span className="showcase-score"><bdi>{calculateEvidenceScore(session.mastery)}</bdi><small>/100</small></span></div>
           <div className="mt-5"><EvidenceGraph session={session} language={language} compact /></div>
-          <MasteryRadar dimensions={session.mastery} language={language} />
+          <UnderstandingMap session={session} language={language} />
         </article>)}
       </section>}
     </div>

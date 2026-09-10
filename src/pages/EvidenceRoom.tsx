@@ -111,14 +111,13 @@ export default function EvidenceRoom({ language }: Props) {
               <span>{rtl ? 'بوابة حتمية ناجحة' : 'deterministic guards passed'}</span>
             </div>
           </div>
-          <div className="guard-control-grid">
-            {evaluationReport.controls.map((control) => (
-              <article key={control.id}>
-                <span className="guard-control-icon"><CheckCircle2 /></span>
-                <div><h3>{rtl ? control.titleAr : control.titleEn}</h3><p dir="ltr">{control.evidence}</p></div>
-                <small>{control.status === 'passed' ? (rtl ? 'ناجح' : 'Passed') : (rtl ? 'يحتاج إصلاحًا' : 'Needs repair')}</small>
-              </article>
-            ))}
+          <div className="proof-groups">
+            {[
+              {ar:'الأمان والاعتمادية',en:'Security & reliability',areas:['access','security','reliability','safety']},
+              {ar:'نزاهة التعلّم',en:'Learning integrity',areas:['assessment','pedagogy']},
+              {ar:'الخصوصية',en:'Privacy',areas:['privacy']},
+              {ar:'الأدلة والشهادات',en:'Evidence & credentials',areas:['trust','integrity']},
+            ].map(group=>{const controls=evaluationReport.controls.filter(control=>group.areas.includes(control.area));return <details className="proof-group" key={group.en} open><summary>{rtl?group.ar:group.en}<span>{controls.filter(c=>c.status==='passed').length}/{controls.length}</span></summary>{controls.map(control=><details className="proof-control" key={control.id}><summary>{rtl?control.titleAr:control.titleEn}<span>{control.status==='passed'?(rtl?'ناجح':'Pass'):(rtl?'يحتاج مراجعة':'Review')}</span></summary><p>{rtl?'التحقق: عقد تنفيذي يفحص آليًا أثناء البناء.':'Verification: an implementation contract checked automatically during the build.'}</p><code dir="ltr">{control.evidence}</code><p>{rtl?'الحد: هذا الفحص لا يثبت دقة النموذج أو تحسّن تعلّم الطلاب.':'Boundary: this check does not establish model accuracy or learner improvement.'}</p></details>)}</details>;})}
           </div>
           <div className="guard-exclusions">
             <LockKeyhole />

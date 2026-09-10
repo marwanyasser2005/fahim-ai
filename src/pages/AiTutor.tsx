@@ -846,7 +846,7 @@ function MessageBubble({
             {message.text}
           </p>
         ) : (
-          <RichMessage text={message.text} />
+          <div className="tutor-response-block"><RichMessage text={message.text} /></div>
         )}
         {Boolean(message.sources?.length) && (
           <div className="mt-5 border-t border-slate-200 pt-4 dark:border-white/10">

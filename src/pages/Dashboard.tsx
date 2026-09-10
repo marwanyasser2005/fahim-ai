@@ -19,6 +19,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import LearningEvidencePanel from '@/components/learning/LearningEvidencePanel';
 import MisconceptionMap from '@/components/learning/MisconceptionMap';
 import BadgeTrail from '@/components/badges/BadgeTrail';
+import LearningChanges from '@/components/learning/LearningChanges';
 import { useBadgeProgress } from '@/hooks/useBadgeProgress';
 import { getStudyEvents, type StudyEvent } from '@/lib/studyProgress';
 import { learningEvidenceStats, loadLearningSessions, type LearningSession } from '@/lib/learningEvidence';
@@ -121,6 +122,7 @@ export default function Dashboard({ language }: Props) {
           <p className="metrics-note">{t.metricsNote}</p>
         </section>
 
+        <LearningChanges sessions={sessions} language={language} />
         <BadgeTrail progress={badgeProgress} language={language} loading={badgesLoading} compact />
 
         <div className="learning-intelligence-grid">
