@@ -201,6 +201,35 @@ html[lang="ar"] .fahim-os h1 {
 .fahim-os svg {
   flex-shrink: 0;
 }
+.fahim-os :is(.sidebar-link, .mobile-dock a, .source-drawer summary, .learning-state-badge) > svg {
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.fahim-os :is(.sidebar-link, .mobile-dock a) > svg {
+  width: 20px;
+  height: 20px;
+}
+.fahim-os :is(.sidebar-link, .mobile-dock a) {
+  min-height: 44px;
+}
+.fahim-os .sidebar-account > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--radius-control);
+}
+.fahim-os .sidebar-account > button:hover {
+  color: var(--brand-primary);
+  background: var(--soft);
+}
+.fahim-os .fahim-icon-tile > svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.8;
+}
 .fahim-os :is(.atlas-grid, .workspace-hero::before, .workspace-hero::after) {
   background-image: none;
 }

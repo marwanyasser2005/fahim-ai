@@ -16,6 +16,6 @@ export default function MobileDock({ language, immersive }: { language: Language
   ];
   return <nav className="mobile-dock" aria-label={language === 'ar' ? 'التنقل الرئيسي للموبايل' : 'Primary mobile navigation'}>{items.map((item) => {
     const active = location.pathname === item.to;
-    return <Link key={item.to} to={item.to} aria-current={active ? 'page' : undefined} className={`${item.primary ? 'mobile-dock-primary' : ''} ${active ? 'mobile-dock-active' : ''}`}><item.icon className="h-5 w-5" /><span>{item[language]}</span></Link>;
+    return <Link key={item.to} to={item.to} aria-current={active ? 'page' : undefined} className={`${item.primary ? 'mobile-dock-primary' : ''} ${active ? 'mobile-dock-active' : ''}`}><item.icon className="h-5 w-5" aria-hidden="true" focusable="false" /><span>{item[language]}</span></Link>;
   })}</nav>;
 }

@@ -76,9 +76,9 @@ const featureCards = [
     titleAr: "مراجعة متباعدة",
     titleEn: "Spaced review",
     bodyAr:
-      "البطاقات تعود وفق تذكرك الفعلي مع حالات pending وsynced وfailed للعمل المحلي.",
+      "راجع في الوقت المناسب وفق تذكرك، واعرف بوضوح هل حُفظت مراجعتك أم تنتظر المزامنة.",
     bodyEn:
-      "Cards return from actual recall, with pending, synced, and failed states for local-first work.",
+      "Review at the right time for your recall, with clear feedback on saved progress and pending sync.",
     href: "/review",
     statusAr: "متاح على الجهاز",
     statusEn: "Available on device",
@@ -104,8 +104,8 @@ const featureCards = [
     bodyEn:
       "Egyptian, Wikimedia, and research results are grouped by learning intent with source types visible.",
     href: "/library",
-    statusAr: "متاح مع fallback واضح",
-    statusEn: "Available with explicit fallbacks",
+    statusAr: "متاح مع توضيح تعذّر أي مصدر",
+    statusEn: "Available with source availability notices",
   },
 ] as const;
 
