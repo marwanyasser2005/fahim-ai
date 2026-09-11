@@ -130,10 +130,14 @@ export default function Navbar({
   const items = appReady ? appItems : publicItems;
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     `relative inline-flex min-h-11 items-center rounded-xl px-3 py-2.5 text-sm font-extrabold transition-colors after:absolute after:inset-x-3 after:bottom-1 after:h-0.5 after:origin-start after:rounded-full after:bg-[#D95D39] after:transition-transform ${isActive ? "bg-[var(--soft)] text-[var(--text)] after:scale-x-100" : "text-[var(--muted)] after:scale-x-0 hover:bg-[var(--soft)] hover:text-[var(--text)] hover:after:scale-x-100"}`;
-  const cycleTheme = () =>
-    setTheme(
-      theme === "system" ? "light" : theme === "light" ? "dark" : "system",
-    );
+  const cycleTheme = () => {
+    if (theme === "system") {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setTheme(prefersDark ? "light" : "dark");
+      return;
+    }
+    setTheme(theme === "light" ? "dark" : "system");
+  };
 
   return (
     <>

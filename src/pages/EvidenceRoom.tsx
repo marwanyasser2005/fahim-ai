@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import type { CSSProperties } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -66,13 +65,14 @@ export default function EvidenceRoom({ language }: Props) {
             </div>
           </div>
           <aside className="evidence-score-card" aria-label={rtl ? 'تقدير الجاهزية الداخلية' : 'Internal readiness estimate'}>
-            <div className="evidence-score-ring" style={{ '--score': `${totalScore * 3.6}deg` } as CSSProperties}>
-              <span><strong>{totalScore}</strong><small>/100</small></span>
-            </div>
             <div>
-              <p className="atlas-section-number">INTERNAL READINESS ESTIMATE</p>
+              <p className="atlas-section-number">{rtl ? 'تقدير جاهزية داخلية · ليست نتيجة لجنة' : 'INTERNAL READINESS ESTIMATE · NOT A JUDGE SCORE'}</p>
               <h2>{rtl ? 'جاهزية تنافسية قوية، وليست نتيجة لجنة.' : 'Strong competition readiness—not a judge score.'}</h2>
               <p>{rtl ? 'الحدّ المتبقي مقصود: لا يمكن تحويل بنية القياس إلى أثر مثبت دون Pilot حقيقي.' : 'The remaining gap is intentional: measurement infrastructure cannot become proven impact without a real pilot.'}</p>
+              <div className="evidence-score-inline">
+                <strong><bdi>{totalScore}</bdi><small>/100</small></strong>
+                <span>{rtl ? 'مقابل أوزان معايير المسابقة، دون أي نقاط لأثر تعليمي غير مقاس بعد.' : 'Against the competition rubric weights, with zero credit for impact that is not yet measured.'}</span>
+              </div>
             </div>
           </aside>
         </div>
@@ -152,7 +152,7 @@ export default function EvidenceRoom({ language }: Props) {
           </div>
           <div className="evidence-final-ask">
             <UsersRound />
-            <div><strong>{rtl ? 'الخطوة التي ترفع فَهيم من 85 إلى نطاق 90+' : 'The step that can move Fahim from 85 into the 90+ range'}</strong><p>{rtl ? 'معلم واحد و12–20 متعلمًا وأربعة أسابيع على مفهوم واحد، مع موافقة واضحة وقياس قبلي/بعدي/مؤجل.' : 'One teacher, 12–20 learners, and four weeks on one concept, with explicit consent and pre/post/delayed measurement.'}</p></div>
+            <div><strong>{rtl ? `الخطوة التي ترفع فَهيم من ${totalScore} إلى نطاق 90+` : `The step that can move Fahim from ${totalScore} into the 90+ range`}</strong><p>{rtl ? 'معلم واحد و12–20 متعلمًا وأربعة أسابيع على مفهوم واحد، مع موافقة واضحة وقياس قبلي/بعدي/مؤجل.' : 'One teacher, 12–20 learners, and four weeks on one concept, with explicit consent and pre/post/delayed measurement.'}</p></div>
             <Link to="/teacher" className="atlas-primary">{rtl ? 'افتح بنية الـPilot' : 'Open the pilot infrastructure'}<Arrow className="h-4 w-4" /></Link>
           </div>
         </div>

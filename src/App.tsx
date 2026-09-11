@@ -168,11 +168,35 @@ const routeTitles: Record<string, { ar: string; en: string }> = {
   '/ai-policy': { ar: 'سياسة الذكاء الاصطناعي | فَهيم', en: 'AI policy | Fahim' },
   '/credentials-policy': { ar: 'سياسة الشارات والشهادات | فَهيم', en: 'Badge and credential policy | Fahim' },
   '/onboarding': { ar: 'إعداد مسارك | فَهيم', en: 'Set up your path | Fahim' },
+  '/login': { ar: 'تسجيل الدخول | فَهيم', en: 'Sign in | Fahim' },
+  '/register': { ar: 'إنشاء حساب | فَهيم', en: 'Create your account | Fahim' },
+  '/forgot-password': { ar: 'استعادة كلمة المرور | فَهيم', en: 'Recover your password | Fahim' },
+  '/reset-password': { ar: 'كلمة مرور جديدة | فَهيم', en: 'Set a new password | Fahim' },
+  '/resources': { ar: 'مصادر مصر التعليمية | فَهيم', en: 'Egypt learning sources | Fahim' },
+  '/library': { ar: 'البحث والمكتبة | فَهيم', en: 'Search & library | Fahim' },
+  '/mobile-app': { ar: 'تطبيق الجوال | فَهيم', en: 'Mobile app | Fahim' },
+  '/support': { ar: 'الدعم | فَهيم', en: 'Support | Fahim' },
+  '/workspace': { ar: 'مساحة تعلّمي | فَهيم', en: 'My learning workspace | Fahim' },
+  '/ask-fahim': { ar: 'اسأل فَهيم', en: 'Ask Fahim' },
+  '/review': { ar: 'المراجعة المتباعدة | فَهيم', en: 'Spaced review | Fahim' },
+  '/knowledge-vault': { ar: 'خزانة المعرفة | فَهيم', en: 'Knowledge vault | Fahim' },
+  '/quiz-lab': { ar: 'مختبر التقييم | فَهيم', en: 'Assessment lab | Fahim' },
+  '/learning': { ar: 'الدرس | فَهيم', en: 'Lesson | Fahim' },
+  '/videos': { ar: 'فيديوهات التعلّم | فَهيم', en: 'Learning videos | Fahim' },
+  '/studio': { ar: 'استوديو المحتوى | فَهيم', en: 'Creator studio | Fahim' },
+  '/profile': { ar: 'حسابي | فَهيم', en: 'My account | Fahim' },
+  '/admin': { ar: 'لوحة الإدارة | فَهيم', en: 'Admin console | Fahim' },
 };
+
+const prefixTitles: Array<[string, { ar: string; en: string }]> = [
+  ['/course/', { ar: 'المسار التعليمي | فَهيم', en: 'Learning path | Fahim' }],
+  ['/verify/', { ar: 'تحقق من شهادة | فَهيم', en: 'Verify a credential | Fahim' }],
+  ['/generation/', { ar: 'تفاصيل التوليد | فَهيم', en: 'Generation detail | Fahim' }],
+];
 
 function RouteMetadata({ language, pathname }: { language: Language; pathname: string }) {
   useEffect(() => {
-    const exact = routeTitles[pathname] || (pathname.startsWith('/course/') ? { ar: 'المسار التعليمي | فَهيم', en: 'Learning path | Fahim' } : null);
+    const exact = routeTitles[pathname] ?? prefixTitles.find(([prefix]) => pathname.startsWith(prefix))?.[1] ?? null;
     document.title = exact?.[language] || (language === 'ar' ? 'فَهيم | نظام تشغيل للفهم الموثق' : 'Fahim | Verified Learning OS');
     const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
     if (canonical) canonical.href = `https://fahim-ai-egypt.vercel.app${pathname === '/' ? '/' : pathname}`;
