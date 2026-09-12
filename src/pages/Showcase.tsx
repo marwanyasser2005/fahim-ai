@@ -95,6 +95,7 @@ export default function Showcase({ language }: Props) {
                 </button>
                 <Link to="/register" className="atlas-secondary">{rtl ? 'ابدأ مسارك الحقيقي' : 'Start your learning path'}</Link>
                 <Link to="/evidence" className="atlas-secondary">{rtl ? 'افتح غرفة الأدلة' : 'Open the evidence room'}</Link>
+                <Link to="/dashboard" className="showcase-try-link">{rtl ? 'أو استكشف لوحة الطالب بالرحلة التجريبية' : 'Or explore the student dashboard with the demo journey'}</Link>
               </div>
             </div>
             <div className="showcase-hero-card" aria-label={rtl ? 'نظرة سريعة على جلسة مريم' : "Mariam's learning session at a glance"}>
@@ -102,6 +103,7 @@ export default function Showcase({ language }: Props) {
                 <div><p className="atlas-section-number">LEARNER / 01</p><h2>{rtl ? 'مريم · فيزياء ثانوية عامة' : 'Mariam · Secondary physics'}</h2></div>
                 <span className="showcase-score"><bdi>{evidenceScore}</bdi><small>/100</small></span>
               </div>
+              <p className="showcase-score-caption">{rtl ? 'الرقم يمثل قوة دليل الفهم، محسوبًا من أحداث الجلسة أدناه.' : 'This figure is the evidence strength, computed from the session events below.'}</p>
               <div className="showcase-concept-bridge">
                 <span>{showcaseSession.conceptAr}</span><i aria-hidden="true" /><span dir="ltr">{showcaseSession.conceptEn}</span>
               </div>

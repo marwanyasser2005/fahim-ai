@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft,
   ArrowRight,
@@ -26,6 +26,7 @@ import { learningEvidenceStats, loadLearningSessions, type LearningSession } fro
 import { hydrateLearningSessionsFromCloud } from '@/lib/supabase/learningEvidenceSync';
 import { dueReviewCards } from '@/lib/spacedReview';
 import { syncEvidenceToReviewCards } from '@/lib/reviewBridge';
+import { clearDemoJourney, isDemoJourneyLoaded, seedDemoJourney } from '@/lib/demoJourney';
 
 type Props = { language: Language };
 
@@ -44,6 +45,11 @@ const copy = {
     recentBody: 'آخر الخطوات التي أضفتها إلى رحلة الفهم.', noRecent: 'لا يوجد نشاط بعد. ابدأ تقييمًا ليظهر السجل هنا.', viewAll: 'افتح مساحة التعلّم',
     quiz: 'تقييم', video: 'فيديو', source: 'مصدر', explain: 'شرح', session: 'جلسة',
     history: 'سجل التعلّم',
+    demoTitle: 'تحب تشوف المنصة كاملة فورًا؟',
+    demoBody: 'حمّل رحلة تعلم تجريبية جاهزة: ثلاثة مفاهيم بأدلة كاملة ومراجعة مستحقة الآن، ولوحة يوم وذاكرة وجواز معمّرين. بيانات عرض موسومة، تُمسح بزر واحد.',
+    demoCta: 'حمّل رحلة مريم التجريبية',
+    demoLoaded: 'تُعرض بيانات الرحلة التجريبية، منفصلة عن أي تقدم حقيقي.',
+    demoClear: 'مسح بيانات العرض',
   },
   en: {
     kicker: 'Personal learning space', welcome: 'Welcome', title: 'What does your understanding need now?',
@@ -59,6 +65,11 @@ const copy = {
     recentBody: 'The latest steps added to your understanding journey.', noRecent: 'No activity yet. Start an assessment to create your record.', viewAll: 'Open learning workspace',
     quiz: 'Assessment', video: 'Video', source: 'Source', explain: 'Explanation', session: 'Session',
     history: 'Learning history',
+    demoTitle: 'Want to see the full platform right now?',
+    demoBody: 'Load a ready demo journey: three concepts with complete evidence, a review due now, and a populated Today, Memory, and Passport. Labelled demo data, wiped with one click.',
+    demoCta: 'Load Mariam’s demo journey',
+    demoLoaded: 'Demo journey data is shown, separate from any real progress.',
+    demoClear: 'Clear demo data',
   },
 } as const;
 
@@ -71,6 +82,8 @@ export default function Dashboard({ language }: Props) {
   const [sessions, setSessions] = useState<LearningSession[]>(() => loadLearningSessions());
   const [events, setEvents] = useState<StudyEvent[]>(() => getStudyEvents());
   const [dueCards, setDueCards] = useState(() => { syncEvidenceToReviewCards(); return dueReviewCards(); });
+  const [demoLoaded, setDemoLoaded] = useState(() => isDemoJourneyLoaded());
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     const refresh = () => {
@@ -131,6 +144,18 @@ export default function Dashboard({ language }: Props) {
   const name = user?.user_metadata?.full_name || user?.email?.split('@')[0] || (language === 'ar' ? 'يا متعلّم' : 'Learner');
   const misconceptionCount = new Set(sessions.flatMap((session) => session.events.map((event) => event.misconception).filter(Boolean))).size;
 
+  const syncAll = () => {
+    setSessions(loadLearningSessions());
+    setEvents(getStudyEvents());
+    setDueCards(syncEvidenceToReviewCards().filter((card) => new Date(card.dueAt) <= new Date()));
+  };
+  const loadDemo = () => { seedDemoJourney(); syncAll(); setDemoLoaded(true); };
+  const wipeDemo = () => { clearDemoJourney(); syncAll(); setDemoLoaded(false); };
+  useEffect(() => {
+    if (searchParams.get('demo') === '1' && sessions.length === 0 && !isDemoJourneyLoaded()) loadDemo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <main className="learning-dashboard">
       <div className="learning-dashboard-shell">
@@ -156,6 +181,14 @@ export default function Dashboard({ language }: Props) {
           </div>
           <Link to={next.href}>{next.cta}<Arrow aria-hidden="true" /></Link>
         </section>
+
+        {sessions.length === 0 && !demoLoaded ? <section className="demo-invite" aria-label={t.demoTitle}>
+          <div><p className="section-kicker"><BrainCircuit aria-hidden="true" />{t.demoTitle}</p><p className="demo-invite-body">{t.demoBody}</p></div>
+          <button type="button" className="atlas-primary" onClick={loadDemo}><Layers3 aria-hidden="true" />{t.demoCta}</button>
+        </section> : demoLoaded ? <div className="demo-chip-row">
+          <span><Layers3 aria-hidden="true" />{t.demoLoaded}</span>
+          <button type="button" onClick={wipeDemo}>{t.demoClear}</button>
+        </div> : null}
 
         <section aria-label={language === 'ar' ? 'مؤشرات التعلّم' : 'Learning indicators'}>
           <div className="learning-metrics">

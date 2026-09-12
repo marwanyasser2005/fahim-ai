@@ -1300,3 +1300,50 @@ html[dir="ltr"] .fahim-os :is(.next-action > a, .premium-button, .atlas-primary)
   html[dir="rtl"] .fahim-os :is(.next-action > a, .premium-button, .atlas-primary):hover svg:last-child,
   html[dir="ltr"] .fahim-os :is(.next-action > a, .premium-button, .atlas-primary):hover svg:last-child { transform: none; }
 }
+
+/* ── Demo journey invite + showcase metric caption ─────────────────────── */
+.fahim-os .demo-invite {
+  display: grid;
+  align-items: center;
+  gap: 1rem;
+  margin-block: 1.5rem;
+  border: 1px dashed color-mix(in srgb, var(--brand-primary) 45%, var(--border));
+  border-radius: var(--radius-card);
+  background: color-mix(in srgb, var(--brand-primary) 5%, var(--panel));
+  padding: clamp(1rem, 3vw, 1.4rem);
+}
+.fahim-os .demo-invite-body { margin-top: .4rem; max-width: 46rem; color: var(--muted); font-size: .85rem; line-height: 1.75; }
+@media (min-width: 900px) { .fahim-os .demo-invite { grid-template-columns: minmax(0,1fr) auto; } }
+.fahim-os .demo-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  margin-block: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--soft);
+  padding: .5rem .6rem .5rem 1rem;
+  font-size: .75rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+.fahim-os .demo-chip-row > span { display: inline-flex; align-items: center; gap: .45rem; }
+.fahim-os .demo-chip-row button {
+  min-height: 2.25rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--panel);
+  padding-inline: .9rem;
+  color: var(--danger);
+  font-size: .72rem;
+  font-weight: 800;
+}
+.fahim-os .demo-chip-row button:hover { border-color: var(--danger-border); background: var(--danger-surface); }
+.showcase-score-caption { margin-top: .55rem; color: var(--muted); font-size: .72rem; line-height: 1.6; }
+.showcase-try-link { align-self: center; color: var(--nile); font-size: .8rem; font-weight: 800; text-decoration: underline; text-decoration-color: var(--saffron); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+@media (max-width: 639px) {
+  .showcase-status-row > span:last-child { display: none; }
+  .showcase-try-link { flex-basis: 100%; text-align: center; }
+}

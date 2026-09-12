@@ -7,6 +7,7 @@ export interface StudyEvent {
   action: StudyAction;
   topic: string;
   createdAt: string;
+  demo?: boolean;
 }
 
 const KEY = 'fahim-study-events-v1';
@@ -16,12 +17,19 @@ export function getStudyEvents(): StudyEvent[] {
   return Array.isArray(events) ? events : [];
 }
 
-export function recordStudyAction(action: StudyAction, topic: string) {
+export function recordStudyAction(action: StudyAction, topic: string, opts?: { demo?: boolean }) {
   const cleanTopic = topic.trim().slice(0, 120);
   if (!cleanTopic) return;
   const events = getStudyEvents();
-  events.unshift({ id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, action, topic: cleanTopic, createdAt: new Date().toISOString() });
+  events.unshift({ id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, action, topic: cleanTopic, createdAt: new Date().toISOString(), ...(opts?.demo ? { demo: true } : {}) });
   writeScopedJson(KEY, events.slice(0, 100));
+  window.dispatchEvent?.(new Event('fahim-progress'));
+}
+
+/** Remove labelled demo activity while keeping the learner's real history. */
+export function clearDemoStudyEvents() {
+  const events = getStudyEvents().filter((event) => !event.demo);
+  writeScopedJson(KEY, events);
   window.dispatchEvent?.(new Event('fahim-progress'));
 }
 
