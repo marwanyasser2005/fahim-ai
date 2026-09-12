@@ -1242,3 +1242,61 @@ html[dir="ltr"] .fahim-os :is(.premium-button, .atlas-primary, .next-action > a,
     transform: none;
   }
 }
+
+/* ── Senior design pass: glass surfaces, typographic calm, icon dynamics ── */
+.fahim-os .fahim-navigation {
+  background: var(--glass);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  border-bottom: 1px solid var(--glass-border);
+  box-shadow: 0 10px 30px rgb(16 24 40 / 5%);
+}
+.dark .fahim-os .fahim-navigation { box-shadow: 0 10px 30px rgb(0 0 0 / 35%); }
+.fahim-os .mobile-dock {
+  background: var(--glass);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 var(--glass-highlight), 0 18px 44px rgb(16 24 40 / 16%);
+}
+.palette-panel {
+  background: var(--glass-strong) !important;
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+}
+.product-sidebar {
+  background: linear-gradient(to bottom, var(--glass-strong), transparent 240px), var(--surface);
+  border-inline-end: 1px solid var(--border);
+}
+.fahim-os :is(.premium-card, .atlas-panel, .learning-panel) {
+  box-shadow: var(--shadow-sm), inset 0 1px 0 var(--glass-highlight);
+  transition: border-color .2s var(--ease-premium), box-shadow .2s var(--ease-premium), transform .2s var(--ease-premium);
+}
+.fahim-os .premium-card:hover { transform: translateY(-2px); }
+.fahim-os .next-action {
+  background: linear-gradient(165deg, var(--glass-strong), var(--panel) 55%);
+  margin-block: 2.25rem;
+}
+.fahim-os :is(p, span, small, div, li).font-black { font-weight: 700; }
+.fahim-os :is(a, button, label).font-black { font-weight: 800; }
+.fahim-os :is(h2, h3) { font-weight: 800; letter-spacing: -.015em; }
+html[lang="ar"] .fahim-os :is(h2, h3) { letter-spacing: 0; }
+.fahim-os :is(.atlas-kicker, .section-kicker) { font-weight: 750; }
+.dashboard-hero { padding-block-end: clamp(2rem, 4vw, 3.25rem); }
+.learning-metrics { gap: .9rem; }
+.learning-intelligence-grid { gap: 1.25rem; margin-top: 2.25rem; }
+.fahim-os :is(.sidebar-link, .icon-button, .mobile-dock a) svg { transition: transform var(--motion-fast) ease; }
+.fahim-os .sidebar-link:hover svg { transform: scale(1.07); }
+.fahim-os .mobile-dock a:hover svg { transform: translateY(-2px); }
+.fahim-os .icon-button:hover svg { transform: translateY(-1px); }
+.fahim-os :is(.next-action > a, .premium-button, .atlas-primary) svg:last-child { transition: transform var(--motion-fast) ease; }
+html[dir="rtl"] .fahim-os :is(.next-action > a, .premium-button, .atlas-primary):hover svg:last-child { transform: translateX(-3px); }
+html[dir="ltr"] .fahim-os :is(.next-action > a, .premium-button, .atlas-primary):hover svg:last-child { transform: translateX(3px); }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .fahim-os .fahim-navigation, .fahim-os .mobile-dock, .palette-panel { background: var(--panel); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fahim-os :is(.sidebar-link, .icon-button, .mobile-dock a) svg,
+  html[dir="rtl"] .fahim-os :is(.next-action > a, .premium-button, .atlas-primary):hover svg:last-child,
+  html[dir="ltr"] .fahim-os :is(.next-action > a, .premium-button, .atlas-primary):hover svg:last-child { transform: none; }
+}
