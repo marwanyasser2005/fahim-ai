@@ -15,7 +15,6 @@ import {
   Loader2,
   RotateCcw,
   ShieldCheck,
-  Sparkles,
   Target,
   X,
 } from 'lucide-react';
@@ -311,7 +310,7 @@ export default function QuizLab({ language }: Props) {
                 </fieldset>
                 {error && <ErrorMessage text={error} />}
                 <button type="button" disabled={loading || topic.trim().length < 3} onClick={() => void startQuiz()} className="premium-button mt-6 w-full justify-center disabled:cursor-not-allowed disabled:opacity-50">
-                  {loading ? <><Loader2 className="h-4 w-4 animate-spin" />{t.generating}</> : <><Sparkles className="h-4 w-4" />{t.generate}<Arrow className="h-4 w-4" /></>}
+                  {loading ? <><Loader2 className="h-4 w-4 animate-spin" />{t.generating}</> : <><BrainCircuit className="h-4 w-4" />{t.generate}<Arrow className="h-4 w-4" /></>}
                 </button>
               </section>
               <MasterySummary language={language} />
@@ -451,7 +450,7 @@ function createQuizEvidenceSession(quiz: GeneratedQuiz, results: GradeResult[], 
     add({ type: 'misconception_detected', title: language === 'ar' ? 'التباس محتمل' : 'Likely misconception', summary: wrong.misconception.slice(0, 800), misconception: normalizeMisconception(wrong.misconception), confidence: 0.7 });
     add({ type: 'intervention_completed', title: language === 'ar' ? 'تفسير موجّه' : 'Targeted explanation', summary: wrong.explanation.slice(0, 1_000) });
     // A real retry = a correct answer to a question that came after the first
-    // wrong one, i.e. post-intervention evidence — never inferred from
+    // wrong one, i.e. post-intervention evidence، never inferred from
     // unrelated correct answers elsewhere in the quiz.
     const firstWrongIndex = results.findIndex((item) => !item.correct);
     const postInterventionCorrect = firstWrongIndex >= 0 ? results.slice(firstWrongIndex + 1).filter((item) => item.correct).length : 0;

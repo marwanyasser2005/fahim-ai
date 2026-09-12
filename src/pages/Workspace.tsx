@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Sparkles, Clock3 } from "lucide-react";
+import { ArrowLeft, ArrowRight, BrainCircuit, Clock3 } from "lucide-react";
 import { getStudyStats, recordStudyAction } from "@/lib/studyProgress";
 import { loadLearningSessions } from "@/lib/learningEvidence";
 import { readScopedJson, writeScopedJson } from "@/lib/userScope";
@@ -110,7 +110,7 @@ export default function Workspace({ language }: { language: "ar" | "en" }) {
         <div className="workspace-os-canvas">
           <div className="workspace-content">
             <p className="atlas-kicker">
-              <Sparkles size={16} />
+              <BrainCircuit size={16} />
               {ar ? "مساحة التعلّم" : "Learning workspace"}
             </p>
             <h1 className="workspace-title">

@@ -13,7 +13,7 @@ const statusCopy: Record<PaymentStatus, { ar: string; en: string; tone: string }
   pending: { ar: 'بانتظار المراجعة', en: 'Waiting for review', tone: 'bg-[var(--warning-surface)] text-[var(--warning-text)]' },
   under_review: { ar: 'قيد المراجعة الآن', en: 'Under review', tone: 'bg-[var(--info-surface)] text-[var(--info-text)]' },
   approved: { ar: 'تم التفعيل', en: 'Activated', tone: 'bg-[var(--success-surface)] text-[var(--success-text)]' },
-  rejected: { ar: 'مرفوض — يمكن إعادة الإرسال', en: 'Rejected — resubmission available', tone: 'bg-[var(--danger-surface)] text-[var(--danger-text)]' },
+  rejected: { ar: 'مرفوض، يمكن إعادة الإرسال', en: 'Rejected، resubmission available', tone: 'bg-[var(--danger-surface)] text-[var(--danger-text)]' },
   resubmission_required: { ar: 'مطلوب إثبات أوضح', en: 'Clearer proof requested', tone: 'bg-[var(--warning-surface)] text-[var(--warning-text)]' },
   canceled: { ar: 'ملغي', en: 'Canceled', tone: 'bg-[var(--neutral-surface)] text-[var(--neutral-text)]' },
 };
@@ -72,7 +72,7 @@ export default function Pricing({ language }: { language: Language }) {
   };
 
   return <main className="bg-[var(--surface)]">
-    <section className="atlas-hero relative overflow-hidden border-b border-[var(--ink)] px-4 py-16 sm:px-6 lg:py-24">
+    <section className="atlas-hero relative overflow-hidden border-b border-[var(--band)] px-4 py-16 sm:px-6 lg:py-24">
       <div className="atlas-grid absolute inset-0 opacity-60" />
       <div className="relative mx-auto max-w-6xl text-center"><p className="atlas-kicker mx-auto w-fit"><WalletCards className="h-4 w-4" />{rtl ? 'تسعير مصري بلا مفاجآت' : 'Egypt-first, surprise-free pricing'}</p><h1 className="atlas-display mx-auto mt-6 max-w-4xl text-5xl sm:text-7xl">{rtl ? 'اتعلم شهرًا كاملًا قبل أن تدفع جنيهًا واحدًا.' : 'Learn for a full month before paying a pound.'}</h1><p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-[var(--muted)]">{rtl ? '30 يومًا مجانية دون بطاقة أو خصم تلقائي. بعدها حوّل بالطريقة المعلنة وارفع الإثبات؛ فريق فَهيم يراجعه بسجل واضح ويُفعّل حسابك.' : '30 free days, no card and no automatic charge. Then transfer using a published method, upload proof, and Fahim reviews it through an auditable process.'}</p><div className="mt-7 flex flex-wrap justify-center gap-3 text-xs font-black text-[var(--text)]"><span className="atlas-chip bg-[var(--saffron)] text-[#14213D]"><Clock3 className="h-4 w-4" />{rtl ? '30 يومًا مجانًا' : '30 days free'}</span><span className="atlas-chip bg-[color-mix(in_srgb,var(--nile)_14%,var(--panel))] text-[var(--nile)]"><ShieldCheck className="h-4 w-4" />{rtl ? 'لا خصم تلقائي' : 'No auto-charge'}</span><span className="atlas-chip bg-[color-mix(in_srgb,var(--vermilion)_12%,var(--panel))] text-[var(--vermilion)]"><BadgeCheck className="h-4 w-4" />{rtl ? 'مراجعة بشرية موثقة' : 'Audited human review'}</span></div></div>
     </section>

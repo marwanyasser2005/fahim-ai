@@ -1,13 +1,13 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { AlarmClock, BrainCircuit, Check, ChevronLeft, ChevronRight, Clock3, Layers3, Plus, RotateCcw, Sparkles, Trash2, TrendingUp, X } from 'lucide-react';
+import { AlarmClock, BrainCircuit, Check, ChevronLeft, ChevronRight, Clock3, Layers3, Plus, RotateCcw, Trash2, TrendingUp, X } from 'lucide-react';
 import { createReviewCard, dueReviewCards, gradeReviewCard, loadReviewCards, removeReviewCard, type ReviewCard as ReviewCardType, type ReviewGrade } from '@/lib/spacedReview';
 import { syncEvidenceToReviewCards } from '@/lib/reviewBridge';
 import { recordStudyAction } from '@/lib/studyProgress';
 import MemoryTimeline from '@/components/learning/MemoryTimeline';
 
 const copy = {
-  ar: { eyebrow: 'ذاكرة فَهيم', title: 'مراجعتك الآن', body: 'جدولة متباعدة حقيقية: كل تقييم يغيّر موعد البطاقة وصعوبتها. بطاقتك جاهزة — أجب من الذاكرة أولًا.', due: 'مستحق الآن', tomorrow: 'خلال 24 ساعة', mature: 'ذاكرة مستقرة', total: 'إجمالي البطاقات', add: 'بطاقة جديدة', front: 'السؤال أو المفهوم', back: 'الإجابة المختصرة', subject: 'المادة', save: 'حفظ البطاقة', cancel: 'إلغاء', reveal: 'اكشف الإجابة', again: 'نسيت', hard: 'صعب', good: 'جيد', easy: 'سهل', empty: 'لا توجد مراجعات مستحقة الآن.', emptyBody: 'أضف بطاقة جديدة أو عد في موعد المراجعة القادم.', all: 'كل البطاقات', interval: 'الفاصل', days: 'يوم', delete: 'حذف', answer: 'الإجابة', method: 'خوارزمية تكيفية مستوحاة من SM-2 مع خطوات تعلم قصيرة.', session: 'جلسة المذاكرة', done: 'أنهيت جلسة اليوم', doneBody: 'راجعت كل البطاقات المستحقة. عُد لاحقًا في موعد المراجعة القادم.', backToday: 'عد لليوم', topicFound: 'بطاقة مراجعتك المجدولة', progress: 'من الجلسة', scheduled: 'مجدولة من تقييمك' },
+  ar: { eyebrow: 'ذاكرة فَهيم', title: 'مراجعتك الآن', body: 'جدولة متباعدة حقيقية: كل تقييم يغيّر موعد البطاقة وصعوبتها. بطاقتك جاهزة، أجب من الذاكرة أولًا.', due: 'مستحق الآن', tomorrow: 'خلال 24 ساعة', mature: 'ذاكرة مستقرة', total: 'إجمالي البطاقات', add: 'بطاقة جديدة', front: 'السؤال أو المفهوم', back: 'الإجابة المختصرة', subject: 'المادة', save: 'حفظ البطاقة', cancel: 'إلغاء', reveal: 'اكشف الإجابة', again: 'نسيت', hard: 'صعب', good: 'جيد', easy: 'سهل', empty: 'لا توجد مراجعات مستحقة الآن.', emptyBody: 'أضف بطاقة جديدة أو عد في موعد المراجعة القادم.', all: 'كل البطاقات', interval: 'الفاصل', days: 'يوم', delete: 'حذف', answer: 'الإجابة', method: 'خوارزمية تكيفية مستوحاة من SM-2 مع خطوات تعلم قصيرة.', session: 'جلسة المذاكرة', done: 'أنهيت جلسة اليوم', doneBody: 'راجعت كل البطاقات المستحقة. عُد لاحقًا في موعد المراجعة القادم.', backToday: 'عد لليوم', topicFound: 'بطاقة مراجعتك المجدولة', progress: 'من الجلسة', scheduled: 'مجدولة من تقييمك' },
   en: { eyebrow: 'Fahim memory', title: 'Your review now', body: 'Real spaced scheduling: every rating changes the card’s next due date and difficulty. Your card is ready—answer from memory first.', due: 'Due now', tomorrow: 'Next 24 hours', mature: 'Stable memory', total: 'Total cards', add: 'New card', front: 'Question or concept', back: 'Concise answer', subject: 'Subject', save: 'Save card', cancel: 'Cancel', reveal: 'Reveal answer', again: 'Again', hard: 'Hard', good: 'Good', easy: 'Easy', empty: 'Nothing is due right now.', emptyBody: 'Add a new card or return at the next scheduled review.', all: 'All cards', interval: 'Interval', days: 'days', delete: 'Delete', answer: 'Answer', method: 'Adaptive scheduling inspired by SM-2 with short learning steps.', session: 'Study session', done: 'Today’s session complete', doneBody: 'You reviewed every due card. Return at the next scheduled review.', backToday: 'Back to Today', topicFound: 'Your scheduled review card', progress: 'of session', scheduled: 'Scheduled from your assessment' },
 } as const;
 
@@ -105,7 +105,7 @@ export default function SpacedReview({ language }: { language: 'ar' | 'en' }) {
         <div>
           <h1 className="atlas-display max-w-4xl text-4xl sm:text-5xl">{t.title}</h1>
           <p className="mt-4 max-w-3xl leading-8 text-[var(--muted)]">{t.body}</p>
-          <p className="mt-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[var(--nile)]"><Sparkles className="h-3.5 w-3.5" />{t.method}</p>
+          <p className="mt-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[var(--nile)]"><BrainCircuit className="h-3.5 w-3.5" />{t.method}</p>
         </div>
         <button type="button" onClick={() => setAdding((value) => !value)} className="atlas-secondary"><Plus className="h-4 w-4" />{t.add}</button>
       </div>

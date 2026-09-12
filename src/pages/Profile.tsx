@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Award, Bookmark, Camera, Edit3, Flame, GraduationCap, Loader2, LogOut, Save, ShieldCheck, Sparkles, X } from 'lucide-react';
+import { Award, Bookmark, Camera, Edit3, Flame, GraduationCap, Loader2, LogOut, Save, ShieldCheck, BrainCircuit, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BadgeTrail from '@/components/badges/BadgeTrail';
 import { useAuth } from '@/contexts/AuthContext';
@@ -64,7 +64,7 @@ export default function Profile({ language }: { language: Language }) {
     {badgesError && <p role="status" className="mt-4 text-xs font-bold text-[var(--muted)]">{language === 'ar' ? 'تعذر تحديث سجل الشارات الآن؛ يظهر المسار من دون منح إنجازات غير موثقة.' : 'The badge registry could not refresh; the trail is shown without granting unverified achievements.'}</p>}
     <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">{[
       [Flame, language === 'ar' ? 'أنشطة اليوم' : 'Today', String(stats.today)],
-      [Sparkles, language === 'ar' ? 'الخبرة' : 'Experience', `${xp} XP`],
+      [BrainCircuit, language === 'ar' ? 'الخبرة' : 'Experience', `${xp} XP`],
       [GraduationCap, language === 'ar' ? 'الموضوعات' : 'Topics', String(stats.topics)],
       [Bookmark, language === 'ar' ? 'المحادثات' : 'Conversations', String(conversations.length)],
       [Award, language === 'ar' ? 'الشارات' : 'Badges', badgesLoading ? '—' : `${badgeProgress.earnedCount}/${badgeProgress.totalCount}`],

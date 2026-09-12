@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Trophy, Target, Zap, Clock, Users, Star, Bell, BookOpen,
-  Flame, Award, TrendingUp, ChevronRight, Home, Sparkles
+  Flame, Award, TrendingUp, ChevronRight, Home, BrainCircuit
 } from 'lucide-react';
 
 interface StudentDashboardProps {
@@ -175,7 +175,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ language }) => {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-bold mb-4">
-            <Sparkles className="w-4 h-4" />
+            <BrainCircuit className="w-4 h-4" />
             <span>{t.streak}: {streak} {language === 'ar' ? 'أيام' : 'days'}</span>
           </div>
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-white mb-3 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-500 bg-clip-text text-transparent">

@@ -1263,7 +1263,7 @@ function SupportDesk({
     }
   };
   return (
-    <div className="grid min-h-[620px] overflow-hidden border border-[var(--ink)] bg-[var(--panel)] lg:grid-cols-[340px_1fr]">
+    <div className="grid min-h-[620px] overflow-hidden border border-[var(--band)] bg-[var(--panel)] lg:grid-cols-[340px_1fr]">
       <aside className="border-e border-[var(--border)]">
         {tickets.length === 0 ? (
           <Empty

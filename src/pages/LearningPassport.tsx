@@ -19,7 +19,7 @@ export default function LearningPassport({ language }: { language: Language }) {
   const stats = useMemo(() => learningEvidenceStats(sessions), [sessions]);
   return <main className="min-h-[80vh] bg-[var(--surface)] px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
     <div className="mx-auto max-w-7xl">
-      <header className="grid gap-6 border-b border-[var(--ink)] pb-8 lg:grid-cols-[1fr_auto] lg:items-end">
+      <header className="grid gap-6 border-b border-[var(--band)] pb-8 lg:grid-cols-[1fr_auto] lg:items-end">
         <div><p className="atlas-kicker"><BadgeCheck className="h-4 w-4" />{rtl ? 'سجل الفهم القابل للفحص' : 'Inspectable understanding record'}</p><h1 className="atlas-display mt-5 text-5xl sm:text-7xl">{rtl ? 'جواز التعلّم' : 'Learning Passport'}</h1><p className="mt-5 max-w-2xl text-base leading-8 text-[var(--muted)]">{rtl ? 'ليس قائمة دورات مكتملة؛ بل آثار توضح ما حاولت، أين أخطأت، كيف صححت، وما الذي ما زال يحتاج استرجاعًا.' : 'Not a list of completed courses—evidence of what you tried, where you struggled, how you corrected, and what still needs recall.'}</p></div>
         <div className="atlas-notice max-w-sm"><ShieldCheck className="h-5 w-5" /><div><b>{rtl ? 'خاص بك افتراضيًا' : 'Private by default'}</b><p className="mt-1 text-xs leading-6">{rtl ? 'المشاركة اختيارية، ولا تُعرض محادثاتك للمعلم أو ولي الأمر.' : 'Sharing is optional; teachers and guardians cannot read your chats.'}</p></div></div>
       </header>

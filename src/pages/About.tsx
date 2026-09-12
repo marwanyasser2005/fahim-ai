@@ -45,21 +45,21 @@ const affiliations = [
   ["HCDG Giza", "Lead & Owner"],
   [
     "Digital Egypt Pioneers Initiative",
-    "AI & Data Science — Microsoft ML Engineer Track",
+    "AI & Data Science، Microsoft ML Engineer Track",
   ],
   ["Kader & Associates Designs", "Junior AI Expert"],
   ["QWorld", "Quantum Computing Programs"],
-  ["Helwan University", "Faculty of Science — Geology & Chemistry"],
+  ["Helwan University", "Faculty of Science، Geology & Chemistry"],
 ] as const;
 
 const achievements = [
   [
     "Huawei ICT Competition 2025–2026",
-    "Silver Medal — Cloud Track, National Phase",
+    "Silver Medal، Cloud Track, National Phase",
   ],
-  ["SOLE2025 BioHackathon", "3rd Place — Metagenomics & AI Track"],
+  ["SOLE2025 BioHackathon", "3rd Place، Metagenomics & AI Track"],
   ["EcoHack", "2nd Place"],
-  ["ITIDA GIGS", "Top Achiever — 3rd Place"],
+  ["ITIDA GIGS", "Top Achiever، 3rd Place"],
 ] as const;
 
 export default function About({ language }: { language: "ar" | "en" }) {
@@ -67,7 +67,7 @@ export default function About({ language }: { language: "ar" | "en" }) {
   const Arrow = rtl ? ArrowLeft : ArrowRight;
   return (
     <main className="bg-[var(--surface)]">
-      <section className="relative overflow-hidden border-b border-[var(--ink)] bg-[var(--paper)]">
+      <section className="relative overflow-hidden border-b border-[var(--band)] bg-[var(--paper)]">
         <div className="atlas-grid absolute inset-0 opacity-50" />
         <div className="relative mx-auto grid max-w-7xl gap-12 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-[1.08fr_.92fr] lg:items-center lg:px-8 lg:py-24">
           <div className="min-w-0">
@@ -158,7 +158,7 @@ export default function About({ language }: { language: "ar" | "en" }) {
         </div>
       </section>
 
-      <section className="border-y border-[var(--ink)] bg-[#14213D] text-white">
+      <section className="border-y border-[var(--band)] bg-[#14213D] text-white">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
           <p className="atlas-section-number !text-[#F2B84B]">
             02 / {rtl ? "منظومة التعلّم" : "The learning system"}
@@ -215,7 +215,7 @@ export default function About({ language }: { language: "ar" | "en" }) {
             </div>
           </div>
           <div>
-            <figure className="relative overflow-hidden border border-[var(--ink)] bg-[var(--paper)] p-3 shadow-[8px_8px_0_#F2B84B]">
+            <figure className="relative overflow-hidden border border-[var(--band)] bg-[var(--paper)] p-3 shadow-[8px_8px_0_#F2B84B]">
               <img
                 src="/images/founder/marwan-abdelghaffar.webp"
                 alt={

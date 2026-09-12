@@ -80,7 +80,7 @@ export default function Dashboard({ language }: Props) {
     };
     refresh();
     // Signed-in learners pick up their cloud evidence so Today is accurate on
-    // any device — this is what makes a demo account portable for reviewers.
+    // any device، this is what makes a demo account portable for reviewers.
     if (user) {
       void hydrateLearningSessionsFromCloud().then((cloudSessions) => {
         if (cloudSessions.length) refresh();

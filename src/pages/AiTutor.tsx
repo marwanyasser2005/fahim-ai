@@ -15,7 +15,7 @@ import {
   Search,
   Send,
   ShieldCheck,
-  Sparkles,
+  BrainCircuit,
   Square,
   Star,
   ThumbsDown,
@@ -771,7 +771,7 @@ export default function AiTutor({ language }: { language: Language }) {
                     <button
                       type="button"
                       onClick={stop}
-                      className="inline-flex h-10 items-center gap-2 rounded-lg bg-[var(--ink)] px-4 text-xs font-black text-white"
+                      className="inline-flex h-10 items-center gap-2 rounded-lg bg-[var(--band)] px-4 text-xs font-black text-white"
                     >
                       <Square className="h-3.5 w-3.5 fill-current" />
                       {t.stop}
@@ -953,7 +953,7 @@ function MessageBubble({
                 onClick={onContinue}
                 disabled={disabled}
               >
-                <Sparkles />
+                <BrainCircuit />
               </Action>
               <Action
                 label="Helpful"

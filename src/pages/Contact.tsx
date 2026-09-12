@@ -1,6 +1,6 @@
 // src/pages/Contact.tsx
 import React, { useState, useEffect } from 'react';
-import { Mail, Phone, MapPin, Send, Github, Linkedin, Facebook, CheckCircle, AlertCircle, Sparkles } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Github, Linkedin, Facebook, CheckCircle, AlertCircle, BrainCircuit } from 'lucide-react';
 
 interface ContactProps {
   language: 'ar' | 'en';
@@ -189,7 +189,7 @@ export const Contact: React.FC<ContactProps> = ({ language }) => {
           {/* Header */}
           <div className="text-center mb-16 sm:mb-20 lg:mb-24">
             <div className="inline-flex items-center gap-3 bg-gradient-to-r from-teal-500 to-blue-600 text-white px-6 py-3 rounded-full text-lg font-bold mb-6 shadow-xl">
-              <Sparkles className="w-6 h-6 animate-pulse" />
+              <BrainCircuit className="w-6 h-6 animate-pulse" />
               <span>{language === 'ar' ? 'دعم 24/7' : '24/7 Support'}</span>
             </div>
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-gray-900 mb-4 bg-gradient-to-r from-blue-600 via-teal-600 to-emerald-600 bg-clip-text text-transparent">

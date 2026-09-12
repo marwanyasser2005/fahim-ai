@@ -213,7 +213,7 @@ export default function Support({ language }: { language: Language }) {
             {error}
           </div>
         )}
-        <div className="mt-6 grid min-h-[560px] overflow-hidden border border-[var(--ink)] bg-[var(--panel)] lg:grid-cols-[340px_1fr]">
+        <div className="mt-6 grid min-h-[560px] overflow-hidden border border-[var(--band)] bg-[var(--panel)] lg:grid-cols-[340px_1fr]">
           <aside className="border-b border-[var(--border)] lg:border-b-0 lg:border-e">
             <div className="border-b border-[var(--border)] p-4">
               <h2 className="font-black">
@@ -348,7 +348,7 @@ export default function Support({ language }: { language: Language }) {
                   {grouped.map((message) => (
                     <article
                       key={message.id}
-                      className={`max-w-[88%] border p-4 ${message.sender_role === "admin" ? "me-auto border-[color-mix(in_srgb,var(--nile)_35%,var(--border))] bg-[color-mix(in_srgb,var(--nile)_9%,var(--panel))] text-[var(--text)]" : "ms-auto border-[var(--ink)] bg-[var(--panel)]"}`}
+                      className={`max-w-[88%] border p-4 ${message.sender_role === "admin" ? "me-auto border-[color-mix(in_srgb,var(--nile)_35%,var(--border))] bg-[color-mix(in_srgb,var(--nile)_9%,var(--panel))] text-[var(--text)]" : "ms-auto border-[var(--band)] bg-[var(--panel)]"}`}
                     >
                       <p className="text-[10px] font-black uppercase tracking-wider opacity-60">
                         {message.sender_role === "admin"

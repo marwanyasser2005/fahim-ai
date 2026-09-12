@@ -126,7 +126,7 @@ export default function Learning({ language }: LearningProps) {
               ))}
             </div>
           </section>
-          <aside className="border border-[var(--ink)] bg-[var(--ink)] p-6 text-white shadow-[7px_7px_0_var(--saffron)] sm:p-8">
+          <aside className="border border-[var(--band)] bg-[var(--band)] p-6 text-white shadow-[7px_7px_0_var(--saffron)] sm:p-8">
             <h2 className="flex items-center gap-2 text-xl font-black">
               <Compass className="h-5 w-5 text-teal-300" />
               {language === "ar" ? "بعد الجلسة" : "After the session"}

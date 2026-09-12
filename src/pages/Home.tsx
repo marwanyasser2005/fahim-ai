@@ -18,7 +18,6 @@ import {
   RefreshCcw,
   Search,
   ShieldCheck,
-  Sparkles,
   Target,
 } from "lucide-react";
 import { courseCatalog } from "@/data/courseCatalog";
@@ -147,10 +146,10 @@ export default function Home({ language }: { language: Language }) {
 
   return (
     <main className="overflow-hidden bg-[var(--surface)]">
-      <section className="relative border-b border-[var(--ink)] bg-[var(--paper)]">
+      <section className="relative border-b border-[var(--band)] bg-[var(--paper)]">
         <div className="atlas-grid absolute inset-0 opacity-55" />
         <div className="relative mx-auto max-w-[100rem] px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-4 border-b border-[var(--ink)]/20 py-3 text-xs font-extrabold text-[var(--muted)]">
+          <div className="flex items-center justify-between gap-4 border-b border-[var(--band)]/20 py-3 text-xs font-extrabold text-[var(--muted)]">
             <span>
               {rtl
                 ? "فَهيم / نظام الفهم الموثّق"
@@ -161,7 +160,7 @@ export default function Home({ language }: { language: Language }) {
             </span>
           </div>
           <div className="grid min-h-[44rem] lg:grid-cols-[1.05fr_.95fr]">
-            <div className="flex min-w-0 flex-col justify-center py-14 lg:border-e lg:border-[var(--ink)]/20 lg:pe-12">
+            <div className="flex min-w-0 flex-col justify-center py-14 lg:border-e lg:border-[var(--band)]/20 lg:pe-12">
               <p className="atlas-kicker w-fit">
                 <BookOpenCheck className="h-4 w-4" />
                 {rtl
@@ -185,8 +184,8 @@ export default function Home({ language }: { language: Language }) {
                   className="atlas-primary justify-center"
                 >
                   {rtl
-                    ? "ابدأ أول تقييم — 30 يومًا مجانًا"
-                    : "Start your first assessment — 30 days free"}
+                    ? "ابدأ أول تقييم، 30 يومًا مجانًا"
+                    : "Start your first assessment، 30 days free"}
                   <Arrow className="h-4 w-4" />
                 </Link>
                 <Link to="/showcase" className="atlas-secondary justify-center">
@@ -194,7 +193,7 @@ export default function Home({ language }: { language: Language }) {
                   {rtl ? "شاهد القصة التفاعلية" : "Open the interactive story"}
                 </Link>
               </div>
-              <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 border-t border-[var(--ink)]/20 pt-5 text-xs font-bold text-[var(--muted)]">
+              <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 border-t border-[var(--band)]/20 pt-5 text-xs font-bold text-[var(--muted)]">
                 <span className="flex items-center gap-2">
                   <ShieldCheck className="h-4 w-4 text-[var(--nile)]" />
                   {rtl ? "لا بطاقة مطلوبة" : "No card required"}
@@ -220,7 +219,7 @@ export default function Home({ language }: { language: Language }) {
         </div>
       </section>
 
-      <section className="border-b border-[var(--ink)] bg-[#14213D] text-white">
+      <section className="border-b border-[var(--band)] bg-[#14213D] text-white">
         <div className="mx-auto max-w-[100rem] px-4 py-10 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center gap-2">
             {learningLoop.map(([code, ar, en], index) => (
@@ -278,7 +277,7 @@ export default function Home({ language }: { language: Language }) {
         </div>
       </section>
 
-      <section className="border-y border-[var(--ink)] bg-[var(--paper)]">
+      <section className="border-y border-[var(--band)] bg-[var(--paper)]">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
           <SectionHeader
             number="02"
@@ -406,7 +405,7 @@ export default function Home({ language }: { language: Language }) {
         </div>
       </section>
 
-      <section className="border-y border-[var(--ink)] bg-[#14213D] text-white">
+      <section className="border-y border-[var(--band)] bg-[#14213D] text-white">
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-3 lg:px-8 lg:py-20">
           {[
             [
@@ -539,7 +538,7 @@ export default function Home({ language }: { language: Language }) {
           width="800"
           height="800"
           loading="lazy"
-          className="aspect-square w-full border border-[var(--ink)] object-cover shadow-[8px_8px_0_#F2B84B]"
+          className="aspect-square w-full border border-[var(--band)] object-cover shadow-[8px_8px_0_#F2B84B]"
         />
         <div>
           <p className="atlas-section-number">06 / FOUNDER</p>
@@ -560,7 +559,7 @@ export default function Home({ language }: { language: Language }) {
         </div>
       </section>
 
-      <section className="border-t border-[var(--ink)] bg-[#F2B84B] text-[#14213D]">
+      <section className="border-t border-[var(--band)] bg-[#F2B84B] text-[#14213D]">
         <div className="mx-auto max-w-5xl px-4 py-16 text-center sm:px-6 lg:py-24">
           <Target className="mx-auto h-8 w-8" />
           <h2 className="mt-5 text-4xl font-black tracking-tight sm:text-6xl">
@@ -690,7 +689,7 @@ function ProductPreview({ language }: { language: Language }) {
       </div>
       <div className="hero-story-content" aria-live="polite">
         <span className="os-ai-mark">
-          <Sparkles size={20} />
+          <BrainCircuit size={20} />
         </span>
         <h2>{ar ? steps[step].ar : steps[step].en}</h2>
         <p>{ar ? steps[step].bodyAr : steps[step].bodyEn}</p>

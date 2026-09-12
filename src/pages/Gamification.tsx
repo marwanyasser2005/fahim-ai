@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Trophy, Zap, Flame, Star, Crown, Medal, Target, Sparkles,
+  Trophy, Zap, Flame, Star, Crown, Medal, Target, BrainCircuit,
   Volume2, VolumeX, ChevronUp, Lock, Unlock, Award
 } from 'lucide-react';
 
@@ -56,7 +56,7 @@ const Gamification: React.FC<GamificationProps> = ({ language }) => {
   const [showConfetti, setShowConfetti] = useState(false);
 
   const [badges, setBadges] = useState<Badge[]>([
-    { id: 1, name: language === 'ar' ? 'مستكشف مبتدئ' : 'Beginner Explorer', description: language === 'ar' ? 'أكمل أول دورة' : 'Complete first course', earned: true, icon: <Sparkles className="w-6 h-6" />, xpReward: 100, rarity: 'common' },
+    { id: 1, name: language === 'ar' ? 'مستكشف مبتدئ' : 'Beginner Explorer', description: language === 'ar' ? 'أكمل أول دورة' : 'Complete first course', earned: true, icon: <BrainCircuit className="w-6 h-6" />, xpReward: 100, rarity: 'common' },
     { id: 2, name: language === 'ar' ? 'محترف المهارات' : 'Skill Master', description: language === 'ar' ? 'أكمل 10 دروس' : 'Complete 10 lessons', earned: true, icon: <Flame className="w-6 h-6" />, xpReward: 250, rarity: 'rare' },
     { id: 3, name: language === 'ar' ? 'ملك التعلم' : 'Learning King', description: language === 'ar' ? 'احصل على 3000 نقطة' : 'Reach 3000 points', earned: false, icon: <Crown className="w-6 h-6" />, xpReward: 500, rarity: 'legendary' },
     { id: 4, name: language === 'ar' ? 'بطل الأسبوع' : 'Weekly Champion', description: language === 'ar' ? 'احتل المركز الأول' : 'Top weekly leaderboard', earned: false, icon: <Trophy className="w-6 h-6" />, xpReward: 1000, rarity: 'epic' }

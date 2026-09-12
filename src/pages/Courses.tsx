@@ -1,5 +1,5 @@
 import { useDeferredValue, useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, BookOpen, Check, Clock3, Filter, Search, Sparkles, Star, Users, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, Check, Clock3, Filter, Search, BrainCircuit, Star, Users, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { Language } from '@/App';
 import { courseCatalog, courseMinutes, type CourseLevel } from '@/data/courseCatalog';
@@ -39,10 +39,10 @@ export default function Courses({ language }: { language: Language }) {
   return <main className="min-h-[80vh] bg-[var(--surface)] pb-20">
     <section className="atlas-grid border-b border-[var(--border)] bg-[var(--paper)] py-14 dark:bg-[#0b1116] sm:py-20">
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl"><span className="atlas-kicker"><Sparkles className="h-4 w-4" />{t.eyebrow}</span><h1 className="atlas-display mt-5 text-4xl sm:text-6xl">{t.title}</h1><p className="mt-5 max-w-2xl text-sm leading-8 text-[var(--muted)] sm:text-base">{t.body}</p><p className="mt-5 inline-flex items-center gap-2 text-xs font-black text-[var(--nile)]"><Check className="h-4 w-4" />{t.quality}</p></div>
+      <div className="max-w-4xl"><span className="atlas-kicker"><BrainCircuit className="h-4 w-4" />{t.eyebrow}</span><h1 className="atlas-display mt-5 text-4xl sm:text-6xl">{t.title}</h1><p className="mt-5 max-w-2xl text-sm leading-8 text-[var(--muted)] sm:text-base">{t.body}</p><p className="mt-5 inline-flex items-center gap-2 text-xs font-black text-[var(--nile)]"><Check className="h-4 w-4" />{t.quality}</p></div>
     </div></section><div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
-      <section className="sticky top-[4.5rem] z-30 mx-auto mt-8 min-w-0 max-w-6xl border border-[var(--ink)] bg-[var(--panel)]/95 p-3 shadow-[5px_5px_0_var(--saffron)] backdrop-blur-xl" aria-label={t.filters}>
+      <section className="sticky top-[4.5rem] z-30 mx-auto mt-8 min-w-0 max-w-6xl border border-[var(--band)] bg-[var(--panel)]/95 p-3 shadow-[5px_5px_0_var(--saffron)] backdrop-blur-xl" aria-label={t.filters}>
         <div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1fr)_auto_auto]">
           <label className="relative min-w-0"><Search className="absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted)]" /><span className="sr-only">{t.search}</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t.search} className="h-12 min-w-0 w-full rounded-2xl border border-[var(--border)] bg-[var(--soft)] pe-10 ps-11 text-sm font-bold text-[var(--text)] outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-500/10" />{query && <button type="button" onClick={() => setQuery('')} className="absolute end-3 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-lg text-[var(--muted)] hover:bg-[var(--panel)]" aria-label={t.clear}><X className="h-4 w-4" /></button>}</label>
           <div className="flex min-w-0 max-w-full items-center gap-2 overflow-x-auto"><Filter className="h-4 w-4 shrink-0 text-[var(--muted)]" />{(['all', 'beginner', 'intermediate', 'advanced'] as const).map((item) => <button type="button" key={item} onClick={() => setLevel(item)} className={`whitespace-nowrap rounded-lg px-3 py-2.5 text-[10px] font-black ${level === item ? 'bg-[var(--lapis)] text-white' : 'bg-[var(--soft)] text-[var(--muted)] hover:text-[var(--text)]'}`}>{t[item]}</button>)}</div>

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Sparkles, ArrowUpRight, BookOpen } from "lucide-react";
+import { BrainCircuit, ArrowUpRight, BookOpen } from "lucide-react";
 import type { LearningSession } from "@/lib/learningEvidence";
 export default function FahimTutorSidecar({
   session,
@@ -22,7 +22,7 @@ export default function FahimTutorSidecar({
     <aside className="tutor-sidecar">
       <header>
         <span className="os-ai-mark">
-          <Sparkles size={18} />
+          <BrainCircuit size={18} />
         </span>
         <div>
           <h2>{ar ? "فَهيم معك" : "Fahim, beside you"}</h2>
@@ -96,7 +96,7 @@ export default function FahimTutorSidecar({
         </p>
         <Link to={`/ask-fahim?${query}`} className="atlas-primary">
           {ar ? "اسأل فَهيم" : "Ask Fahim"}
-          <Sparkles size={16} />
+          <BrainCircuit size={16} />
         </Link>
       </footer>
     </aside>

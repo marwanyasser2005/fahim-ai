@@ -99,7 +99,7 @@ export default function HowItWorks({ language }: { language: "ar" | "en" }) {
   const Arrow = rtl ? ArrowLeft : ArrowRight;
   return (
     <main className="bg-[var(--surface)]">
-      <section className="border-b border-[var(--ink)] bg-[#14213D] px-4 py-16 text-white sm:px-6 lg:py-24">
+      <section className="border-b border-[var(--band)] bg-[#14213D] px-4 py-16 text-white sm:px-6 lg:py-24">
         <div className="mx-auto max-w-6xl">
           <p className="flex items-center gap-2 text-xs font-black text-[#F2B84B]">
             <Route className="h-4 w-4" />
@@ -148,7 +148,7 @@ export default function HowItWorks({ language }: { language: "ar" | "en" }) {
         </ol>
       </section>
 
-      <section className="border-y border-[var(--ink)] bg-[var(--paper)]">
+      <section className="border-y border-[var(--band)] bg-[var(--paper)]">
         <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
           <p className="atlas-section-number">
             {rtl ? "عقد الدليل" : "The evidence contract"}

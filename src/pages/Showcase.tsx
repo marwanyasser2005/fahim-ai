@@ -17,7 +17,6 @@ import {
   Play,
   RotateCcw,
   ShieldCheck,
-  Sparkles,
   UsersRound,
 } from 'lucide-react';
 import type { Language } from '@/App';
@@ -32,32 +31,32 @@ type Props = { language: Language };
 
 const stepCopy = [
   {
-    ar: { label: '01 — المصدر والتشخيص', title: 'مريم تبدأ من سؤال، لا من إجابة جاهزة.', body: 'يربط فَهيم المفهوم بمصدر محدد، ثم يطلب محاولة قصيرة تكشف نقطة البداية الحقيقية.', signal: 'ما الذي يتغير عندما تؤثر قوة أكبر على نفس الكتلة؟' },
-    en: { label: '01 — Source & diagnostic', title: 'Mariam starts with a question, not a ready-made answer.', body: 'Fahim anchors the concept to a specific source, then asks for a short attempt that reveals the real starting point.', signal: 'What changes when a larger force acts on the same mass?' },
+    ar: { label: '01، المصدر والتشخيص', title: 'مريم تبدأ من سؤال، لا من إجابة جاهزة.', body: 'يربط فَهيم المفهوم بمصدر محدد، ثم يطلب محاولة قصيرة تكشف نقطة البداية الحقيقية.', signal: 'ما الذي يتغير عندما تؤثر قوة أكبر على نفس الكتلة؟' },
+    en: { label: '01، Source & diagnostic', title: 'Mariam starts with a question, not a ready-made answer.', body: 'Fahim anchors the concept to a specific source, then asks for a short attempt that reveals the real starting point.', signal: 'What changes when a larger force acts on the same mass?' },
   },
   {
-    ar: { label: '02 — محاولة أصلية', title: 'المحاولة تحفظ كما هي؛ لا تُطمس بعد التصحيح.', body: 'قالت مريم إن القوة الأكبر تجعل الجسم أسرع دائمًا، حتى لو تغيّرت كتلته.', signal: 'ثقة المتعلّمة في الإجابة: 72%' },
-    en: { label: '02 — Original attempt', title: 'The attempt stays visible; correction does not erase it.', body: 'Mariam said a larger force always makes an object faster, even when its mass changes.', signal: 'Learner confidence: 72%' },
+    ar: { label: '02، محاولة أصلية', title: 'المحاولة تحفظ كما هي؛ لا تُطمس بعد التصحيح.', body: 'قالت مريم إن القوة الأكبر تجعل الجسم أسرع دائمًا، حتى لو تغيّرت كتلته.', signal: 'ثقة المتعلّمة في الإجابة: 72%' },
+    en: { label: '02، Original attempt', title: 'The attempt stays visible; correction does not erase it.', body: 'Mariam said a larger force always makes an object faster, even when its mass changes.', signal: 'Learner confidence: 72%' },
   },
   {
-    ar: { label: '03 — تشخيص الخطأ', title: 'المشكلة ليست “إجابة خاطئة” فقط.', body: 'اكتشف فَهيم خلطًا بين السرعة والتسارع، مع إهمال أثر الكتلة. هذا نمط مفاهيمي قابل للتدخل.', signal: 'ثقة التشخيص: 91% — فرضية قابلة للتحديث' },
-    en: { label: '03 — Misconception', title: 'The problem is more than a “wrong answer.”', body: 'Fahim detects confusion between velocity and acceleration while ignoring mass—a teachable conceptual pattern.', signal: 'Diagnostic confidence: 91% — a revisable hypothesis' },
+    ar: { label: '03، تشخيص الخطأ', title: 'المشكلة ليست “إجابة خاطئة” فقط.', body: 'اكتشف فَهيم خلطًا بين السرعة والتسارع، مع إهمال أثر الكتلة. هذا نمط مفاهيمي قابل للتدخل.', signal: 'ثقة التشخيص: 91%، فرضية قابلة للتحديث' },
+    en: { label: '03، Misconception', title: 'The problem is more than a “wrong answer.”', body: 'Fahim detects confusion between velocity and acceleration while ignoring mass—a teachable conceptual pattern.', signal: 'Diagnostic confidence: 91%، a revisable hypothesis' },
   },
   {
-    ar: { label: '04 — تدخل موجّه', title: 'شرح أقل، مقارنة أذكى.', body: 'يقارن فَهيم عربتي تسوق مختلفتي الكتلة تحت نفس القوة، ويربط التسارع بكلمة acceleration.', signal: 'تدخل: مثال حسي + جسر عربي/إنجليزي + سؤال توقع' },
-    en: { label: '04 — Targeted intervention', title: 'Less exposition, a smarter comparison.', body: 'Fahim compares two shopping carts with different masses under the same force and bridges acceleration to التسارع.', signal: 'Intervention: concrete analogy + bilingual bridge + prediction' },
+    ar: { label: '04، تدخل موجّه', title: 'شرح أقل، مقارنة أذكى.', body: 'يقارن فَهيم عربتي تسوق مختلفتي الكتلة تحت نفس القوة، ويربط التسارع بكلمة acceleration.', signal: 'تدخل: مثال حسي + جسر عربي/إنجليزي + سؤال توقع' },
+    en: { label: '04، Targeted intervention', title: 'Less exposition, a smarter comparison.', body: 'Fahim compares two shopping carts with different masses under the same force and bridges acceleration to التسارع.', signal: 'Intervention: concrete analogy + bilingual bridge + prediction' },
   },
   {
-    ar: { label: '05 — إعادة المحاولة', title: 'مريم تصلح نموذجها العقلي بنفسها.', body: 'عند ثبات الكتلة، زيادة القوة تزيد التسارع. وعند ثبات القوة، زيادة الكتلة تقلل التسارع.', signal: 'شرح صحيح + تطبيق عددي واحد' },
-    en: { label: '05 — Retry', title: 'Mariam repairs the mental model herself.', body: 'At constant mass, more force creates more acceleration. At constant force, more mass creates less acceleration.', signal: 'Correct explanation + one numerical application' },
+    ar: { label: '05، إعادة المحاولة', title: 'مريم تصلح نموذجها العقلي بنفسها.', body: 'عند ثبات الكتلة، زيادة القوة تزيد التسارع. وعند ثبات القوة، زيادة الكتلة تقلل التسارع.', signal: 'شرح صحيح + تطبيق عددي واحد' },
+    en: { label: '05، Retry', title: 'Mariam repairs the mental model herself.', body: 'At constant mass, more force creates more acceleration. At constant force, more mass creates less acceleration.', signal: 'Correct explanation + one numerical application' },
   },
   {
-    ar: { label: '06 — دليل التعلّم', title: 'التقدّم هنا قابل للفحص، لا مجرد شريط مكتمل.', body: 'يجمع فَهيم المحاولة والتشخيص والتدخل والإعادة والمصدر في أثر واحد مع أبعاد واضحة للإتقان.', signal: 'درجة الدليل المركبة: 85/100' },
-    en: { label: '06 — Learning evidence', title: 'Progress is inspectable, not just a completed bar.', body: 'Fahim combines the attempt, diagnosis, intervention, retry, and source into one artifact with clear mastery dimensions.', signal: 'Composite evidence score: 85/100' },
+    ar: { label: '06، دليل التعلّم', title: 'التقدّم هنا قابل للفحص، لا مجرد شريط مكتمل.', body: 'يجمع فَهيم المحاولة والتشخيص والتدخل والإعادة والمصدر في أثر واحد مع أبعاد واضحة للإتقان.', signal: 'درجة الدليل المركبة: 85/100' },
+    en: { label: '06، Learning evidence', title: 'Progress is inspectable, not just a completed bar.', body: 'Fahim combines the attempt, diagnosis, intervention, retry, and source into one artifact with clear mastery dimensions.', signal: 'Composite evidence score: 85/100' },
   },
   {
-    ar: { label: '07 — الذاكرة والمعلم', title: 'تنتهي الجلسة بخطوة تالية ذات معنى.', body: 'تُجدول مراجعة استرجاعية بعد 3 أيام، بينما يرى المعلم نمط الخطأ المجمع دون قراءة محادثات الطلاب.', signal: 'الخصوصية: إشارة صفية مجمعة، لا محادثات شخصية' },
-    en: { label: '07 — Memory & teacher', title: 'The session ends with a meaningful next action.', body: 'A recall check is scheduled in three days, while the teacher sees an aggregate pattern without reading student chats.', signal: 'Privacy: aggregate class signal, not private conversations' },
+    ar: { label: '07، الذاكرة والمعلم', title: 'تنتهي الجلسة بخطوة تالية ذات معنى.', body: 'تُجدول مراجعة استرجاعية بعد 3 أيام، بينما يرى المعلم نمط الخطأ المجمع دون قراءة محادثات الطلاب.', signal: 'الخصوصية: إشارة صفية مجمعة، لا محادثات شخصية' },
+    en: { label: '07، Memory & teacher', title: 'The session ends with a meaningful next action.', body: 'A recall check is scheduled in three days, while the teacher sees an aggregate pattern without reading student chats.', signal: 'Privacy: aggregate class signal, not private conversations' },
   },
 ] as const;
 
@@ -78,7 +77,7 @@ export default function Showcase({ language }: Props) {
         <div className="atlas-grid absolute inset-0 opacity-60" />
         <div className="relative mx-auto max-w-[96rem] px-4 py-12 sm:px-6 lg:px-8 lg:py-20">
           <div className="showcase-status-row">
-            <span className="showcase-demo-badge"><span />{rtl ? 'بيئة عرض جاهزة — بيانات توضيحية' : 'Prepared demo — illustrative data'}</span>
+            <span className="showcase-demo-badge"><span />{rtl ? 'بيئة عرض جاهزة، بيانات توضيحية' : 'Prepared demo، illustrative data'}</span>
             <span>{rtl ? 'GenAI for Education Hackathon 2026' : 'GenAI for Education Hackathon 2026'}</span>
           </div>
           <div className="mt-10 grid items-end gap-10 xl:grid-cols-[1.05fr_.95fr]">
@@ -124,7 +123,7 @@ export default function Showcase({ language }: Props) {
               <div className="showcase-stage-meta"><span>{content.label}</span><span><Clock3 className="h-4 w-4" /><bdi>{eventTime}</bdi></span></div>
               <div className="showcase-stage-body">
                 <div>
-                  <span className="showcase-stage-icon">{step < 2 ? <BookOpenCheck /> : step === 2 ? <BrainCircuit /> : step < 5 ? <Sparkles /> : step === 5 ? <BadgeCheck /> : <Clock3 />}</span>
+                  <span className="showcase-stage-icon">{step < 2 ? <BookOpenCheck /> : step === 2 ? <BrainCircuit /> : step < 5 ? <BrainCircuit /> : step === 5 ? <BadgeCheck /> : <Clock3 />}</span>
                   <h3>{content.title}</h3>
                   <p>{content.body}</p>
                   <div className="showcase-signal"><span>{rtl ? 'إشارة مسجلة' : 'Recorded signal'}</span><strong>{content.signal}</strong></div>

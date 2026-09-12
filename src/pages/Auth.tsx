@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, CheckCircle2, Clock3, Eye, EyeOff, Github, KeyRound, Loader2, LockKeyhole, Mail, RefreshCw, ShieldCheck, Sparkles, UserRound } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Clock3, Eye, EyeOff, Github, KeyRound, Loader2, LockKeyhole, Mail, RefreshCw, ShieldCheck, BrainCircuit, UserRound } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { AUTH_SESSION_EXPIRED, getAuthProviders, getFreshSession, supabase, type AuthProviders } from '@/lib/supabase/client';
 import type { Language } from '@/App';
@@ -180,7 +180,7 @@ export default function Auth({ language, mode }: Props) {
     <div className="atlas-grid absolute inset-0 opacity-45" />
     <div className="fahim-auth-shell relative mx-auto grid max-w-6xl overflow-hidden bg-[var(--panel)] lg:grid-cols-[.88fr_1.12fr]">
       <section className="fahim-auth-aside hidden p-10 text-white lg:flex lg:flex-col lg:justify-between xl:p-12">
-        <div><div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-2 text-xs font-black text-[var(--saffron)]"><Sparkles className="h-4 w-4" />{language === 'ar' ? 'فَهيم · نظام الفهم الموثّق' : 'Fahim · Verified learning system'}</div><h1 className="mt-9 text-4xl font-black leading-[1.3]">{language === 'ar' ? 'مساحة واحدة لكل رحلة التعلّم.' : 'One workspace for your entire learning journey.'}</h1><p className="mt-5 max-w-md text-base leading-8 text-slate-300">{language === 'ar' ? 'شرح بالذكاء الاصطناعي، فيديوهات، ملاحظات، اختبارات وتقدّم محفوظ في تجربة هادئة ومترابطة.' : 'AI explanations, videos, notes, quizzes, and saved progress in one calm, connected experience.'}</p></div>
+        <div><div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-2 text-xs font-black text-[var(--saffron)]"><BrainCircuit className="h-4 w-4" />{language === 'ar' ? 'فَهيم · نظام الفهم الموثّق' : 'Fahim · Verified learning system'}</div><h1 className="mt-9 text-4xl font-black leading-[1.3]">{language === 'ar' ? 'مساحة واحدة لكل رحلة التعلّم.' : 'One workspace for your entire learning journey.'}</h1><p className="mt-5 max-w-md text-base leading-8 text-slate-300">{language === 'ar' ? 'شرح بالذكاء الاصطناعي، فيديوهات، ملاحظات، اختبارات وتقدّم محفوظ في تجربة هادئة ومترابطة.' : 'AI explanations, videos, notes, quizzes, and saved progress in one calm, connected experience.'}</p></div>
         <div className="grid gap-3">{[t.valueA, t.valueB, t.valueC].map((item) => <div key={item} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.055] p-4 text-sm font-bold"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--saffron)]/10"><CheckCircle2 className="h-5 w-5 text-[var(--saffron)]" /></span>{item}</div>)}</div>
       </section>
       <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .28, ease: [0.22, 1, 0.36, 1] }} className="fahim-auth-form p-6 sm:p-10 lg:p-14">

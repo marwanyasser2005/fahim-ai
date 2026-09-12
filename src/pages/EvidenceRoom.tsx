@@ -13,7 +13,7 @@ import {
   Radar,
   Scale,
   ShieldCheck,
-  Sparkles,
+  BrainCircuit,
   UsersRound,
 } from 'lucide-react';
 import type { Language } from '@/App';
@@ -22,7 +22,7 @@ import evaluationReport from '@/data/evaluationReport.json';
 type Props = { language: Language };
 
 const rubric = [
-  { id: 'innovation', weight: 25, score: 23, icon: Sparkles, ar: 'الابتكار والإبداع', en: 'Innovation & creativity', proofAr: 'حلقة دليل متكاملة بدل شات منفصل: خطأ ← تدخل ← إعادة محاولة ← ذاكرة.', proofEn: 'A full evidence loop instead of isolated chat: error → intervention → retry → memory.' },
+  { id: 'innovation', weight: 25, score: 23, icon: BrainCircuit, ar: 'الابتكار والإبداع', en: 'Innovation & creativity', proofAr: 'حلقة دليل متكاملة بدل شات منفصل: خطأ ← تدخل ← إعادة محاولة ← ذاكرة.', proofEn: 'A full evidence loop instead of isolated chat: error → intervention → retry → memory.' },
   { id: 'impact', weight: 25, score: 16, icon: GraduationCap, ar: 'الأثر التعليمي', en: 'Impact on education', proofAr: 'قياس pre/post/retention/transfer جاهز، لكن نتائج المتعلمين الحقيقية لم تُقَس بعد.', proofEn: 'Pre/post/retention/transfer measurement is ready; real learner outcomes are not measured yet.' },
   { id: 'technical', weight: 20, score: 19, icon: Braces, ar: 'التنفيذ التقني', en: 'Technical execution', proofAr: 'توجيه AI احتياطي، RLS، تصحيح موقّع، بوابات خصوصية، وفحص حماية حتمي.', proofEn: 'AI failover, RLS, signed grading, privacy gates, and a deterministic guard suite.' },
   { id: 'feasibility', weight: 15, score: 13, icon: Gauge, ar: 'القابلية للتطبيق والتوسع', en: 'Feasibility & scalability', proofAr: 'منتج منشور، PWA ووضع بيانات خفيفة وبنية Pilot؛ اقتصاديات الوحدة تحتاج بيانات تشغيل.', proofEn: 'Deployed PWA, low-data mode, and pilot infrastructure; unit economics still need field data.' },

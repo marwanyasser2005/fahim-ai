@@ -1,4 +1,4 @@
-import { Check, Circle, Sparkles } from 'lucide-react';
+import { Check, Circle, BrainCircuit } from 'lucide-react';
 import { buildEvidenceGraph, type LearningSession } from '@/lib/learningEvidence';
 
 type Props = {
@@ -24,7 +24,7 @@ export default function EvidenceGraph({ session, language, visibleSteps, compact
       {graph.map((node, index) => (
         <li key={node.id} className="evidence-node" data-state={node.state} aria-current={node.state === 'current' ? 'step' : undefined}>
           <span className="evidence-node-marker" aria-hidden="true">
-            {node.state === 'complete' ? <Check /> : node.state === 'current' ? <Sparkles /> : <Circle />}
+            {node.state === 'complete' ? <Check /> : node.state === 'current' ? <BrainCircuit /> : <Circle />}
           </span>
           <span className="evidence-node-index"><bdi>{String(index + 1).padStart(2, '0')}</bdi></span>
           <span className="evidence-node-label">{node.label}</span>

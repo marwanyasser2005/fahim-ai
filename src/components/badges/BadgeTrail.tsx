@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Award, Check, LockKeyhole, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Award, Check, LockKeyhole, BrainCircuit } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { Language } from '@/App';
 import type { BadgeProgress } from '@/lib/badges';
@@ -12,13 +12,13 @@ export default function BadgeTrail({ progress, language, compact = false, loadin
   const next = progress.badges.find((badge) => !badge.earnedAt);
   return <section className={`badge-trail ${compact ? 'is-compact' : ''}`} aria-labelledby={compact ? 'dashboard-badges-title' : 'profile-badges-title'}>
     <header className="badge-trail-heading">
-      <div><p className="atlas-section-number"><Sparkles aria-hidden="true" />{rtl ? 'سلسلة الدوافع' : 'MOTIVATION TRAIL'}</p><h2 id={compact ? 'dashboard-badges-title' : 'profile-badges-title'}>{rtl ? 'كل خطوة فهم لها علامة.' : 'Every learning step leaves a mark.'}</h2><p>{rtl ? 'شارات تُمنح من دليل التعلّم المسجل، وتوصلك تدريجيًا إلى شهادة الإتمام.' : 'Evidence-backed badges turn each learning action into visible progress toward a completion credential.'}</p></div>
+      <div><p className="atlas-section-number"><BrainCircuit aria-hidden="true" />{rtl ? 'سلسلة الدوافع' : 'MOTIVATION TRAIL'}</p><h2 id={compact ? 'dashboard-badges-title' : 'profile-badges-title'}>{rtl ? 'كل خطوة فهم لها علامة.' : 'Every learning step leaves a mark.'}</h2><p>{rtl ? 'شارات تُمنح من دليل التعلّم المسجل، وتوصلك تدريجيًا إلى شهادة الإتمام.' : 'Evidence-backed badges turn each learning action into visible progress toward a completion credential.'}</p></div>
       <div className="badge-trail-summary" aria-live="polite"><strong>{loading ? '—' : `${progress.earnedCount}/${progress.totalCount}`}</strong><span>{rtl ? 'شارة مكتسبة' : 'badges earned'}</span><div role="progressbar" aria-label={rtl ? 'تقدم الشارات' : 'Badge progress'} aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}><i style={{ width: `${percent}%` }} /></div></div>
     </header>
     <ol className="badge-trail-grid">
       {shown.map((badge) => { const earned = Boolean(badge.earnedAt); const title = rtl ? badge.titleAr : badge.titleEn; return <li key={badge.key} className={earned ? 'is-earned' : 'is-locked'}>
         <span className="badge-stage"><bdi>{String(badge.stageOrder).padStart(2, '0')}</bdi></span>
-        <BadgeEmblem iconKey={badge.iconKey} colorKey={badge.colorKey} earned={earned} label={`${title} — ${earned ? (rtl ? 'مكتسبة' : 'earned') : (rtl ? 'مقفلة' : 'locked')}`} size={compact ? 'small' : 'large'} />
+        <BadgeEmblem iconKey={badge.iconKey} colorKey={badge.colorKey} earned={earned} label={`${title}، ${earned ? (rtl ? 'مكتسبة' : 'earned') : (rtl ? 'مقفلة' : 'locked')}`} size={compact ? 'small' : 'large'} />
         <div className="badge-card-copy"><h3>{title}</h3><p>{earned ? (rtl ? badge.descriptionAr : badge.descriptionEn) : (rtl ? badge.requirementAr : badge.requirementEn)}</p></div>
         <span className="badge-state">{earned ? <><Check aria-hidden="true" />{rtl ? 'مكتسبة' : 'Earned'}</> : <><LockKeyhole aria-hidden="true" />{rtl ? 'المطلوب التالي' : 'Next requirement'}</>}</span>
         {earned && <small className="badge-earned-date">+{badge.xpReward} XP · {new Intl.DateTimeFormat(rtl ? 'ar-EG' : 'en-US', { dateStyle: 'medium' }).format(new Date(badge.earnedAt!))}</small>}

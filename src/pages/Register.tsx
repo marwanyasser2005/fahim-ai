@@ -1,7 +1,7 @@
 // src/pages/Register.tsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, Eye, EyeOff, Sparkles, ArrowRight, CheckCircle } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, BrainCircuit, ArrowRight, CheckCircle } from 'lucide-react';
 
 interface RegisterProps {
   language: 'ar' | 'en';
@@ -120,7 +120,7 @@ export const Register: React.FC<RegisterProps> = ({ language }) => {
           <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl p-8 sm:p-10 border border-white/50">
             <div className="text-center mb-8">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-teal-500 to-blue-600 rounded-2xl mb-4 shadow-lg">
-                <Sparkles className="w-8 h-8 text-white" />
+                <BrainCircuit className="w-8 h-8 text-white" />
               </div>
               <h1 className="text-3xl sm:text-4xl font-black text-gray-900 mb-2">{content.title}</h1>
               <p className="text-gray-600">{content.subtitle}</p>
