@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { getFreshSession, isSupabaseConfigured, supabase } from '@/lib/supabase/client';
+import { setUserScope } from '@/lib/userScope';
 
 type AuthResult = { error?: string; needsVerification?: boolean };
 
@@ -27,6 +28,10 @@ function getSupabase() {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setUserScope(session?.user?.id ?? null);
+  }, [session?.user?.id]);
 
   useEffect(() => {
     if (!isSupabaseConfigured) {

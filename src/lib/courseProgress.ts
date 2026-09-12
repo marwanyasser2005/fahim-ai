@@ -5,15 +5,13 @@ export type CourseProgress = {
   updatedAt: string;
 };
 
+import { readScopedJson, writeScopedJson } from '@/lib/userScope';
+
 const KEY = 'fahim-course-progress-v1';
 
 export function loadCourseProgress(): CourseProgress[] {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(KEY) || '[]') as CourseProgress[];
-    return Array.isArray(parsed) ? parsed.filter((item) => item.courseId && Array.isArray(item.completedLessonIds)) : [];
-  } catch {
-    return [];
-  }
+  const parsed = readScopedJson<CourseProgress[]>(KEY, []);
+  return Array.isArray(parsed) ? parsed.filter((item) => item.courseId && Array.isArray(item.completedLessonIds)) : [];
 }
 
 export function getCourseProgress(courseId: string): CourseProgress {
@@ -28,6 +26,6 @@ export function getCourseProgress(courseId: string): CourseProgress {
 export function saveCourseProgress(progress: CourseProgress) {
   const items = loadCourseProgress().filter((item) => item.courseId !== progress.courseId);
   items.unshift({ ...progress, completedLessonIds: [...new Set(progress.completedLessonIds)], updatedAt: new Date().toISOString() });
-  localStorage.setItem(KEY, JSON.stringify(items.slice(0, 50)));
+  writeScopedJson(KEY, items.slice(0, 50));
   window.dispatchEvent(new Event('fahim-progress'));
 }

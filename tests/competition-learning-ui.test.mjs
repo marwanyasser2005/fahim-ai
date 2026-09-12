@@ -8,7 +8,7 @@ const dock = readFileSync(new URL('../src/components/MobileDock.tsx', import.met
 
 describe('competition learning experience', () => {
   it('makes assessment—not chat or gamification—the primary signed-in action', () => {
-    expect(navbar).toContain('to="/quiz-lab"');
+    expect(navbar).toContain('"/quiz-lab"');
     expect(dock).toContain("to: '/quiz-lab'");
     expect(dock).toContain('primary: true');
     expect(dock).not.toContain("to: '/ask-fahim', ar: 'اسأل'");
@@ -30,6 +30,6 @@ describe('competition learning experience', () => {
   it('does not render the correct answer after an incorrect response', () => {
     expect(quiz).not.toContain('{result.correctAnswer}');
     expect(quiz).toContain('result?.correct && result.correctIndex');
-    expect(quiz).toContain('New application attempt');
+    expect(quiz).toContain('Post-intervention retry');
   });
 });

@@ -25,6 +25,8 @@ export type Conversation = {
   messages: ChatMessage[];
 };
 
+import { readScopedJson, writeScopedJson } from '@/lib/userScope';
+
 const KEY = 'fahim-conversations-v2';
 
 const makeId = () => crypto.randomUUID();
@@ -46,16 +48,12 @@ export function createConversation(language: 'ar' | 'en', intro: string): Conver
 }
 
 export function loadConversations(): Conversation[] {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(KEY) || '[]') as Conversation[];
-    return Array.isArray(parsed) ? parsed.filter((item) => item?.id && Array.isArray(item.messages)).slice(0, 100) : [];
-  } catch {
-    return [];
-  }
+  const parsed = readScopedJson<Conversation[]>(KEY, []);
+  return Array.isArray(parsed) ? parsed.filter((item) => item?.id && Array.isArray(item.messages)).slice(0, 100) : [];
 }
 
 export function saveConversations(items: Conversation[]) {
-  localStorage.setItem(KEY, JSON.stringify(items.slice(0, 100)));
+  writeScopedJson(KEY, items.slice(0, 100));
 }
 
 export function conversationTitle(question: string) {

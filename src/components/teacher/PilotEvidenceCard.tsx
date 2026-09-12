@@ -115,7 +115,7 @@ export default function PilotEvidenceCard({ pilot, classTitle, userId, language,
 
     <div className="grid gap-6 border-t border-[var(--border)] pt-6 lg:grid-cols-[1fr_.72fr]">
       <form onSubmit={submit} className="pilot-measurement-form">
-        <div className="flex items-center justify-between gap-3"><div><p className="atlas-section-number">EVIDENCE ENTRY</p><h3>{rtl ? 'سجّل نتيجة تقييم فعلي' : 'Record an administered assessment'}</h3></div><BarChart3 className="h-5 w-5 text-[#0F766E]" /></div>
+        <div className="flex items-center justify-between gap-3"><div><p className="atlas-section-number">EVIDENCE ENTRY</p><h3>{rtl ? 'سجّل نتيجة تقييم فعلي' : 'Record an administered assessment'}</h3></div><BarChart3 className="h-5 w-5 text-[var(--nile)]" /></div>
         {students.length ? <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <label><span className="atlas-label">{rtl ? 'المتعلم' : 'Learner'}</span><select className="atlas-field mt-2 min-h-11" value={studentId} onChange={(event) => setStudentId(event.target.value)}>{students.map((student, index) => <option key={student.user_id} value={student.user_id}>{rtl ? 'متعلم' : 'Learner'} {index + 1} · {student.user_id.slice(0, 4).toUpperCase()}</option>)}</select></label>
           <label><span className="atlas-label">{rtl ? 'مرحلة القياس' : 'Measurement phase'}</span><select className="atlas-field mt-2 min-h-11" value={phase} onChange={(event) => setPhase(event.target.value as PilotPhase)}>{(['pre','post','delayed'] as PilotPhase[]).map((item) => <option key={item} value={item}>{phaseCopy[item][language]}</option>)}</select></label>
@@ -128,10 +128,10 @@ export default function PilotEvidenceCard({ pilot, classTitle, userId, language,
 
       <aside className="pilot-readiness">
         <p className="atlas-section-number">REPORTING GATE</p>
-        {loading ? <Loader2 className="mt-5 h-5 w-5 animate-spin" /> : summary?.isReportable ? <><CheckCircle2 className="mt-5 h-7 w-7 text-[#0F766E]" /><h3>{rtl ? 'العينة قابلة للتحليل' : 'Sample is reportable'}</h3><p>{rtl ? 'يمكن تصدير الأرقام مع حجم العينة والمنهجية، دون تحويلها إلى ادعاء سببي أكبر من التصميم.' : 'Metrics can be reported with sample size and method, without overstating causality.'}</p></> : <><Clock3 className="mt-5 h-7 w-7 text-[#D95D39]" /><h3>{rtl ? 'الدليل ما زال غير مكتمل' : 'Evidence is not reportable yet'}</h3><p>{rtl ? `يلزم ${Math.max(0, pilot.minimum_sample_size - (summary?.pairedLearners || 0))} طلاب إضافيين لديهم قياس pre/post متكامل.` : `${Math.max(0, pilot.minimum_sample_size - (summary?.pairedLearners || 0))} more learners need complete pre/post measurements.`}</p></>}
+        {loading ? <Loader2 className="mt-5 h-5 w-5 animate-spin" /> : summary?.isReportable ? <><CheckCircle2 className="mt-5 h-7 w-7 text-[var(--nile)]" /><h3>{rtl ? 'العينة قابلة للتحليل' : 'Sample is reportable'}</h3><p>{rtl ? 'يمكن تصدير الأرقام مع حجم العينة والمنهجية، دون تحويلها إلى ادعاء سببي أكبر من التصميم.' : 'Metrics can be reported with sample size and method, without overstating causality.'}</p></> : <><Clock3 className="mt-5 h-7 w-7 text-[#D95D39]" /><h3>{rtl ? 'الدليل ما زال غير مكتمل' : 'Evidence is not reportable yet'}</h3><p>{rtl ? `يلزم ${Math.max(0, pilot.minimum_sample_size - (summary?.pairedLearners || 0))} طلاب إضافيين لديهم قياس pre/post متكامل.` : `${Math.max(0, pilot.minimum_sample_size - (summary?.pairedLearners || 0))} more learners need complete pre/post measurements.`}</p></>}
         {nextStatus ? <button type="button" disabled={busy} onClick={() => void advance()} className="atlas-secondary mt-6 w-full justify-center">{rtl ? 'انتقل للمرحلة التالية' : 'Advance protocol'}<ArrowRight className="h-4 w-4 rtl:rotate-180" /></button> : null}
       </aside>
     </div>
-    {error ? <p role="alert" className="mt-5 border border-rose-300 bg-rose-50 p-3 text-xs font-bold text-rose-800">{error}</p> : null}
+    {error ? <p role="alert" className="mt-5 border border-[var(--danger-border)] bg-[var(--danger-surface)] p-3 text-xs font-bold text-[var(--danger-text)]">{error}</p> : null}
   </article>;
 }

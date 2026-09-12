@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Sparkles, Clock3 } from "lucide-react";
 import { getStudyStats, recordStudyAction } from "@/lib/studyProgress";
 import { loadLearningSessions } from "@/lib/learningEvidence";
+import { readScopedJson, writeScopedJson } from "@/lib/userScope";
 import { displayLabel } from "@/lib/displayLabels";
 import FahimTutorSidecar from "@/components/learning/FahimTutorSidecar";
 import LearningEvidencePanel from "@/components/learning/LearningEvidencePanel";
@@ -15,18 +16,16 @@ export default function Workspace({ language }: { language: "ar" | "en" }) {
     grade: string;
     subject: string;
     topic: string;
-  }>(() => {
-    try {
-      return {
-        grade: "",
-        subject: "",
-        topic: "",
-        ...JSON.parse(localStorage.getItem("fahim-study-profile") || "{}"),
-      };
-    } catch {
-      return { grade: "", subject: "", topic: "" };
-    }
-  });
+  }>(() => ({
+    grade: "",
+    subject: "",
+    topic: "",
+    ...readScopedJson<{
+      grade?: string;
+      subject?: string;
+      topic?: string;
+    }>("fahim-study-profile", {}),
+  }));
   const [stats, setStats] = useState(getStudyStats);
   const [sessions, setSessions] = useState(loadLearningSessions);
   const [view, setView] = useState("content");
@@ -54,7 +53,7 @@ export default function Workspace({ language }: { language: "ar" | "en" }) {
   const start = (event: FormEvent) => {
     event.preventDefault();
     if (profile.topic.trim().length < 3) return;
-    localStorage.setItem("fahim-study-profile", JSON.stringify(profile));
+    writeScopedJson("fahim-study-profile", profile);
     recordStudyAction("session", profile.topic);
     navigate(`/ask-fahim?${params}`);
   };

@@ -196,11 +196,11 @@ export default function Home({ language }: { language: Language }) {
               </div>
               <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 border-t border-[var(--ink)]/20 pt-5 text-xs font-bold text-[var(--muted)]">
                 <span className="flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-[#0F766E]" />
+                  <ShieldCheck className="h-4 w-4 text-[var(--nile)]" />
                   {rtl ? "لا بطاقة مطلوبة" : "No card required"}
                 </span>
                 <span className="flex items-center gap-2">
-                  <LockKeyhole className="h-4 w-4 text-[#0F766E]" />
+                  <LockKeyhole className="h-4 w-4 text-[var(--nile)]" />
                   {rtl
                     ? "الاستخدام الحقيقي بعد حساب آمن"
                     : "Real use after secure signup"}
@@ -260,7 +260,7 @@ export default function Home({ language }: { language: Language }) {
               to={feature.href}
               className="group bg-[var(--panel)] p-6 transition hover:bg-[var(--paper)] sm:p-8"
             >
-              <feature.icon className="h-6 w-6 text-[#0F766E]" />
+              <feature.icon className="h-6 w-6 text-[var(--nile)]" />
               <h3 className="mt-6 text-xl font-black text-[var(--text)]">
                 {rtl ? feature.titleAr : feature.titleEn}
               </h3>
@@ -294,7 +294,7 @@ export default function Home({ language }: { language: Language }) {
             }
           />
           <div className="mt-10 grid gap-4 lg:grid-cols-[.8fr_1.2fr]">
-            <article className="border border-[#D95D39] bg-[#F7DDD4] p-6 text-[#14213D]">
+            <article className="border border-[color-mix(in_srgb,var(--vermilion)_35%,var(--border))] bg-[color-mix(in_srgb,var(--vermilion)_10%,var(--panel))] p-6 text-[var(--text)]">
               <p className="text-[9px] font-black tracking-widest">
                 ATTEMPT 01
               </p>
@@ -309,7 +309,7 @@ export default function Home({ language }: { language: Language }) {
                   : "Misconception: confusing average and instantaneous velocity."}
               </p>
             </article>
-            <article className="border border-[#0F766E] bg-[#DCEDE9] p-6 text-[#14213D]">
+            <article className="border border-[color-mix(in_srgb,var(--nile)_35%,var(--border))] bg-[color-mix(in_srgb,var(--nile)_10%,var(--panel))] p-6 text-[var(--text)]">
               <p className="text-[9px] font-black tracking-widest">
                 INTERVENTION → EVIDENCE
               </p>
@@ -364,7 +364,7 @@ export default function Home({ language }: { language: Language }) {
               className="flex flex-col border border-[var(--border)] bg-[var(--panel)] p-6"
             >
               <div className="flex items-center justify-between gap-3">
-                <span className="bg-[#DCEDE9] px-2.5 py-1 text-[9px] font-black text-[#0F766E]">
+                <span className="bg-[color-mix(in_srgb,var(--nile)_14%,var(--panel))] px-2.5 py-1 text-[9px] font-black text-[var(--nile)]">
                   {levelNames[course.level]}
                 </span>
                 <span className="text-[9px] font-black text-[var(--muted)]">
@@ -398,7 +398,7 @@ export default function Home({ language }: { language: Language }) {
         <div className="mt-7 text-center">
           <Link
             to="/courses"
-            className="inline-flex items-center gap-2 text-sm font-black text-[#0F766E]"
+            className="inline-flex items-center gap-2 text-sm font-black text-[var(--nile)]"
           >
             {rtl ? "استكشف كل المسارات" : "Explore all paths"}
             <Arrow className="h-4 w-4" />
@@ -481,7 +481,7 @@ export default function Home({ language }: { language: Language }) {
                     key={feature.en}
                     className={`flex items-start gap-2 text-xs leading-6 ${plan.code === "plus_annual" ? "text-blue-100" : "text-[var(--muted)]"}`}
                   >
-                    <Check className="mt-1 h-3.5 w-3.5 shrink-0 text-[#0F766E]" />
+                    <Check className="mt-1 h-3.5 w-3.5 shrink-0 text-[var(--nile)]" />
                     {feature[language]}
                   </li>
                 ))}

@@ -208,7 +208,7 @@ export default function Support({ language }: { language: Language }) {
         {error && (
           <div
             role="alert"
-            className="mt-5 border border-rose-300 bg-rose-50 p-4 text-sm font-bold text-rose-900"
+            className="mt-5 border border-[var(--danger-border)] bg-[var(--danger-surface)] p-4 text-sm font-bold text-[var(--danger-text)]"
           >
             {error}
           </div>
@@ -348,7 +348,7 @@ export default function Support({ language }: { language: Language }) {
                   {grouped.map((message) => (
                     <article
                       key={message.id}
-                      className={`max-w-[88%] border p-4 ${message.sender_role === "admin" ? "me-auto border-[var(--nile)] bg-[#DCEDE9] text-[#14213D]" : "ms-auto border-[var(--ink)] bg-[var(--panel)]"}`}
+                      className={`max-w-[88%] border p-4 ${message.sender_role === "admin" ? "me-auto border-[color-mix(in_srgb,var(--nile)_35%,var(--border))] bg-[color-mix(in_srgb,var(--nile)_9%,var(--panel))] text-[var(--text)]" : "ms-auto border-[var(--ink)] bg-[var(--panel)]"}`}
                     >
                       <p className="text-[10px] font-black uppercase tracking-wider opacity-60">
                         {message.sender_role === "admin"

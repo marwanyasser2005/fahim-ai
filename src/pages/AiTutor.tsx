@@ -188,14 +188,27 @@ export default function AiTutor({ language }: { language: Language }) {
 
   useEffect(() => {
     const saved = loadConversations();
+    const contextQuestion = params.get("q");
     const first = saved[0] || createConversation(language, t.intro);
     if (!saved.length) {
       first.tutorMode = initialMode;
       first.grade = params.get("grade") || "";
       first.subject = params.get("subject") || "";
     }
-    setConversations(saved.length ? saved : [first]);
-    setActiveId(first.id);
+    // A context handoff (lesson/video/course → ask-fahim?q=…) must open a NEW
+    // conversation bound to that context, never resume an unrelated old one.
+    if (contextQuestion) {
+      const contextual = createConversation(language, t.intro);
+      contextual.tutorMode = initialMode;
+      contextual.grade = params.get("grade") || "";
+      contextual.subject = params.get("subject") || "";
+      contextual.title = contextQuestion.replace(/\s+/g, " ").trim().slice(0, 42) || contextual.title;
+      setConversations([contextual, ...(saved.length ? saved : [first])]);
+      setActiveId(contextual.id);
+    } else {
+      setConversations(saved.length ? saved : [first]);
+      setActiveId(first.id);
+    }
     if (user) {
       void loadCloudConversations(user.id).then((cloud) => {
         if (!cloud.length) return;
@@ -835,7 +848,7 @@ function MessageBubble({
               {language === "ar" ? "محرك التعلّم" : "Learning engine"}
             </span>
             {message.mode === "unavailable" && (
-              <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[8px] font-black text-amber-700">
+              <span className="rounded-full bg-[var(--warning-surface)] px-2 py-0.5 text-[8px] font-black text-[var(--warning-text)]">
                 {t.local}
               </span>
             )}

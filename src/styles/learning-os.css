@@ -1089,3 +1089,156 @@ html[lang="ar"] .fahim-os h1 {
     padding: 14px;
   }
 }
+
+/* ── Theme integrity: no light-only surfaces survive dark mode ─────────── */
+.fahim-os input:-webkit-autofill,
+.fahim-os input:-webkit-autofill:hover,
+.fahim-os input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text);
+  -webkit-box-shadow: 0 0 0 1000px var(--panel) inset;
+  caret-color: var(--text);
+  transition: background-color 9999s ease-out 0s;
+}
+.dark .fahim-os input:-webkit-autofill,
+.dark .fahim-os input:-webkit-autofill:hover,
+.dark .fahim-os input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text-primary);
+  -webkit-box-shadow: 0 0 0 1000px var(--background-surface) inset;
+}
+.fahim-os input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: none;
+  opacity: .65;
+}
+.dark .fahim-os input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(.85);
+}
+.fahim-os select option {
+  background: var(--panel);
+  color: var(--text);
+}
+.dark .fahim-os ::placeholder,
+.fahim-os ::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+.fahim-os ::selection {
+  background: var(--brand-primary);
+  color: #fff;
+}
+
+/* ── Today card: the review-first decision surface ─────────────────────── */
+.fahim-os .next-action.is-review {
+  border-color: color-mix(in srgb, var(--nile) 45%, var(--border));
+  box-shadow: 5px 5px 0 color-mix(in srgb, var(--nile) 24%, transparent);
+}
+.fahim-os .next-action.is-review .next-action-icon {
+  background: var(--nile);
+}
+.fahim-os .next-action.is-review > a {
+  background: var(--nile);
+}
+.fahim-os .next-action.is-review > a:hover {
+  background: color-mix(in srgb, var(--nile) 85%, var(--ink));
+}
+
+/* ── Senior design pass: glass system, type rhythm, icon dynamics ───────── */
+
+/* Glass surfaces — frosted navigation, dock, and palette in both themes. */
+.fahim-os .fahim-navigation {
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%);
+  border-bottom: 1px solid var(--glass-border);
+  box-shadow: 0 10px 30px rgb(16 24 40 / 5%);
+}
+.dark .fahim-os .fahim-navigation {
+  box-shadow: 0 12px 32px rgb(0 0 0 / 32%);
+}
+.fahim-os .mobile-dock {
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  backdrop-filter: blur(22px) saturate(160%);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 18px 44px rgb(16 24 40 / 16%), inset 0 1px 0 var(--glass-highlight);
+}
+.fahim-os .palette-panel {
+  background: var(--glass-strong);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  backdrop-filter: blur(24px) saturate(150%);
+}
+.fahim-os .product-sidebar {
+  border-inline-end: 1px solid var(--border);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--panel) 60%, var(--surface)), var(--surface));
+}
+@supports not ((backdrop-filter: blur(4px)) or (-webkit-backdrop-filter: blur(4px))) {
+  .fahim-os .fahim-navigation,
+  .fahim-os .mobile-dock,
+  .fahim-os .palette-panel {
+    background: var(--panel);
+  }
+}
+
+/* Cards keep solid surfaces for readability, with a glass top highlight. */
+.fahim-os :is(.learning-panel, .atlas-panel, .premium-card, .next-action, .workspace-form) {
+  box-shadow: var(--shadow-sm), inset 0 1px 0 var(--glass-highlight);
+  transition: border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
+}
+.fahim-os .next-action {
+  margin-block: 2.25rem;
+  padding: clamp(1.15rem, 3vw, 1.65rem);
+}
+.fahim-os .dashboard-hero {
+  padding-block-end: clamp(2rem, 4vw, 3.25rem);
+}
+.fahim-os .learning-intelligence-grid {
+  gap: 1.25rem;
+  margin-top: 2.25rem;
+}
+
+/* Type rhythm: keep display weight for headlines, soften the shouty labels. */
+.fahim-os :is(h2, h3) {
+  font-weight: 800;
+}
+.fahim-os :is(p, span, small, b, li, div).font-black {
+  font-weight: 700;
+}
+.fahim-os :is(a, button, label).font-black {
+  font-weight: 800;
+}
+.fahim-os .atlas-kicker,
+.fahim-os .section-kicker {
+  letter-spacing: .04em;
+}
+
+/* Icon dynamics — small, reversible, restrained. */
+.fahim-os .sidebar-link svg,
+.fahim-os .mobile-dock a svg,
+.fahim-os .icon-button svg {
+  transition: transform var(--motion-fast) ease;
+}
+.fahim-os .sidebar-link:hover svg {
+  transform: scale(1.08);
+}
+.fahim-os .mobile-dock a:hover svg,
+.fahim-os .icon-button:hover svg {
+  transform: translateY(-2px);
+}
+.fahim-os .mobile-dock a.mobile-dock-active svg {
+  transform: translateY(-1px);
+}
+html[dir="rtl"] .fahim-os :is(.premium-button, .atlas-primary, .next-action > a, .text-link):hover svg {
+  transform: translateX(-3px);
+}
+html[dir="ltr"] .fahim-os :is(.premium-button, .atlas-primary, .next-action > a, .text-link):hover svg {
+  transform: translateX(3px);
+}
+.fahim-os :is(.premium-button, .atlas-primary):active {
+  transform: translateY(0) scale(.99);
+}
+@media (prefers-reduced-motion: reduce) {
+  .fahim-os :is(.sidebar-link, .mobile-dock a, .icon-button) svg,
+  html[dir="rtl"] .fahim-os :is(.premium-button, .atlas-primary, .next-action > a, .text-link):hover svg,
+  html[dir="ltr"] .fahim-os :is(.premium-button, .atlas-primary, .next-action > a, .text-link):hover svg {
+    transform: none;
+  }
+}

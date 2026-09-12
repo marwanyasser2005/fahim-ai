@@ -217,7 +217,7 @@ export default function Admin({ language }: { language: Language }) {
     return (
       <main className="grid min-h-[72vh] place-items-center bg-[var(--surface)] px-4">
         <div className="max-w-lg text-center">
-          <span className="mx-auto grid h-16 w-16 place-items-center bg-rose-100 text-rose-700">
+          <span className="mx-auto grid h-16 w-16 place-items-center bg-[var(--danger-surface)] text-[var(--danger-text)]">
             <ShieldAlert className="h-8 w-8" />
           </span>
           <h1 className="mt-6 text-3xl font-black">
@@ -283,7 +283,7 @@ export default function Admin({ language }: { language: Language }) {
           </div>
           <div className="flex items-center gap-2 text-xs font-black">
             <span
-              className={`h-2.5 w-2.5 rounded-full ${health.ok ? "bg-emerald-500" : "bg-amber-500"}`}
+              className={`h-2.5 w-2.5 rounded-full ${health.ok ? "bg-[var(--success)]" : "bg-[var(--warning)]"}`}
             />
             {health.ok
               ? rtl
@@ -318,7 +318,7 @@ export default function Admin({ language }: { language: Language }) {
         {error && (
           <div
             role="alert"
-            className="mt-5 border border-rose-300 bg-rose-50 p-4 text-sm font-bold text-rose-900"
+            className="mt-5 border border-[var(--danger-border)] bg-[var(--danger-surface)] p-4 text-sm font-bold text-[var(--danger-text)]"
           >
             {error}
           </div>
@@ -326,7 +326,7 @@ export default function Admin({ language }: { language: Language }) {
         {notice && (
           <div
             role="status"
-            className="mt-5 border border-emerald-300 bg-emerald-50 p-4 text-sm font-bold text-emerald-900"
+            className="mt-5 border border-[var(--success-border)] bg-[var(--success-surface)] p-4 text-sm font-bold text-[var(--success-text)]"
           >
             {notice}
           </div>
@@ -1081,7 +1081,7 @@ function Content({
               </div>
               <button
                 onClick={() => void toggleVideo(item)}
-                className={`px-3 py-2 text-xs font-black ${item.is_published ? "bg-emerald-100 text-emerald-900" : "bg-amber-100 text-amber-900"}`}
+                className={`px-3 py-2 text-xs font-black ${item.is_published ? "bg-[var(--success-surface)] text-[var(--success-text)]" : "bg-[var(--warning-surface)] text-[var(--warning-text)]"}`}
               >
                 {item.is_published
                   ? rtl
@@ -1169,7 +1169,7 @@ function Content({
               </div>
               <button
                 onClick={() => void publishResource(item)}
-                className={`px-3 py-2 text-xs font-black ${item.status === "published" ? "bg-emerald-100 text-emerald-900" : "bg-amber-100 text-amber-900"}`}
+                className={`px-3 py-2 text-xs font-black ${item.status === "published" ? "bg-[var(--success-surface)] text-[var(--success-text)]" : "bg-[var(--warning-surface)] text-[var(--warning-text)]"}`}
               >
                 {item.status === "published"
                   ? rtl
@@ -1310,7 +1310,7 @@ function SupportDesk({
               {messages.map((message) => (
                 <article
                   key={message.id}
-                  className={`max-w-[85%] border p-4 ${message.sender_role === "admin" ? "ms-auto bg-[var(--panel)]" : "me-auto border-[var(--nile)] bg-[#DCEDE9] text-[#14213D]"}`}
+                  className={`max-w-[85%] border p-4 ${message.sender_role === "admin" ? "ms-auto bg-[var(--panel)]" : "me-auto border-[color-mix(in_srgb,var(--nile)_35%,var(--border))] bg-[color-mix(in_srgb,var(--nile)_9%,var(--panel))] text-[var(--text)]"}`}
                 >
                   <b className="text-[10px] uppercase opacity-60">
                     {displayLabel(message.sender_role, language)}
@@ -1560,8 +1560,8 @@ function CredentialOperations({ language, users }: { language: Language; users: 
       <label className="mt-4 block"><span className="atlas-label">{rtl ? "المسار المنشور" : "Published course"}</span><select className="atlas-field mt-2 min-h-12" value={courseId} onChange={(event) => setCourseId(event.target.value)} required><option value="">{rtl ? "اختر مسارًا" : "Choose a course"}</option>{courses.map((course) => <option key={course.id} value={course.id}>{courseTitle(course)}</option>)}</select></label>
       <div className="mt-4 grid gap-3 sm:grid-cols-2"><label><span className="atlas-label">{rtl ? "نسبة الإكمال" : "Completion"}</span><input className="atlas-field mt-2 min-h-12" value="100%" readOnly /></label><label><span className="atlas-label">{rtl ? "درجة التقييم النهائي" : "Final assessment"}</span><input className="atlas-field mt-2 min-h-12" type="number" min="70" max="100" value={score} onChange={(event) => setScore(event.target.value)} required /></label></div>
       <label className="mt-4 block"><span className="atlas-label">{rtl ? "ملاحظة المراجع" : "Reviewer note"}</span><textarea className="atlas-field mt-2" rows={4} minLength={8} maxLength={1000} value={reviewNote} onChange={(event) => setReviewNote(event.target.value)} placeholder={rtl ? "ما الذي راجعته قبل الإصدار؟" : "What did you review before issuance?"} required /></label>
-      {error && <p role="alert" className="mt-4 border border-rose-300 bg-rose-50 p-3 text-xs font-bold text-rose-900">{error}</p>}
-      {notice && <p role="status" className="mt-4 border border-emerald-300 bg-emerald-50 p-3 text-xs font-bold text-emerald-900">{notice}</p>}
+      {error && <p role="alert" className="mt-4 border border-[var(--danger-border)] bg-[var(--danger-surface)] p-3 text-xs font-bold text-[var(--danger-text)]">{error}</p>}
+      {notice && <p role="status" className="mt-4 border border-[var(--success-border)] bg-[var(--success-surface)] p-3 text-xs font-bold text-[var(--success-text)]">{notice}</p>}
       <button type="submit" disabled={submitting || loading || !learnerId || !courseId} className="atlas-primary mt-5 w-full justify-center disabled:cursor-not-allowed disabled:opacity-50">{submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileBadge2 className="h-4 w-4" />}{rtl ? "تحقق وأصدر" : "Verify and issue"}</button>
     </form>
     <div className="atlas-panel overflow-hidden">

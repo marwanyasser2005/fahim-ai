@@ -1,21 +1,25 @@
 import { Link, useLocation } from 'react-router-dom';
-import { ClipboardCheck, Sparkles, Home, Search, UserRound } from 'lucide-react';
+import { ClipboardCheck, UserRound } from 'lucide-react';
 import type { Language } from '@/App';
 import { useAuth } from '@/contexts/AuthContext';
+import { label, productNav } from '@/lib/appNavigation';
 
 export default function MobileDock({ language, immersive }: { language: Language; immersive: boolean }) {
   const { user } = useAuth();
   const location = useLocation();
   if (!user || immersive) return null;
+  const today = productNav.find((entry) => entry.to === '/dashboard')!;
+  const askFahim = productNav.find((entry) => entry.to === '/ask-fahim')!;
+  const review = productNav.find((entry) => entry.to === '/review')!;
   const items = [
-    { to: '/dashboard', ar: 'اليوم', en: 'Today', icon: Home },
-    { to: '/ask-fahim', ar: 'اسأل فَهيم', en: 'Ask Fahim', icon: Sparkles },
-    { to: '/quiz-lab', ar: 'قيّم فهمك', en: 'Assess', icon: ClipboardCheck, primary: true },
-    { to: '/resources', ar: 'ابحث', en: 'Search', icon: Search },
-    { to: '/profile', ar: 'حسابي', en: 'Account', icon: UserRound },
+    { to: today.to, text: label(today, language), icon: today.icon },
+    { to: askFahim.to, text: label(askFahim, language), icon: askFahim.icon },
+    { to: '/quiz-lab', text: language === 'ar' ? 'قيّم فهمك' : 'Assess', icon: ClipboardCheck, primary: true },
+    { to: review.to, text: label(review, language), icon: review.icon },
+    { to: '/profile', text: language === 'ar' ? 'حسابي' : 'Account', icon: UserRound },
   ];
   return <nav className="mobile-dock" aria-label={language === 'ar' ? 'التنقل الرئيسي للموبايل' : 'Primary mobile navigation'}>{items.map((item) => {
     const active = location.pathname === item.to;
-    return <Link key={item.to} to={item.to} aria-current={active ? 'page' : undefined} className={`${item.primary ? 'mobile-dock-primary' : ''} ${active ? 'mobile-dock-active' : ''}`}><item.icon className="h-5 w-5" aria-hidden="true" focusable="false" /><span>{item[language]}</span></Link>;
+    return <Link key={item.to} to={item.to} aria-current={active ? 'page' : undefined} className={`${item.primary ? 'mobile-dock-primary' : ''} ${active ? 'mobile-dock-active' : ''}`}><item.icon className="h-5 w-5" aria-hidden="true" focusable="false" /><span>{item.text}</span></Link>;
   })}</nav>;
 }

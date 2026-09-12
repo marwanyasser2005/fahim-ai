@@ -60,7 +60,7 @@ export default function Profile({ language }: { language: Language }) {
         <div className="flex gap-2"><button type="button" onClick={() => setEditing(true)} className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs font-black text-slate-950"><Edit3 className="h-4 w-4" />{language === 'ar' ? 'تعديل الملف' : 'Edit profile'}</button><button type="button" onClick={() => void signOut()} className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-4 py-2.5 text-xs font-black hover:bg-white/10"><LogOut className="h-4 w-4" />{language === 'ar' ? 'خروج' : 'Sign out'}</button></div>
       </div>
     </section>
-    {message && <p className="mt-4 rounded-xl border border-teal-300/40 bg-teal-50 px-4 py-3 text-sm font-bold text-teal-900">{message}</p>}
+    {message && <p className="mt-4 rounded-xl border border-[var(--success-border)] bg-[var(--success-surface)] px-4 py-3 text-sm font-bold text-[var(--success-text)]">{message}</p>}
     {badgesError && <p role="status" className="mt-4 text-xs font-bold text-[var(--muted)]">{language === 'ar' ? 'تعذر تحديث سجل الشارات الآن؛ يظهر المسار من دون منح إنجازات غير موثقة.' : 'The badge registry could not refresh; the trail is shown without granting unverified achievements.'}</p>}
     <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">{[
       [Flame, language === 'ar' ? 'أنشطة اليوم' : 'Today', String(stats.today)],

@@ -1,55 +1,19 @@
-import { useEffect, useState } from "react";
-import { NavLink, Link } from "react-router-dom";
-import {
-  Home,
-  Compass,
-  Sparkles,
-  RotateCcw,
-  Network,
-  Library,
-  BookOpen,
-  Settings,
-  Headphones,
-  Users,
-  Shield,
-  LogOut,
-} from "lucide-react";
+import { Link, NavLink } from "react-router-dom";
+import { Headphones, LogOut, Settings } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/lib/supabase/client";
+import { useProfileRole } from "@/hooks/useProfileRole";
+import { hint, label, productNav } from "@/lib/appNavigation";
+
 export default function ProductSidebar({
   language,
 }: {
   language: "ar" | "en";
 }) {
   const { user, signOut } = useAuth();
-  const [role, setRole] = useState("student");
+  const { isStaff, isAdmin } = useProfileRole();
   const ar = language === "ar";
-  useEffect(() => {
-    let active = true;
-    setRole("student");
-    if (user && supabase)
-      void supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .maybeSingle()
-        .then(({ data }) => {
-          if (active && data?.role) setRole(data.role);
-        });
-    return () => {
-      active = false;
-    };
-  }, [user]);
   if (!user) return null;
-  const items = [
-    ["/dashboard", "اليوم", "Today", Home],
-    ["/workspace", "تعلّمي", "Learn", Compass],
-    ["/ask-fahim", "اسأل فَهيم", "Ask Fahim", Sparkles],
-    ["/review", "الذاكرة", "Review", RotateCcw],
-    ["/passport", "خريطة التقدّم", "Progress", Network],
-    ["/knowledge-vault", "مكتبتي", "My library", Library],
-    ["/resources", "المصادر", "Sources", BookOpen],
-  ] as const;
+  const items = productNav.filter((entry) => entry.role === "all" || isStaff);
   return (
     <aside className="product-sidebar">
       <Link className="sidebar-brand" to="/dashboard">
@@ -63,27 +27,31 @@ export default function ProductSidebar({
         {ar ? "مساحتك للتعلّم" : "Your learning space"}
       </p>
       <nav aria-label={ar ? "التنقل داخل المنصة" : "Workspace navigation"}>
-        {items.map(([to, arabic, english, Icon]) => (
+        {items.map((entry) => (
           <NavLink
-            key={to}
-            to={to}
+            key={entry.to}
+            to={entry.to}
+            title={hint(entry, language)}
             className={({ isActive }) =>
-              `sidebar-link ${isActive ? "active" : ""} ${to === "/ask-fahim" ? "sidebar-ai" : ""}`
+              `sidebar-link ${isActive ? "active" : ""} ${entry.to === "/ask-fahim" ? "sidebar-ai" : ""}`
             }
           >
-            <Icon size={19} />
-            {ar ? arabic : english}
+            <entry.icon size={19} />
+            {label(entry, language)}
           </NavLink>
         ))}
-        {["teacher", "instructor", "admin", "moderator"].includes(role) && (
-          <NavLink to="/teacher" className="sidebar-link">
-            <Users size={19} />
-            {ar ? "غرفة المعلم" : "Teacher"}
+        {isStaff && (
+          <NavLink to="/teacher" className="sidebar-link" title={ar ? "فصولك وقياس الأثر" : "Classes and impact"}>
+            {(() => {
+              const Entry = productNav.find((item) => item.to === "/teacher")!;
+              return <Entry.icon size={19} />;
+            })()}
+            {ar ? "غرفة المعلم" : "Teacher room"}
           </NavLink>
         )}
-        {role === "admin" && (
-          <NavLink to="/admin" className="sidebar-link">
-            <Shield size={19} />
+        {isAdmin && (
+          <NavLink to="/admin" className="sidebar-link" title={ar ? "لوحة الإدارة" : "Admin console"}>
+            <Settings size={19} />
             {ar ? "الإدارة" : "Admin"}
           </NavLink>
         )}

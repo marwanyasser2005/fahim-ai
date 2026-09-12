@@ -205,7 +205,7 @@ export default function HowItWorks({ language }: { language: "ar" | "en" }) {
       </section>
 
       <section className="mx-auto max-w-5xl px-4 py-16 text-center sm:px-6 lg:py-24">
-        <FolderInput className="mx-auto h-8 w-8 text-[#0F766E]" />
+        <FolderInput className="mx-auto h-8 w-8 text-[var(--nile)]" />
         <h2 className="atlas-display mt-5 text-4xl sm:text-6xl">
           {rtl
             ? "جرّب العملية على هدفك الحقيقي."

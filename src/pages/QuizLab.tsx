@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { readScopedJson, writeScopedJson } from '@/lib/userScope';
 import {
   ArrowLeft,
   ArrowRight,
@@ -156,10 +157,7 @@ const copy = {
 export default function QuizLab({ language }: Props) {
   const t = copy[language];
   const [params] = useSearchParams();
-  const storedProfile = useMemo(() => {
-    try { return JSON.parse(localStorage.getItem('fahim-study-profile') || '{}') as Record<string, string>; }
-    catch { return {}; }
-  }, []);
+  const storedProfile = useMemo(() => readScopedJson<Record<string, string>>('fahim-study-profile', {}), []);
   const [topic, setTopic] = useState(params.get('topic') || storedProfile.topic || '');
   const [subject, setSubject] = useState(storedProfile.subject || '');
   const [grade, setGrade] = useState(storedProfile.grade || '');
@@ -199,7 +197,7 @@ export default function QuizLab({ language }: Props) {
       setReasoning('');
       setReasonings([]);
       setCompletedSession(null);
-      localStorage.setItem('fahim-study-profile', JSON.stringify({ topic: topic.trim(), subject, grade }));
+      writeScopedJson('fahim-study-profile', { topic: topic.trim(), subject, grade });
     } catch {
       setError(t.error);
     } finally {
@@ -441,6 +439,7 @@ function createQuizEvidenceSession(quiz: GeneratedQuiz, results: GradeResult[], 
     conceptKey: quiz.topic.toLowerCase().replace(/\s+/g, '-').slice(0, 160),
     occurredAt: occurredAt(),
   });
+  const primarySource = quiz.sources[0]?.title || '';
   add({ type: 'diagnostic_started', title: language === 'ar' ? 'اختبار تشخيصي' : 'Diagnostic assessment', summary: `${quiz.questions.length} ${language === 'ar' ? 'أسئلة تطبيقية' : 'application questions'}` });
   add({
     type: 'attempt_submitted',
@@ -449,9 +448,16 @@ function createQuizEvidenceSession(quiz: GeneratedQuiz, results: GradeResult[], 
     payload: { reasonings: reasonings.slice(0, quiz.questions.length), correct: results.map((item) => item.correct) },
   });
   if (wrong) {
-    add({ type: 'misconception_detected', title: language === 'ar' ? 'التباس محتمل' : 'Likely misconception', summary: wrong.misconception.slice(0, 800), misconception: normalizeMisconception(wrong.misconception), confidence: .7 });
+    add({ type: 'misconception_detected', title: language === 'ar' ? 'التباس محتمل' : 'Likely misconception', summary: wrong.misconception.slice(0, 800), misconception: normalizeMisconception(wrong.misconception), confidence: 0.7 });
     add({ type: 'intervention_completed', title: language === 'ar' ? 'تفسير موجّه' : 'Targeted explanation', summary: wrong.explanation.slice(0, 1_000) });
-    if (results.some((item) => item.correct)) add({ type: 'retry_submitted', title: language === 'ar' ? 'محاولة تطبيقية جديدة' : 'New application attempt', summary: language === 'ar' ? 'أجاب المتعلم عن سؤال جديد في الموضوع بعد التدخل.' : 'The learner answered a new question in the topic after intervention.' });
+    // A real retry = a correct answer to a question that came after the first
+    // wrong one, i.e. post-intervention evidence — never inferred from
+    // unrelated correct answers elsewhere in the quiz.
+    const firstWrongIndex = results.findIndex((item) => !item.correct);
+    const postInterventionCorrect = firstWrongIndex >= 0 ? results.slice(firstWrongIndex + 1).filter((item) => item.correct).length : 0;
+    if (postInterventionCorrect > 0) {
+      add({ type: 'retry_submitted', title: language === 'ar' ? 'محاولة تطبيقية جديدة بعد التدخل' : 'Post-intervention retry', summary: language === 'ar' ? `أجاب المتعلم إجابة صحيحة على ${postInterventionCorrect} سؤال جديد بعد التدخل.` : `The learner answered ${postInterventionCorrect} new question(s) correctly after the intervention.` });
+    }
   }
   add({ type: 'evidence_created', title: language === 'ar' ? 'دليل تقييم تكويني' : 'Formative assessment evidence', summary: language === 'ar' ? 'نتيجة مصححة على الخادم مع المهارات المقاسة.' : 'Server-graded result with measured skills.' });
   const reviewDueAt = scheduleReviewFromScore(mastery, now);
@@ -461,8 +467,9 @@ function createQuizEvidenceSession(quiz: GeneratedQuiz, results: GradeResult[], 
     conceptKey: quiz.topic.toLowerCase().replace(/\s+/g, '-').slice(0, 160),
     conceptAr: quiz.topic,
     conceptEn: quiz.topic,
-    classification: 'needs_review',
-    mastery: { concept: mastery, explanation: Math.max(0, mastery - 5), application: mastery, recall: 0, sourceUse: 0 },
+    sourceTitle: primarySource || undefined,
+    classification: primarySource ? 'verified_source' : 'inferred',
+    mastery: { concept: mastery, explanation: Math.max(0, mastery - 5), application: mastery, recall: 0, sourceUse: primarySource ? 60 : 0 },
     status: 'evidence_ready',
     reviewDueAt,
     events,

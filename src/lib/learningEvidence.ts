@@ -1,3 +1,5 @@
+import { readScopedJson, writeScopedJson } from '@/lib/userScope';
+
 export type LearningEventType =
   | 'diagnostic_started'
   | 'attempt_submitted'
@@ -84,7 +86,6 @@ export function calculateEvidenceScore(dimensions: MasteryDimensions) {
       dimensions.sourceUse * 0.1,
   );
 }
-
 export function normalizeMisconception(value: string): MisconceptionCategory {
   const normalized = value.trim().toLowerCase().replace(/[\s-]+/g, '_');
   if (/unit|وحد/.test(normalized)) return 'unit_reasoning';
@@ -140,21 +141,15 @@ export function buildEvidenceGraph(session: LearningSession, totalNodes = 9): Ev
 }
 
 export function loadLearningSessions(): LearningSession[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const parsed = JSON.parse(window.localStorage.getItem(STORE_KEY) || '[]') as LearningSession[];
-    return Array.isArray(parsed) ? parsed.filter((item) => item?.id && Array.isArray(item.events)).slice(0, MAX_SESSIONS) : [];
-  } catch {
-    return [];
-  }
+  const parsed = readScopedJson<LearningSession[]>(STORE_KEY, []);
+  return Array.isArray(parsed) ? parsed.filter((item) => item?.id && Array.isArray(item.events)).slice(0, MAX_SESSIONS) : [];
 }
 
 export function saveLearningSession(session: LearningSession) {
-  if (typeof window === 'undefined') return session;
   const sessions = loadLearningSessions();
   const next = [session, ...sessions.filter((item) => item.id !== session.id)].slice(0, MAX_SESSIONS);
-  window.localStorage.setItem(STORE_KEY, JSON.stringify(next));
-  window.dispatchEvent(new CustomEvent('fahim-evidence', { detail: { sessionId: session.id } }));
+  writeScopedJson(STORE_KEY, next);
+  window.dispatchEvent?.(new CustomEvent('fahim-evidence', { detail: { sessionId: session.id } }));
   return session;
 }
 

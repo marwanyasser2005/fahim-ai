@@ -144,7 +144,7 @@ export default function About({ language }: { language: "ar" | "en" }) {
               const ItemIcon = Icon as typeof Target;
               return (
                 <article key={String(title)} className="bg-[var(--panel)] p-6">
-                  <ItemIcon className="h-5 w-5 text-[#0F766E]" />
+                  <ItemIcon className="h-5 w-5 text-[var(--nile)]" />
                   <h3 className="mt-5 text-lg font-black text-[var(--text)]">
                     {String(title)}
                   </h3>
@@ -239,7 +239,7 @@ export default function About({ language }: { language: "ar" | "en" }) {
                   key={track.en}
                   className="flex items-start gap-3 border border-[var(--border)] bg-[var(--panel)] p-4"
                 >
-                  <track.icon className="mt-1 h-4 w-4 shrink-0 text-[#0F766E]" />
+                  <track.icon className="mt-1 h-4 w-4 shrink-0 text-[var(--nile)]" />
                   <p className="text-xs font-bold leading-6 text-[var(--text)]">
                     {rtl ? track.ar : track.en}
                   </p>

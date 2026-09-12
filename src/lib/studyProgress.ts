@@ -1,3 +1,5 @@
+import { readScopedJson, writeScopedJson } from '@/lib/userScope';
+
 export type StudyAction = 'session' | 'explain' | 'video' | 'source' | 'quiz';
 
 export interface StudyEvent {
@@ -10,8 +12,8 @@ export interface StudyEvent {
 const KEY = 'fahim-study-events-v1';
 
 export function getStudyEvents(): StudyEvent[] {
-  try { return JSON.parse(localStorage.getItem(KEY) || '[]') as StudyEvent[]; }
-  catch { return []; }
+  const events = readScopedJson<StudyEvent[]>(KEY, []);
+  return Array.isArray(events) ? events : [];
 }
 
 export function recordStudyAction(action: StudyAction, topic: string) {
@@ -19,8 +21,8 @@ export function recordStudyAction(action: StudyAction, topic: string) {
   if (!cleanTopic) return;
   const events = getStudyEvents();
   events.unshift({ id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, action, topic: cleanTopic, createdAt: new Date().toISOString() });
-  localStorage.setItem(KEY, JSON.stringify(events.slice(0, 100)));
-  window.dispatchEvent(new Event('fahim-progress'));
+  writeScopedJson(KEY, events.slice(0, 100));
+  window.dispatchEvent?.(new Event('fahim-progress'));
 }
 
 export function getStudyStats() {

@@ -2,24 +2,16 @@ import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import {
   Archive,
+  BadgeCheck,
   BookOpenCheck,
   ChevronDown,
   CircleUserRound,
-  Compass,
-  Gauge,
   Globe2,
-  GraduationCap,
   Headphones,
-  Layers3,
-  BadgeCheck,
-  Presentation,
-  LibraryBig,
   LogIn,
   LogOut,
   Menu,
   Moon,
-  Route,
-  ShieldCheck,
   Sun,
   Tag,
   X,
@@ -30,7 +22,42 @@ import {
 import type { Language, Theme } from "@/App";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProductAccess } from "@/contexts/ProductAccessContext";
+import { useProfileRole } from "@/hooks/useProfileRole";
 import CommandPalette from "@/components/CommandPalette";
+import { hint, label, productNav, publicNav } from "@/lib/appNavigation";
+import type { NavEntry } from "@/lib/appNavigation";
+
+const extraAppNav: NavEntry[] = [
+  {
+    to: "/quiz-lab",
+    ar: "قيّم فهمك",
+    en: "Assess",
+    hintAr: "خمسة أسئلة تكشف نقطة البداية",
+    hintEn: "Five questions that reveal your starting point",
+    icon: ClipboardCheck,
+    role: "all",
+  },
+];
+const extraPublicNav: NavEntry[] = [
+  {
+    to: "/pricing",
+    ar: "الأسعار",
+    en: "Pricing",
+    hintAr: "30 يومًا مجانًا دون بطاقة",
+    hintEn: "30 free days, no card",
+    icon: Tag,
+    role: "all",
+  },
+  {
+    to: "/about",
+    ar: "عن فَهيم",
+    en: "About",
+    hintAr: "القصة والمؤسس",
+    hintEn: "The story and the founder",
+    icon: BookOpenCheck,
+    role: "all",
+  },
+];
 
 interface NavbarProps {
   language: Language;
@@ -107,27 +134,17 @@ export default function Navbar({
   const [open, setOpen] = useState(false);
   const { user, signOut } = useAuth();
   const access = useProductAccess();
+  const { isStaff } = useProfileRole();
   const t = copy[language];
   const appReady = Boolean(user && access.onboardingComplete);
-  const publicItems = [
-    { to: "/showcase", label: t.showcase, icon: Presentation },
-    { to: "/evidence", label: t.evidence, icon: ShieldCheck },
-    { to: "/how-it-works", label: t.how, icon: Route },
-    { to: "/courses", label: t.courses, icon: GraduationCap },
-    { to: "/pricing", label: t.pricing, icon: Tag },
-    { to: "/about", label: t.about, icon: BookOpenCheck },
-  ];
-  const appItems = [
-    { to: "/dashboard", label: t.dashboard, icon: Gauge },
-    { to: "/quiz-lab", label: t.assessment, icon: ClipboardCheck },
-    { to: "/workspace", label: t.workspace, icon: Compass },
-    { to: "/courses", label: t.courses, icon: GraduationCap },
-    { to: "/library", label: t.search, icon: LibraryBig },
-    { to: "/review", label: t.review, icon: Layers3 },
-    { to: "/passport", label: t.passport, icon: BadgeCheck },
-    { to: "/teacher", label: t.teacher, icon: Presentation },
-  ];
-  const items = appReady ? appItems : publicItems;
+  const manifestItems = (appReady ? [...productNav, ...extraAppNav] : [...publicNav, ...extraPublicNav])
+    .filter((entry) => entry.role === 'all' || isStaff);
+  const items = manifestItems.map((entry) => ({
+    to: entry.to,
+    label: label(entry, language),
+    icon: entry.icon,
+    hint: hint(entry, language),
+  }));
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     `relative inline-flex min-h-11 items-center rounded-xl px-3 py-2.5 text-sm font-extrabold transition-colors after:absolute after:inset-x-3 after:bottom-1 after:h-0.5 after:origin-start after:rounded-full after:bg-[#D95D39] after:transition-transform ${isActive ? "bg-[var(--soft)] text-[var(--text)] after:scale-x-100" : "text-[var(--muted)] after:scale-x-0 hover:bg-[var(--soft)] hover:text-[var(--text)] hover:after:scale-x-100"}`;
   const cycleTheme = () => {
@@ -297,7 +314,7 @@ export default function Navbar({
                   <button
                     type="button"
                     onClick={() => void signOut()}
-                    className="flex min-h-11 w-full items-center gap-2 px-3 py-2.5 text-start text-xs font-black text-rose-600 hover:bg-rose-50"
+                    className="flex min-h-11 w-full items-center gap-2 px-3 py-2.5 text-start text-xs font-black text-[var(--danger)] hover:bg-[var(--danger-surface)]"
                   >
                     <LogOut className="h-4 w-4" />
                     {t.signOut}
@@ -326,7 +343,7 @@ export default function Navbar({
                   className="flex items-center gap-3 border-b border-[var(--border)] px-3 py-3 text-sm font-black text-[var(--text)]"
                   onClick={() => setOpen(false)}
                 >
-                  <item.icon className="h-4 w-4 text-[#0F766E]" />
+                  <item.icon className="h-4 w-4 text-[var(--nile)]" />
                   {item.label}
                 </NavLink>
               ))}
@@ -336,7 +353,7 @@ export default function Navbar({
                   className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-black text-[var(--text)]"
                   onClick={() => setOpen(false)}
                 >
-                  <BadgeCheck className="h-4 w-4 text-[#0F766E]" />
+                  <BadgeCheck className="h-4 w-4 text-[var(--nile)]" />
                   {t.certificates}
                 </NavLink>
               )}
@@ -346,7 +363,7 @@ export default function Navbar({
                   className="flex items-center gap-3 border-b border-[var(--border)] px-3 py-3 text-sm font-black text-[var(--text)]"
                   onClick={() => setOpen(false)}
                 >
-                  <Archive className="h-4 w-4 text-[#0F766E]" />
+                  <Archive className="h-4 w-4 text-[var(--nile)]" />
                   {t.vault}
                 </NavLink>
               )}

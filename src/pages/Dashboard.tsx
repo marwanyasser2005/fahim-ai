@@ -10,8 +10,8 @@ import {
   ClipboardCheck,
   Clock3,
   FileQuestion,
+  Layers3,
   Lightbulb,
-  RotateCcw,
   ShieldCheck,
 } from 'lucide-react';
 import type { Language } from '@/App';
@@ -23,17 +23,21 @@ import LearningChanges from '@/components/learning/LearningChanges';
 import { useBadgeProgress } from '@/hooks/useBadgeProgress';
 import { getStudyEvents, type StudyEvent } from '@/lib/studyProgress';
 import { learningEvidenceStats, loadLearningSessions, type LearningSession } from '@/lib/learningEvidence';
+import { hydrateLearningSessionsFromCloud } from '@/lib/supabase/learningEvidenceSync';
+import { dueReviewCards } from '@/lib/spacedReview';
+import { syncEvidenceToReviewCards } from '@/lib/reviewBridge';
 
 type Props = { language: Language };
 
 const copy = {
   ar: {
     kicker: 'مساحة التعلّم الشخصية', welcome: 'أهلًا', title: 'ماذا يحتاج فهمك الآن؟',
-    subtitle: 'لوحة مركّزة على القرار التالي: تشخيص، تدخل، إعادة محاولة، ثم دليل يمكن مراجعته.',
-    startAssessment: 'ابدأ تقييمًا تشخيصيًا', continueAssessment: 'تابع التقييم', askFahim: 'اسأل فَهيم عن مفهوم',
+    subtitle: 'قرار واحد في الأعلى: راجع ما استحق، أو أكمل حلقة فهم، أو ابدأ خط أساس جديد.',
+    startAssessment: 'ابدأ تقييمًا تشخيصيًا', continueAssessment: 'أكمل حلقة الفهم', askFahim: 'اسأل فَهيم عن مفهوم',
+    reviewToday: 'مراجعتك اليوم', reviewCount: 'بطاقة مستحقة الآن', reviewBody: 'حان موعد استرجاع هذه المفاهيم من الذاكرة قبل موعد النسيان.', startReview: 'ابدأ المراجعة',
     nextTitle: 'الخطوة التالية المقترحة', nextNewTitle: 'ابدأ بخط أساس قصير',
     nextNewBody: 'خمسة أسئلة تطبيقية تكشف أين يبدأ التدخل المناسب، من دون كشف الإجابة قبل التفكير.',
-    nextReviewTitle: 'راجع هذا المفهوم الآن', nextReviewBody: 'حان موعد استرجاع الفكرة من الذاكرة. أجب أولًا ثم راجع دليل الجلسة السابقة.',
+    nextReviewTitle: 'راجع هذا المفهوم الآن', nextReviewBody: 'حان موعد استرجاع الفكرة من الذاكرة. أجب أولًا ثم راجع دليل الجلسة السابقة.', reviewOne: 'راجع الآن',
     nextActiveTitle: 'أكمل حلقة الفهم', nextActiveBody: 'لديك جلسة لم تصل بعد إلى دليل مكتمل. أكمل التدخل ثم جرّب سؤالًا تطبيقيًا جديدًا.',
     evidenceReady: 'أدلة تعلّم جاهزة', activePatterns: 'التباسات مرصودة', reviewDue: 'مراجعات مستحقة', evidenceAverage: 'متوسط قوة الدليل',
     metricsNote: 'أرقام مبنية على جلساتك المسجلة على هذا الجهاز.', recentTitle: 'النشاط الأخير',
@@ -43,11 +47,12 @@ const copy = {
   },
   en: {
     kicker: 'Personal learning space', welcome: 'Welcome', title: 'What does your understanding need now?',
-    subtitle: 'A dashboard focused on the next decision: diagnose, intervene, retry, then create reviewable evidence.',
-    startAssessment: 'Start diagnostic assessment', continueAssessment: 'Continue assessment', askFahim: 'Ask Fahim about a concept',
+    subtitle: 'One decision up top: review what is due, complete the understanding loop, or start a fresh baseline.',
+    startAssessment: 'Start diagnostic assessment', continueAssessment: 'Complete the loop', askFahim: 'Ask Fahim about a concept',
+    reviewToday: 'Your review today', reviewCount: 'cards due now', reviewBody: 'These concepts are ready to be retrieved from memory before the forgetting deadline.', startReview: 'Start review',
     nextTitle: 'Recommended next step', nextNewTitle: 'Start with a short baseline',
     nextNewBody: 'Five application questions reveal where intervention should start without exposing the answer before reflection.',
-    nextReviewTitle: 'Review this concept now', nextReviewBody: 'It is time to retrieve the idea from memory. Answer first, then inspect the previous evidence record.',
+    nextReviewTitle: 'Review this concept now', nextReviewBody: 'It is time to retrieve the idea from memory. Answer first, then inspect the previous evidence record.', reviewOne: 'Review now',
     nextActiveTitle: 'Complete the understanding loop', nextActiveBody: 'A session has not reached complete evidence yet. Finish the intervention, then try a new application question.',
     evidenceReady: 'Learning evidence ready', activePatterns: 'Patterns detected', reviewDue: 'Reviews due', evidenceAverage: 'Average evidence strength',
     metricsNote: 'Figures are based on sessions recorded on this device.', recentTitle: 'Recent activity',
@@ -65,23 +70,62 @@ export default function Dashboard({ language }: Props) {
   const { progress: badgeProgress, loading: badgesLoading } = useBadgeProgress();
   const [sessions, setSessions] = useState<LearningSession[]>(() => loadLearningSessions());
   const [events, setEvents] = useState<StudyEvent[]>(() => getStudyEvents());
+  const [dueCards, setDueCards] = useState(() => { syncEvidenceToReviewCards(); return dueReviewCards(); });
 
   useEffect(() => {
-    const refresh = () => { setSessions(loadLearningSessions()); setEvents(getStudyEvents()); };
+    const refresh = () => {
+      setSessions(loadLearningSessions());
+      setEvents(getStudyEvents());
+      setDueCards(syncEvidenceToReviewCards().filter((card) => new Date(card.dueAt) <= new Date()));
+    };
+    refresh();
+    // Signed-in learners pick up their cloud evidence so Today is accurate on
+    // any device — this is what makes a demo account portable for reviewers.
+    if (user) {
+      void hydrateLearningSessionsFromCloud().then((cloudSessions) => {
+        if (cloudSessions.length) refresh();
+      });
+    }
     window.addEventListener('fahim-evidence', refresh);
     window.addEventListener('fahim-progress', refresh);
     return () => { window.removeEventListener('fahim-evidence', refresh); window.removeEventListener('fahim-progress', refresh); };
-  }, []);
+  }, [user]);
 
   const stats = useMemo(() => learningEvidenceStats(sessions), [sessions]);
   const latest = sessions[0];
-  const due = sessions.find((session) => session.reviewDueAt && new Date(session.reviewDueAt) <= new Date());
   const active = sessions.find((session) => session.status === 'active');
-  const next = due
-    ? { title: t.nextReviewTitle, body: t.nextReviewBody, concept: due.conceptAr || due.conceptEn, icon: RotateCcw, href: `/review?topic=${encodeURIComponent(due.conceptAr || due.conceptEn)}` }
+
+  // ONE decision object drives title, body, icon, label, and destination —
+  // the button text can never disagree with where it goes again.
+  const next = dueCards.length
+    ? {
+        kicker: t.reviewToday,
+        title: `${dueCards.length} ${t.reviewCount}`,
+        body: t.reviewBody,
+        concept: dueCards[0].front,
+        icon: Layers3,
+        cta: t.startReview,
+        href: dueCards.length === 1 ? `/review?topic=${encodeURIComponent(dueCards[0].front)}` : '/review',
+      }
     : active
-      ? { title: t.nextActiveTitle, body: t.nextActiveBody, concept: active.conceptAr || active.conceptEn, icon: BrainCircuit, href: `/quiz-lab?topic=${encodeURIComponent(active.conceptAr || active.conceptEn)}` }
-      : { title: t.nextNewTitle, body: t.nextNewBody, concept: '', icon: ClipboardCheck, href: '/quiz-lab' };
+      ? {
+          kicker: t.nextTitle,
+          title: t.nextActiveTitle,
+          body: t.nextActiveBody,
+          concept: active.conceptAr || active.conceptEn,
+          icon: BrainCircuit,
+          cta: t.continueAssessment,
+          href: `/quiz-lab?topic=${encodeURIComponent(active.conceptAr || active.conceptEn)}`,
+        }
+      : {
+          kicker: t.nextTitle,
+          title: t.nextNewTitle,
+          body: t.nextNewBody,
+          concept: '',
+          icon: ClipboardCheck,
+          cta: t.startAssessment,
+          href: '/quiz-lab',
+        };
   const NextIcon = next.icon;
   const Arrow = language === 'ar' ? ArrowLeft : ArrowRight;
   const name = user?.user_metadata?.full_name || user?.email?.split('@')[0] || (language === 'ar' ? 'يا متعلّم' : 'Learner');
@@ -98,18 +142,19 @@ export default function Dashboard({ language }: Props) {
             <p className="dashboard-subtitle">{t.subtitle}</p>
           </div>
           <div className="dashboard-actions">
-            <Link to="/quiz-lab" className="premium-button"><ClipboardCheck aria-hidden="true" />{active ? t.continueAssessment : t.startAssessment}<Arrow aria-hidden="true" /></Link>
             <Link to="/ask-fahim" className="premium-button-secondary"><FileQuestion aria-hidden="true" />{t.askFahim}</Link>
           </div>
         </header>
 
-        <section className="next-action" aria-labelledby="next-action-title">
+        <section className={`next-action ${dueCards.length ? 'is-review' : ''}`} aria-labelledby="next-action-title">
           <span className="next-action-icon"><NextIcon aria-hidden="true" /></span>
           <div>
-            <p>{t.nextTitle}</p><h2 id="next-action-title">{next.title}</h2>
-            {next.concept && <strong>{next.concept}</strong>}<span>{next.body}</span>
+            <p>{next.kicker}</p>
+            <h2 id="next-action-title">{next.title}</h2>
+            {next.concept && <strong>{next.concept}</strong>}
+            <span>{next.body}</span>
           </div>
-          <Link to={next.href}>{active ? t.continueAssessment : t.startAssessment}<Arrow aria-hidden="true" /></Link>
+          <Link to={next.href}>{next.cta}<Arrow aria-hidden="true" /></Link>
         </section>
 
         <section aria-label={language === 'ar' ? 'مؤشرات التعلّم' : 'Learning indicators'}>
