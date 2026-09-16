@@ -7,12 +7,12 @@ import { recordStudyAction } from '@/lib/studyProgress';
 interface LibraryProps { language: 'ar' | 'en'; }
 const copy = {
   ar: {
-    eyebrow: 'مرصد المعرفة', title: 'ابحث في أكثر من طبقة معرفة.', body: 'محرك واحد يجمع المصادر المصرية المتحقق منها، الموسوعات المفتوحة، والفهرسة البحثية من OpenAlex وCrossref—ثم يرتبها حسب فائدتها للتعلّم لا حسب الشهرة فقط.',
+    eyebrow: 'مرصد المعرفة', title: 'ابحث في أكثر من طبقة معرفة.', body: 'محرك واحد يجمع المصادر المصرية المتحقق منها، والموسوعات المفتوحة، والفهرسة البحثية من OpenAlex وCrossref، ثم يرتبها حسب فائدتها للتعلّم لا حسب الشهرة فقط.',
     placeholder: 'ابحث: قانون نيوتن، المناعة، تصميم قواعد البيانات…', search: 'ابحث', all: 'الكل', official: 'مصادر مصر', encyclopedia: 'موسوعات', research: 'أبحاث', open: 'وصول مفتوح', year: 'من سنة', filters: 'مرشحات البحث',
     empty: 'اكتب مفهومًا أو سؤالًا لتبدأ. كل نتيجة تعود للمصدر الأصلي.', noResults: 'لم نجد نتيجة مناسبة بهذه المرشحات.', source: 'افتح المصدر', score: 'ملاءمة للتعلّم', citations: 'استشهاد', partial: 'بعض مزودي البحث لم يستجيبوا؛ النتائج المعروضة من المصادر المتاحة.', note: 'فَهيم يعرض بيانات وصفية ومقتطفات قصيرة فقط. تحقّق من المصدر الأصلي، ولا تعتبر ترتيب النتيجة اعتمادًا رسميًا.', results: 'نتيجة', providers: 'المصادر المتصلة', error: 'تعذر الوصول إلى محرك البحث الآن. حاول لاحقًا.'
   },
   en: {
-    eyebrow: 'Knowledge observatory', title: 'Search across layers of knowledge.', body: 'One engine combines verified Egyptian destinations, open encyclopedias, and scholarly indexes from OpenAlex and Crossref—ranked for learning value, not popularity alone.',
+    eyebrow: 'Knowledge observatory', title: 'Search across layers of knowledge.', body: 'One engine combines verified Egyptian destinations, open encyclopedias, and scholarly indexes from OpenAlex and Crossref, ranked for learning value rather than popularity alone.',
     placeholder: 'Search: Newton’s law, immunity, database design…', search: 'Search', all: 'All', official: 'Egypt sources', encyclopedia: 'Encyclopedias', research: 'Research', open: 'Open access', year: 'From year', filters: 'Search filters',
     empty: 'Enter a concept or question to begin. Every result leads to its original source.', noResults: 'No suitable result matched these filters.', source: 'Open source', score: 'Learning fit', citations: 'citations', partial: 'Some search providers did not respond; these results come from available sources.', note: 'Fahim shows metadata and short excerpts only. Verify the original source; ranking is not an official endorsement.', results: 'results', providers: 'Connected sources', error: 'The search engine is unavailable right now. Please try again.'
   },

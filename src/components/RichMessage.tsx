@@ -3,23 +3,28 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
-import { Check, Copy } from 'lucide-react';
+import { Check, Copy, ExternalLink, Quote } from 'lucide-react';
+import { polishGeneratedText } from '@/lib/editorialText';
 import 'katex/dist/katex.min.css';
 
-export default function RichMessage({ text }: { text: string }) {
-  return <div className="prose-fahim">
+export default function RichMessage({ text, language }: { text: string; language?: 'ar' | 'en' }) {
+  const polished = polishGeneratedText(text);
+  const resolvedLanguage = language || (/[؀-ۿ]/.test(polished) ? 'ar' : 'en');
+  return <div className="prose-fahim" lang={resolvedLanguage} dir={resolvedLanguage === 'ar' ? 'rtl' : 'ltr'}>
     <ReactMarkdown
       remarkPlugins={[remarkGfm, remarkMath]}
       rehypePlugins={[rehypeKatex]}
       components={{
-        a: ({ children, href }) => <a href={href} target="_blank" rel="noreferrer">{children}</a>,
+        a: ({ children, href }) => <a href={href} target="_blank" rel="noreferrer">{children}<ExternalLink aria-hidden="true" /></a>,
+        blockquote: ({ children }) => <blockquote><Quote aria-hidden="true" /> <div>{children}</div></blockquote>,
         code: ({ children, className, ...props }) => {
           const inline = !className && !String(children).includes('\n');
           return inline ? <code className="inline-code" {...props}>{children}</code> : <CodeBlock className={className}>{String(children).replace(/\n$/, '')}</CodeBlock>;
         },
-        table: ({ children }) => <div className="table-scroll"><table>{children}</table></div>,
+        table: ({ children }) => <div className="table-scroll" tabIndex={0} role="region" aria-label={resolvedLanguage === 'ar' ? 'جدول قابل للتمرير' : 'Scrollable table'}><table>{children}</table></div>,
+        hr: () => null,
       }}
-    >{text}</ReactMarkdown>
+    >{polished}</ReactMarkdown>
   </div>;
 }
 
@@ -31,8 +36,9 @@ function CodeBlock({ children, className }: { children: string; className?: stri
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1200);
   };
-  return <div className="code-shell">
-    <div className="code-toolbar"><span>{language}</span><button type="button" onClick={copy}>{copied ? <Check /> : <Copy />}{copied ? 'Copied' : 'Copy'}</button></div>
+  const arabic = document.documentElement.lang === 'ar';
+  return <div className="code-shell" dir="ltr">
+    <div className="code-toolbar"><span>{language}</span><button type="button" onClick={copy} aria-label={arabic ? 'نسخ الكود' : 'Copy code'}>{copied ? <Check /> : <Copy />}{copied ? (arabic ? 'تم النسخ' : 'Copied') : (arabic ? 'نسخ' : 'Copy')}</button></div>
     <pre><code className={className}>{children}</code></pre>
   </div>;
 }

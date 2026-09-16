@@ -30,7 +30,7 @@ import {
 const copy = {
   ar: {
     eyebrow: "خزانة المعرفة",
-    title: "مادتك الدراسية تبقى عندك—والبحث يوضح لماذا وجدها.",
+    title: "مادتك الدراسية تبقى عندك، والبحث يوضح لماذا وجدها.",
     body: "ارفع PDF أو نصًا أو Markdown أو CSV. يستخرج فَهيم النص داخل المتصفح، يقسمه إلى مقاطع، ويرتّب الدليل باستخدام BM25 وتغطية المصطلحات والجسر العربي/الإنجليزي دون رفع الملف إلى خادم.",
     upload: "أضف مصادر",
     supported: "PDF · TXT · MD · CSV · JSON · HTML، حتى 15MB",
@@ -56,7 +56,7 @@ const copy = {
   },
   en: {
     eyebrow: "Knowledge vault",
-    title: "Your study material stays with you—and retrieval explains why it matched.",
+    title: "Your study material stays with you, and retrieval explains why it matched.",
     body: "Upload PDF, text, Markdown, CSV, JSON, or HTML. Fahim extracts text in the browser and ranks evidence with BM25, term coverage, and an Arabic/English concept bridge without uploading the file.",
     upload: "Add sources",
     supported: "PDF · TXT · MD · CSV · JSON · HTML, up to 15MB",
@@ -78,7 +78,7 @@ const copy = {
     localRag: "Explainable local retrieval",
     result: "Retrieved evidence",
     characters: "characters",
-    askHint: "Confidence describes retrieval strength—not the truth of the source.",
+    askHint: "Confidence describes retrieval strength, not the truth of the source.",
   },
 } as const;
 

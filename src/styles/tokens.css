@@ -3,14 +3,14 @@
    radius and motion token lives here; index.css only declares component-local
    shorthands. */
 :root {
-  --background-app: #f7f8fc;
-  --background-surface: #fff;
-  --background-elevated: #f0f2f8;
-  --text-primary: #121826;
-  --text-secondary: #465062;
-  --text-muted: #535e72;
-  --border-default: #e7e9f0;
-  --border-strong: #c7cddc;
+  --background-app: #f6f4ee;
+  --background-surface: #fffefb;
+  --background-elevated: #efeee8;
+  --text-primary: #14213d;
+  --text-secondary: #46566a;
+  --text-muted: #627084;
+  --border-default: #dde1e6;
+  --border-strong: #b9c2cc;
   --brand-primary: #173f5f;
   --brand-secondary: #14213d;
   --ai-accent: #c94f2c;
@@ -49,8 +49,8 @@
   /* Solid fills for surfaces that carry white text. --lapis/--nile/--vermilion
      deliberately shift to light tints in dark mode, so they cannot sit behind
      white text; these stay dark enough for AA contrast in both themes. */
-  --brand-solid: #4f46e5;
-  --evidence-solid: #0b7285;
+  --brand-solid: #173f5f;
+  --evidence-solid: #0f766e;
   --danger-solid: #b91c1c;
   --warning-solid: #b45309;
   --on-solid: #fff;
@@ -95,14 +95,14 @@
   --space-12: 48px;
 }
 :root.dark {
-  --background-app: #0c0d12;
-  --background-surface: #12141b;
-  --background-elevated: #181b24;
-  --text-primary: #f5f7fa;
-  --text-secondary: #c3cadb;
-  --text-muted: #b4bcd0;
-  --border-default: #252936;
-  --border-strong: #434b61;
+  --background-app: #080d12;
+  --background-surface: #101820;
+  --background-elevated: #17222c;
+  --text-primary: #f7f0e4;
+  --text-secondary: #c4cdd7;
+  --text-muted: #a9b4c0;
+  --border-default: #273541;
+  --border-strong: #45596a;
   --brand-primary: #87c8dc;
   --brand-secondary: #f2b84b;
   --ai-accent: #ff8a68;
@@ -143,8 +143,8 @@
   --nile: var(--evidence);
   --vermilion: var(--ai-accent);
   --saffron: #e6b554;
-  --brand-solid: #4338ca;
-  --evidence-solid: #0e7490;
+  --brand-solid: #1b5d7a;
+  --evidence-solid: #0f766e;
   --danger-solid: #b91c1c;
   --warning-solid: #b45309;
   --on-solid: #fff;

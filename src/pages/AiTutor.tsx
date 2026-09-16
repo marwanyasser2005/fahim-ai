@@ -1,13 +1,16 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
-  Bot,
+  BookOpenText,
   Check,
+  ChevronDown,
+  HelpCircle,
   Copy,
   Download,
   Edit3,
   Menu,
   MessageSquarePlus,
+  MessagesSquare,
   Mic,
   PanelLeftClose,
   Pin,
@@ -23,6 +26,9 @@ import {
   Trash2,
   Volume2,
   X,
+  LibraryBig,
+  Sparkles,
+  Wand2,
 } from "lucide-react";
 import {
   askFahim,
@@ -89,22 +95,22 @@ const modeLabels: Record<Language, Record<TutorMode, string>> = {
 const copy = {
   ar: {
     intro:
-      "أهلًا! أنا فَهيم. أخبرني ماذا تتعلم وأين توقفت، وسنبني الفهم خطوة بخطوة.\n\nيمكنني **الشرح بالأمثلة**، إعداد اختبار أو بطاقات، وبناء خطة تعلم عملية.",
+      "أهلًا، أنا فَهيم. قل لي ما الذي تدرسه وأين توقفت، وسنبني الفهم معًا خطوة بخطوة. أشرح بالأمثلة، أختبر فهمك، وأربط الإجابة بمصدر عندما يتوفر.",
     newChat: "محادثة جديدة",
     search: "ابحث في المحادثات",
     empty: "ابدأ محادثة جديدة",
-    placeholder: "اسأل عن أي مفهوم أو اطلب اختبارًا أو خطة…",
+    placeholder: "اكتب ما تريد فهمه، أو الصق السؤال هنا",
     level: "المرحلة",
     subject: "المادة",
     noSubject: "المادة (اختياري)",
     send: "إرسال",
-    thinking: "فَهيم يبني الإجابة",
+    thinking: "فَهيم يراجع السياق ويجهّز الشرح",
     stop: "إيقاف",
     today: "اليوم",
     history: "المحادثات",
     connected: "متصل",
     offline: "خدمة AI غير متاحة",
-    privacy: "راجع المعلومات المهمة ولا تشارك بيانات شخصية.",
+    privacy: "لا تكتب بيانات شخصية. راجع المصادر قبل الاعتماد على معلومة مهمة.",
     rename: "إعادة تسمية",
     delete: "حذف",
     export: "تصدير Markdown",
@@ -119,6 +125,27 @@ const copy = {
     sources: "مصادر للمراجعة",
     local: "AI غير متاح",
     menu: "خيارات",
+    all: "الكل",
+    pinned: "المثبتة",
+    context: "سياق الجلسة",
+    gradePlaceholder: "المرحلة الدراسية",
+    openVault: "إضافة مصدر من ملفاتي",
+    readyTitle: "ما الذي تريد أن تفهمه اليوم؟",
+    readyBody: "ابدأ بسؤال حقيقي. سيقسّم فَهيم الفكرة، يطلب منك محاولة، ثم يقترح خطوة تالية واضحة.",
+    evidence: "مصادر واضحة",
+    adaptive: "شرح يناسب مستواك",
+    practice: "تحقق من الفهم",
+    responseTools: "إجراءات الإجابة",
+    learner: "أنت",
+    assistant: "فَهيم",
+    helpful: "إجابة مفيدة",
+    notHelpful: "الإجابة تحتاج تحسينًا",
+    messages: "رسالة",
+    conversations: "محادثة",
+    checking: "جارٍ التحقق",
+    voiceUnavailable: "الإملاء الصوتي غير مدعوم في هذا المتصفح",
+    voiceFailed: "تعذّر تشغيل الإملاء الصوتي. راجع إذن الميكروفون وحاول مرة أخرى.",
+    confirmDelete: "هل تريد حذف هذه المحادثة نهائيًا؟",
   },
   en: {
     intro:
@@ -126,12 +153,12 @@ const copy = {
     newChat: "New conversation",
     search: "Search conversations",
     empty: "Start a new conversation",
-    placeholder: "Ask about a concept, request a quiz, or build a plan…",
+    placeholder: "Describe what you want to understand, or paste a question",
     level: "Level",
     subject: "Subject",
     noSubject: "Subject (optional)",
     send: "Send",
-    thinking: "Fahim is building the answer",
+    thinking: "Fahim is reviewing the context and preparing an explanation",
     stop: "Stop",
     today: "Today",
     history: "Conversations",
@@ -152,8 +179,34 @@ const copy = {
     sources: "Sources to review",
     local: "AI unavailable",
     menu: "Options",
+    all: "All",
+    pinned: "Pinned",
+    context: "Session context",
+    gradePlaceholder: "Learning level",
+    openVault: "Add a source from my files",
+    readyTitle: "What do you want to understand today?",
+    readyBody: "Start with a real question. Fahim will break it down, ask for an attempt, and recommend a clear next step.",
+    evidence: "Clear sources",
+    adaptive: "Level-aware teaching",
+    practice: "Check understanding",
+    responseTools: "Response actions",
+    learner: "You",
+    assistant: "Fahim",
+    helpful: "Helpful response",
+    notHelpful: "Response needs improvement",
+    messages: "messages",
+    conversations: "conversations",
+    checking: "Checking",
+    voiceUnavailable: "Voice input is not supported in this browser",
+    voiceFailed: "Voice input could not start. Check microphone permission and try again.",
+    confirmDelete: "Delete this conversation permanently?",
   },
 } as const;
+
+const gradeOptions: Record<Language, string[]> = {
+  ar: ["ابتدائي", "إعدادي", "ثانوي", "جامعي", "تعلّم ذاتي"],
+  en: ["Primary", "Middle school", "High school", "University", "Self-learning"],
+};
 
 const newId = () => crypto.randomUUID();
 
@@ -168,11 +221,13 @@ export default function AiTutor({ language }: { language: Language }) {
   const [activeId, setActiveId] = useState("");
   const [input, setInput] = useState(params.get("q") || "");
   const [query, setQuery] = useState("");
+  const [historyFilter, setHistoryFilter] = useState<"all" | "pinned">("all");
   const [loading, setLoading] = useState(false);
   const [sidebar, setSidebar] = useState(true);
   const [mobileSidebar, setMobileSidebar] = useState(false);
   const [copied, setCopied] = useState("");
   const [configured, setConfigured] = useState<boolean | null>(null);
+  const [composerNotice, setComposerNotice] = useState("");
   const [vaultContext] = useState<TutorSourceContext[]>(() => {
     if (params.get("vault") !== "1") return [];
     try {
@@ -270,6 +325,7 @@ export default function AiTutor({ language }: { language: Language }) {
   const visible = useMemo(
     () =>
       conversations
+        .filter((item) => historyFilter === "all" || item.pinned)
         .filter((item) =>
           `${item.title} ${item.subject}`
             .toLowerCase()
@@ -280,7 +336,7 @@ export default function AiTutor({ language }: { language: Language }) {
             Number(b.pinned) - Number(a.pinned) ||
             b.updatedAt.localeCompare(a.updatedAt),
         ),
-    [conversations, query],
+    [conversations, historyFilter, query],
   );
   const updateActive = (mutate: (item: Conversation) => Conversation) =>
     setConversations((items) =>
@@ -294,6 +350,7 @@ export default function AiTutor({ language }: { language: Language }) {
     setInput("");
   };
   const removeConversation = (id: string) => {
+    if (!window.confirm(t.confirmDelete)) return;
     if (user) void deleteCloudConversation(id, user.id);
     const remaining = conversations.filter((item) => item.id !== id);
     if (!remaining.length) {
@@ -486,7 +543,11 @@ export default function AiTutor({ language }: { language: Language }) {
   const voice = () => {
     const Recognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!Recognition) return;
+    if (!Recognition) {
+      setComposerNotice(t.voiceUnavailable);
+      return;
+    }
+    setComposerNotice("");
     const recognition = new Recognition();
     recognition.lang = language === "ar" ? "ar-EG" : "en-US";
     recognition.interimResults = false;
@@ -494,88 +555,106 @@ export default function AiTutor({ language }: { language: Language }) {
       setInput(event.results[0][0].transcript);
       inputRef.current?.focus();
     };
+    recognition.onerror = () => setComposerNotice(t.voiceFailed);
     recognition.start();
   };
 
   if (!active) return <main className="min-h-[80vh] bg-[var(--surface)]" />;
+  const freshConversation = active.messages.length === 1 && active.messages[0]?.role === "assistant";
+  const suggestions = language === "ar"
+    ? [
+        active.subject ? `اشرح لي أهم فكرة في ${active.subject} بمثال قريب من الواقع.` : "اشرح لي مفهومًا صعبًا بمثال قريب من الواقع.",
+        "اختبر فهمي بثلاثة أسئلة متدرجة، ولا تعرض الحل قبل محاولتي.",
+        "ابنِ لي خطة مذاكرة قصيرة وحدد ما أراجعه أولًا.",
+        "ساعدني أشرح الفكرة بطريقتي، ثم صحح أي فجوة في فهمي.",
+      ]
+    : [
+        active.subject ? `Explain the most important idea in ${active.subject} with a practical example.` : "Explain a difficult concept with a practical example.",
+        "Check my understanding with three progressive questions. Wait for my attempt before showing the answer.",
+        "Build a short study plan and tell me what to review first.",
+        "Help me teach the idea back in my own words, then correct any gap.",
+      ];
   const sidebarPanel = (
-    <aside className="flex h-full flex-col border-e border-slate-200 bg-slate-50/90 dark:border-white/10 dark:bg-[#0c1018]">
-      <div className="p-3">
+    <aside className="chat-sidebar">
+      <div className="chat-sidebar-head">
+        <div className="chat-sidebar-title">
+          <span><MessagesSquare aria-hidden="true" /></span>
+          <div><strong>{t.history}</strong><small>{conversations.length} {t.conversations}</small></div>
+        </div>
         <button
           onClick={addConversation}
-          className="flex h-11 w-full items-center justify-between rounded-lg bg-[var(--brand-solid)] px-3 text-xs font-black text-[var(--on-solid)] hover:bg-[var(--evidence-solid)]"
+          className="chat-new-button"
         >
           <span className="flex items-center gap-2">
             <MessageSquarePlus className="h-4 w-4" />
             {t.newChat}
           </span>
-          <kbd className="rounded-sm bg-white/10 px-1.5 py-0.5 text-[9px]">
-            ⇧⌘O
+          <kbd>
+            Ctrl Shift O
           </kbd>
         </button>
-        <label className="relative mt-3 block">
-          <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        <label className="chat-search">
+          <Search aria-hidden="true" />
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={t.search}
-            className="h-10 w-full rounded-lg border border-[var(--border)] bg-[var(--panel)] pe-3 ps-9 text-xs font-bold outline-none focus:border-[var(--lapis)]"
+            aria-label={t.search}
           />
         </label>
+        <div className="chat-history-filters" aria-label={t.history}>
+          <button type="button" aria-pressed={historyFilter === "all"} onClick={() => setHistoryFilter("all")}>{t.all}</button>
+          <button type="button" aria-pressed={historyFilter === "pinned"} onClick={() => setHistoryFilter("pinned")}><Pin aria-hidden="true" />{t.pinned}</button>
+        </div>
       </div>
-      <div className="flex-1 overflow-y-auto px-2 pb-3">
-        <p className="px-2 py-2 text-[10px] font-black uppercase tracking-wider text-slate-400">
-          {t.history}
-        </p>
+      <div className="chat-history-list">
         {visible.map((conversation) => (
           <div
             key={conversation.id}
-            className={`group relative mb-1 flex items-center rounded-xl ${conversation.id === activeId ? "bg-teal-100 text-teal-950 dark:bg-teal-500/15 dark:text-teal-100" : "hover:bg-slate-200/70 dark:hover:bg-white/5"}`}
+            className={`chat-history-item ${conversation.id === activeId ? "active" : ""}`}
           >
             <button
               onClick={() => {
                 setActiveId(conversation.id);
                 setMobileSidebar(false);
               }}
-              className="min-w-0 flex-1 px-3 py-2.5 text-start"
+              className="chat-history-main"
             >
               <span className="flex items-center gap-2">
-                <span className="truncate text-xs font-black">
+                <span className="truncate text-sm font-extrabold">
                   {conversation.title}
                 </span>
                 {conversation.pinned && (
-                  <Pin className="h-3 w-3 shrink-0 fill-current text-[var(--vermilion)]" />
+                  <Pin className="h-3.5 w-3.5 shrink-0 fill-current" />
                 )}
               </span>
-              <span className="mt-1 block truncate text-[9px] text-slate-500">
+              <span className="chat-history-meta">
                 {conversation.subject ||
                   modeLabels[language][conversation.tutorMode]}{" "}
-                • {conversation.messages.length - 1} messages
+                <span aria-hidden="true">·</span> {Math.max(0, conversation.messages.length - 1)} {t.messages}
               </span>
             </button>
             <button
-              className="me-1 grid h-7 w-7 place-items-center rounded-lg opacity-0 hover:bg-white/60 group-hover:opacity-100 dark:hover:bg-white/10"
+              className="chat-history-delete"
               onClick={() => removeConversation(conversation.id)}
               aria-label={t.delete}
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              <Trash2 className="h-4 w-4" />
             </button>
           </div>
         ))}
         {!visible.length && (
-          <p className="px-3 py-10 text-center text-xs text-slate-500">
-            {t.empty}
-          </p>
+          <div className="chat-empty-history"><HelpCircle aria-hidden="true" /><p>{t.empty}</p></div>
         )}
       </div>
-      <div className="border-t border-slate-200 p-3 text-[10px] leading-5 text-slate-500 dark:border-white/10">
+      <div className="chat-sidebar-status">
         <span
-          className={`mb-1 flex items-center gap-1.5 font-black ${configured ? "text-teal-600" : "text-amber-600"}`}
+          className={configured === null ? "checking" : configured ? "online" : "offline"}
         >
           <span
-            className={`h-1.5 w-1.5 rounded-full ${configured ? "bg-teal-500" : "bg-amber-500"}`}
+            aria-hidden="true"
           />
-          {configured ? t.connected : t.offline}
+          {configured === null ? t.checking : configured ? t.connected : t.offline}
         </span>
         {t.privacy}
       </div>
@@ -583,43 +662,42 @@ export default function AiTutor({ language }: { language: Language }) {
   );
 
   return (
-    <main className="h-[calc(100vh-65px)] min-h-[42rem] overflow-hidden bg-[var(--surface)]">
+    <main className="fahim-chat">
       {/* The immersive tutor had no top-level heading, so assistive tech had no page title. */}
       <h1 className="sr-only">{language === "ar" ? "مساعد فَهيم التعليمي" : "Fahim learning assistant"}</h1>
-      <div
-        className={`mx-auto grid h-full max-w-[100rem] ${sidebar ? "lg:grid-cols-[17rem_1fr]" : "grid-cols-1"}`}
-      >
+      <div className={`chat-shell ${sidebar ? "with-sidebar" : "without-sidebar"}`}>
         {sidebar && (
           <div className="hidden min-h-0 lg:block">{sidebarPanel}</div>
         )}
         {mobileSidebar && (
           <div
-            className="fixed inset-0 z-[80] bg-slate-950/50 backdrop-blur-sm lg:hidden"
+            className="chat-mobile-scrim"
             onMouseDown={(event) => {
               if (event.currentTarget === event.target) setMobileSidebar(false);
             }}
           >
-            <div className="h-full w-[min(86vw,20rem)] shadow-2xl">
+            <div className="chat-mobile-panel">
               {sidebarPanel}
             </div>
             <button
               onClick={() => setMobileSidebar(false)}
-              className="absolute end-4 top-4 grid h-10 w-10 place-items-center rounded-xl bg-white text-slate-950"
+              className="chat-mobile-close"
+              aria-label={language === "ar" ? "إغلاق سجل المحادثات" : "Close conversation history"}
             >
               <X className="h-5 w-5" />
             </button>
           </div>
         )}
-        <section className="flex min-h-0 min-w-0 flex-col">
-          <header className="flex h-14 shrink-0 items-center gap-2 border-b border-slate-200 bg-white/75 px-3 backdrop-blur-xl dark:border-white/10 dark:bg-[#0b0f17]/80 sm:px-5">
+        <section className="chat-stage">
+          <header className="chat-topbar">
             <button
               onClick={() =>
                 window.innerWidth < 1024
                   ? setMobileSidebar(true)
                   : setSidebar((value) => !value)
               }
-              className="grid h-9 w-9 place-items-center rounded-xl hover:bg-slate-100 dark:hover:bg-white/5"
-              aria-label="Toggle conversations"
+              className="chat-icon-button"
+              aria-label={language === "ar" ? "إظهار أو إخفاء سجل المحادثات" : "Toggle conversation history"}
             >
               {sidebar ? (
                 <PanelLeftClose className="h-4 w-4" />
@@ -627,7 +705,7 @@ export default function AiTutor({ language }: { language: Language }) {
                 <Menu className="h-4 w-4" />
               )}
             </button>
-            <div className="min-w-0 flex-1">
+            <div className="chat-title-block">
               <input
                 aria-label={t.rename}
                 value={active.title}
@@ -637,20 +715,21 @@ export default function AiTutor({ language }: { language: Language }) {
                     title: event.target.value.slice(0, 80),
                   }))
                 }
-                className="w-full truncate bg-transparent text-sm font-black outline-none"
+                className="chat-title-input"
               />
-              <p className="truncate text-[10px] text-slate-500">
-                {active.subject ||
-                  (language === "ar"
-                    ? "جلسة تعلم شخصية"
-                    : "Personal learning session")}
+              <p>
+                <ShieldCheck aria-hidden="true" />
+                {active.subject || (language === "ar" ? "جلسة تعلّم خاصة" : "Private learning session")}
               </p>
             </div>
+            <span className={`chat-connection-badge ${configured === null ? "checking" : configured ? "online" : "offline"}`}>
+              <span aria-hidden="true" />{configured === null ? t.checking : configured ? t.connected : t.offline}
+            </span>
             <button
               onClick={() =>
                 updateActive((item) => ({ ...item, pinned: !item.pinned }))
               }
-              className={`grid h-9 w-9 place-items-center rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 ${active.pinned ? "text-[var(--vermilion)]" : "text-slate-400"}`}
+              className={`chat-icon-button ${active.pinned ? "active" : ""}`}
               aria-label={t.pin}
             >
               <Pin
@@ -665,22 +744,24 @@ export default function AiTutor({ language }: { language: Language }) {
                   "text/markdown;charset=utf-8",
                 )
               }
-              className="grid h-9 w-9 place-items-center rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5"
+              className="chat-icon-button"
               aria-label={t.export}
             >
               <Download className="h-4 w-4" />
             </button>
             <button
               onClick={() => removeConversation(active.id)}
-              className="grid h-9 w-9 place-items-center rounded-xl text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-500/10"
+              className="chat-icon-button danger"
               aria-label={t.delete}
             >
               <Trash2 className="h-4 w-4" />
             </button>
           </header>
-          <div ref={scrollRef} className="flex-1 overflow-y-auto">
-            <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-              {active.messages.map((message, messageIndex) => (
+          <div ref={scrollRef} className="chat-transcript" aria-live="polite">
+            <div className="chat-transcript-inner">
+              {freshConversation ? (
+                <TutorWelcome language={language} t={t} suggestions={suggestions} onChoose={(value) => void submit(undefined, value)} />
+              ) : active.messages.map((message, messageIndex) => (
                 <MessageBubble
                   key={message.id}
                   message={message}
@@ -713,17 +794,17 @@ export default function AiTutor({ language }: { language: Language }) {
               ))}
               {loading &&
                 active.messages[active.messages.length - 1]?.text === "" && (
-                  <div className="flex gap-3 py-5">
-                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[var(--brand-solid)] text-[var(--on-solid)]">
-                      <Bot className="h-4 w-4" />
+                  <div className="chat-thinking">
+                    <span className="chat-assistant-mark">
+                      <img src="/brand/fahim-icon.svg" alt="" />
                     </span>
-                    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 dark:border-white/10 dark:bg-white/[.04]">
+                    <div className="chat-thinking-card">
                       <span className="flex items-center gap-1.5">
                         <span className="typing-dot h-1.5 w-1.5 rounded-full bg-[var(--nile)]" />
                         <span className="typing-dot h-1.5 w-1.5 rounded-full bg-[var(--nile)]" />
                         <span className="typing-dot h-1.5 w-1.5 rounded-full bg-[var(--nile)]" />
                       </span>
-                      <span className="mt-2 block text-[10px] font-bold text-slate-400">
+                      <span className="chat-thinking-label">
                         {t.thinking}
                       </span>
                     </div>
@@ -731,9 +812,9 @@ export default function AiTutor({ language }: { language: Language }) {
                 )}
             </div>
           </div>
-          <div className="shrink-0 border-t border-slate-200 bg-white/85 px-3 pb-3 pt-2 backdrop-blur-xl dark:border-white/10 dark:bg-[#0b0f17]/90 sm:px-6 sm:pb-4">
-            <div className="mx-auto max-w-4xl">
-              <div className="mb-2 flex gap-2 overflow-x-auto pb-1">
+          <div className="chat-composer-dock">
+            <div className="chat-composer-inner">
+              <div className="chat-mode-row" aria-label={language === "ar" ? "نمط المساعدة" : "Tutor mode"}>
                 {MODES.map((item) => (
                   <button
                     key={item}
@@ -743,7 +824,8 @@ export default function AiTutor({ language }: { language: Language }) {
                         tutorMode: item,
                       }))
                     }
-                    className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[10px] font-black transition ${active.tutorMode === item ? "bg-[var(--brand-solid)] text-[var(--on-solid)]" : "bg-slate-100 text-slate-600 hover:bg-teal-50 dark:bg-white/[.06] dark:text-slate-300"}`}
+                    className={active.tutorMode === item ? "active" : ""}
+                    aria-pressed={active.tutorMode === item}
                   >
                     {modeLabels[language][item]}
                   </button>
@@ -751,14 +833,14 @@ export default function AiTutor({ language }: { language: Language }) {
               </div>
               <form
                 onSubmit={submit}
-                className="rounded-xl border border-[var(--border)] bg-[var(--panel)] p-2 shadow-[var(--shadow-lg)] focus-within:border-[var(--lapis)]"
+                className="chat-composer"
               >
                 <textarea
                   ref={inputRef}
                   value={input}
                   onChange={(event) => setInput(event.target.value)}
                   onKeyDown={(event) => {
-                    if (event.key === "Enter" && !event.shiftKey) {
+                    if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
                       event.preventDefault();
                       void submit();
                     }
@@ -766,19 +848,21 @@ export default function AiTutor({ language }: { language: Language }) {
                   rows={2}
                   maxLength={4000}
                   placeholder={t.placeholder}
-                  className="max-h-40 min-h-[48px] w-full resize-none bg-transparent px-3 py-2 text-sm leading-6 outline-none"
+                  aria-label={t.placeholder}
                 />
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1">
+                <div className="chat-composer-tools">
+                  <div className="chat-context-controls">
                     <button
                       type="button"
                       onClick={voice}
-                      className="grid h-9 w-9 place-items-center rounded-lg text-[var(--muted)] hover:bg-[var(--soft)]"
-                      aria-label="Voice input"
+                      className="chat-tool-button"
+                      aria-label={language === "ar" ? "إملاء صوتي" : "Voice input"}
                     >
                       <Mic className="h-4 w-4" />
                     </button>
-                    <input
+                    <label className="chat-context-select">
+                      <BookOpenText aria-hidden="true" />
+                      <input
                       value={active.subject}
                       onChange={(event) =>
                         updateActive((item) => ({
@@ -787,37 +871,82 @@ export default function AiTutor({ language }: { language: Language }) {
                         }))
                       }
                       placeholder={t.noSubject}
-                      className="h-9 w-28 rounded-lg bg-[var(--soft)] px-3 text-[10px] font-bold outline-none focus:w-40 sm:w-36"
-                    />
+                      aria-label={t.subject}
+                      />
+                    </label>
+                    <label className="chat-context-select grade-select">
+                      <select value={active.grade} aria-label={t.level} onChange={(event) => updateActive((item) => ({ ...item, grade: event.target.value }))}>
+                        <option value="">{t.gradePlaceholder}</option>
+                        {gradeOptions[language].map((grade) => <option key={grade} value={grade}>{grade}</option>)}
+                      </select>
+                      <ChevronDown aria-hidden="true" />
+                    </label>
+                    <Link to="/knowledge-vault" className="chat-tool-button" aria-label={t.openVault} title={t.openVault}><LibraryBig /></Link>
                   </div>
                   {loading ? (
                     <button
                       type="button"
                       onClick={stop}
-                      className="inline-flex h-10 items-center gap-2 rounded-lg bg-[var(--band)] px-4 text-xs font-black text-white"
+                      className="chat-stop-button"
                     >
                       <Square className="h-3.5 w-3.5 fill-current" />
-                      {t.stop}
+                      <span>{t.stop}</span>
                     </button>
                   ) : (
                     <button
                       disabled={input.trim().length < 3}
-                      className="inline-flex h-10 items-center gap-2 rounded-lg bg-[var(--brand-solid)] px-4 text-xs font-black text-[var(--on-solid)] hover:brightness-95 disabled:bg-slate-300 dark:disabled:bg-slate-700"
+                      className="chat-send-button"
                     >
                       <Send className="h-4 w-4" />
-                      {t.send}
+                      <span>{t.send}</span>
                     </button>
                   )}
                 </div>
               </form>
-              <p className="mt-2 text-center text-[9px] text-slate-400">
-                {t.privacy}
-              </p>
+              <div className="chat-composer-foot"><span>{t.privacy}</span><bdi>{input.length}/4000</bdi></div>
+              {composerNotice && <p className="chat-composer-notice" role="status">{composerNotice}</p>}
             </div>
           </div>
         </section>
       </div>
     </main>
+  );
+}
+
+function TutorWelcome({
+  language,
+  t,
+  suggestions,
+  onChoose,
+}: {
+  language: Language;
+  t: typeof copy.ar | typeof copy.en;
+  suggestions: string[];
+  onChoose: (value: string) => void;
+}) {
+  const benefits = [
+    [ShieldCheck, t.evidence],
+    [Wand2, t.adaptive],
+    [BookOpenText, t.practice],
+  ] as const;
+  return (
+    <section className="chat-welcome" aria-labelledby="chat-welcome-title">
+      <div className="chat-welcome-brand"><img src="/brand/fahim-icon.svg" alt="" /><span>{language === "ar" ? "مساحة فَهيم للتعلّم" : "Fahim learning space"}</span></div>
+      <h2 id="chat-welcome-title">{t.readyTitle}</h2>
+      <p>{t.readyBody}</p>
+      <div className="chat-welcome-benefits">
+        {benefits.map(([Icon, label]) => <span key={label}><Icon aria-hidden="true" />{label}</span>)}
+      </div>
+      <div className="chat-suggestion-grid">
+        {suggestions.map((suggestion, index) => (
+          <button type="button" key={suggestion} onClick={() => onChoose(suggestion)}>
+            <span>0{index + 1}</span>
+            <strong>{suggestion}</strong>
+            <Sparkles aria-hidden="true" />
+          </button>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -854,51 +983,50 @@ function MessageBubble({
   if (!message.text) return null;
   return (
     <article
-      className={`group flex gap-3 py-5 ${user ? "flex-row-reverse" : ""}`}
+      className={`chat-message ${user ? "from-user" : "from-fahim"}`}
     >
       <span
-        className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl text-xs font-black ${user ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : "bg-[var(--brand-solid)] text-[var(--on-solid)]"}`}
+        className={user ? "chat-user-mark" : "chat-assistant-mark"}
       >
-        {user ? language === "ar" ? "أ" : "Y" : <Bot className="h-4 w-4" />}
+        {user ? language === "ar" ? "أ" : "Y" : <img src="/brand/fahim-icon.svg" alt="" />}
       </span>
       <div
-        className={`min-w-0 max-w-[calc(100%-3rem)] ${user ? "rounded-2xl rounded-se-md bg-slate-100 px-4 py-3 dark:bg-white/[.07]" : "flex-1"}`}
+        className="chat-message-content"
       >
-        {!user && (
-          <div className="mb-2 flex items-center gap-2">
-            <span className="text-xs font-black">Fahim AI</span>
-            <span className="rounded-full bg-teal-50 px-2 py-0.5 text-[8px] font-black text-teal-700 dark:bg-teal-500/10 dark:text-teal-300">
+        <div className="chat-message-author">
+            <span>{user ? t.learner : t.assistant}</span>
+            {!user && <span className="chat-learning-engine">
               {language === "ar" ? "محرك التعلّم" : "Learning engine"}
-            </span>
+            </span>}
             {message.mode === "unavailable" && (
-              <span className="rounded-full bg-[var(--warning-surface)] px-2 py-0.5 text-[8px] font-black text-[var(--warning-text)]">
+              <span className="chat-unavailable">
                 {t.local}
               </span>
             )}
-          </div>
-        )}
+        </div>
         {user ? (
-          <p className="whitespace-pre-wrap text-sm leading-7">
+          <p className="chat-user-copy">
             {message.text}
           </p>
         ) : (
-          <div className="tutor-response-block"><RichMessage text={message.text} /></div>
+          <div className="tutor-response-block"><RichMessage text={message.text} language={language} /></div>
         )}
         {Boolean(message.sources?.length) && (
-          <div className="mt-5 border-t border-slate-200 pt-4 dark:border-white/10">
-            <p className="mb-3 text-xs font-black text-slate-500">
+          <div className="chat-sources">
+            <p>
+              <ShieldCheck aria-hidden="true" />
               {t.sources}
             </p>
-            <div className="flex gap-3 overflow-x-auto pb-2">
+            <div className="chat-source-list">
               {message.sources?.map((source: TutorSource, index) => (
                 <a
                   key={source.url}
                   href={source.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="min-w-[14rem] max-w-[18rem] rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-teal-400 hover:shadow-md dark:border-white/10 dark:bg-white/[.04]"
+                  className="chat-source-card"
                 >
-                  <span className="flex items-center justify-between gap-2 text-xs font-black text-teal-800 dark:text-teal-300">
+                  <span className="chat-source-card-head">
                     <span>
                       {language === "ar"
                         ? `مرجع ${source.citationId || index + 1}`
@@ -911,16 +1039,15 @@ function MessageBubble({
                       )}
                     </span>
                   </span>
-                  <span className="mt-3 block truncate text-sm font-black">
+                  <strong>
                     {source.title}
-                  </span>
-                  <span className="mt-1 line-clamp-2 text-xs leading-5 text-slate-500">
+                  </strong>
+                  <small>
                     {source.description}
-                  </span>
+                  </small>
                   {source.verifiedAt && (
-                    <span className="mt-3 block text-xs font-bold text-teal-700 dark:text-teal-300">
-                      {language === "ar" ? "آخر تحقق" : "Last verified"} ·{" "}
-                      {source.verifiedAt}
+                    <span className="chat-source-verified">
+                      <Check aria-hidden="true" />{language === "ar" ? "آخر تحقق" : "Last verified"}: {source.verifiedAt}
                     </span>
                   )}
                 </a>
@@ -929,7 +1056,8 @@ function MessageBubble({
           </div>
         )}
         <div
-          className={`mt-3 flex items-center gap-0.5 text-slate-400 ${user ? "justify-end" : ""}`}
+          className="chat-message-actions"
+          aria-label={t.responseTools}
         >
           {!user && message.generationId && (
             <Link
@@ -938,7 +1066,7 @@ function MessageBubble({
               aria-label={
                 language === "ar" ? "سجل الإجابة" : "Generation record"
               }
-              className="grid h-7 w-7 place-items-center rounded-lg transition hover:bg-slate-100 hover:text-[var(--nile)] dark:hover:bg-white/[.06] [&>svg]:h-3.5 [&>svg]:w-3.5"
+              className="chat-action-button"
             >
               <ShieldCheck />
             </Link>
@@ -979,14 +1107,14 @@ function MessageBubble({
                 <BrainCircuit />
               </Action>
               <Action
-                label="Helpful"
+                label={t.helpful}
                 onClick={() => onFeedback("up")}
                 active={message.feedback === "up"}
               >
                 <ThumbsUp />
               </Action>
               <Action
-                label="Not helpful"
+                label={t.notHelpful}
                 onClick={() => onFeedback("down")}
                 active={message.feedback === "down"}
               >
@@ -1020,7 +1148,7 @@ function Action({
       disabled={disabled}
       title={label}
       aria-label={label}
-      className={`grid h-7 w-7 place-items-center rounded-lg transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-35 dark:hover:bg-white/[.06] dark:hover:text-white [&>svg]:h-3.5 [&>svg]:w-3.5 ${active ? "text-[var(--vermilion)]" : ""}`}
+      className={`chat-action-button ${active ? "active" : ""}`}
     >
       {children}
     </button>
@@ -1038,6 +1166,7 @@ declare global {
     lang: string;
     interimResults: boolean;
     onresult: (event: SpeechRecognitionEvent) => void;
+    onerror: () => void;
     start: () => void;
   }
   interface SpeechRecognitionConstructor {

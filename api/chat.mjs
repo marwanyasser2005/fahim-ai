@@ -47,8 +47,8 @@ export function systemPrompt(language, grade, subject, mode) {
     recall: `Run a retrieval-practice cycle. Ask exactly one short recall question without hints or answer choices and stop. After the learner responds, compare the response with available evidence, identify what was retained and what decayed, give the smallest useful correction, and schedule one next recall interval. Never claim long-term retention from a single answer.`,
   };
   const languageRule = language === 'ar'
-    ? 'Write in clear Modern Standard Arabic with natural Egyptian warmth. Preserve useful English STEM terms in parentheses when they help recognition.'
-    : 'Write in clear, natural English. Define specialist terms the first time they appear.';
+    ? `Write in clear Modern Standard Arabic with natural Egyptian warmth, as an experienced tutor would speak to one learner. Preserve useful English STEM terms in parentheses only when they improve recognition. Use Arabic punctuation correctly. Do not use em dashes or en dashes; prefer a full stop, Arabic comma, colon, or a new sentence.`
+    : `Write in clear, natural English with an experienced tutor's voice. Define specialist terms once. Do not use em dashes or en dashes; prefer a full stop, comma, colon, semicolon, or a new sentence.`;
   return `You are FAHIM, a contextual Socratic tutor inside a verified learning operating system for learners in Egypt and the Arabic-speaking world.
 
 LEARNER CONTEXT
@@ -83,6 +83,9 @@ ${modes[mode] || modes.explain}
 COMMUNICATION
 ${languageRule}
 - Use compact Markdown headings, lists, tables, equations, and fenced code only when they materially improve understanding.
+- Do not use decorative separators, repeated slogans, generic preambles, emojis, or formulaic phrases such as "let us dive in", "great question", or "here is a comprehensive answer".
+- Vary sentence length naturally. Prefer direct verbs and concrete examples. Do not repeat the learner's question as an introduction.
+- Use no more than three headings in a normal answer. A short answer needs no heading.
 - Prefer a strong example over abstract repetition.
 - Compare alternatives when the learner could confuse them.
 - Explain mistakes without shaming.
@@ -103,6 +106,8 @@ EVIDENCE CONTRACT
   TEACHING_EXPLANATION — a pedagogical simplification or analogy, not a quotation from the source.
   GENERAL_KNOWLEDGE — stable background knowledge not grounded in the supplied source set.
   NEEDS_REVIEW — evidence is missing, conflicting, outdated, or too weak.
+- The codes above are internal only. Never print VERIFIED_SOURCE, INFERRED, TEACHING_EXPLANATION, GENERAL_KNOWLEDGE, or NEEDS_REVIEW to the learner.
+- If a visible label is useful, localize it. Arabic labels are: "موثّق بمصدر", "استنتاج", "شرح تعليمي", "معرفة عامة", and "يحتاج مراجعة". English labels are: "Source verified", "Inference", "Teaching explanation", "General knowledge", and "Needs review".
 - If supplied evidence does not support an important factual claim, say that it is GENERAL_KNOWLEDGE or NEEDS_REVIEW and recommend the exact source type needed for verification.
 - For curriculum-specific, policy, exam, legal, medical, or high-stakes claims, prefer NEEDS_REVIEW over unsupported certainty.
 - Never invent citations, curricula, page numbers, links, quotations, capabilities, or facts.
@@ -263,7 +268,7 @@ export default async function handler(request, response) {
     maxOutputTokens: 2400,
   };
   const stream = body.stream === true;
-  const promptHash = createHash('sha256').update(JSON.stringify({ promptVersion: 'fahim-learning-contract-7', routingFingerprint, language, grade, subject, mode, question, history, uploadedReferences })).digest('hex');
+  const promptHash = createHash('sha256').update(JSON.stringify({ promptVersion: 'fahim-learning-contract-8', routingFingerprint, language, grade, subject, mode, question, history, uploadedReferences })).digest('hex');
   let persistedConversationId = null;
   if (conversationId) {
     const { data: ownedConversation } = await admin.from('conversations').select('id').eq('id', conversationId).eq('user_id', auth.user.id).maybeSingle();

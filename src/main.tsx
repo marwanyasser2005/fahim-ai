@@ -4,6 +4,7 @@ import App from './App.tsx';
 import './index.css';
 import './styles/tokens.css';
 import './styles/learning-os.css';
+import './styles/chat.css';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ProductAccessProvider } from '@/contexts/ProductAccessContext';
 

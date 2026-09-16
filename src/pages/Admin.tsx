@@ -279,8 +279,8 @@ export default function Admin({ language }: { language: Language }) {
             </h1>
             <p className="mt-3 max-w-2xl leading-7 text-[var(--muted)]">
               {rtl
-                ? "قرارات دفع ومحتوى ودعم قابلة للتتبع—بدون تفعيل صامت أو بيانات وهمية."
-                : "Traceable payment, content, and support decisions—without silent activation or fake data."}
+                ? "قرارات دفع ومحتوى ودعم قابلة للتتبع، بدون تفعيل صامت أو بيانات وهمية."
+                : "Traceable payment, content, and support decisions without silent activation or fake data."}
             </p>
           </div>
           <div className="flex items-center gap-2 text-xs font-black">
@@ -827,8 +827,8 @@ function Payments({
             >
               <strong>
                 {rtl
-                  ? "لا توجد وسيلة دفع نشطة — لن يتمكن أي متعلّم من الدفع."
-                  : "No active payment method — nobody can pay."}
+                  ? "لا توجد وسيلة دفع نشطة؛ لن يتمكن أي متعلّم من الدفع."
+                  : "No active payment method; nobody can pay."}
               </strong>
               <p className="mt-1 font-normal">
                 {rtl

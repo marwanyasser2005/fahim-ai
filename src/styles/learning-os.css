@@ -1347,3 +1347,65 @@ html[dir="ltr"] .fahim-os :is(.next-action > a, .premium-button, .atlas-primary)
   .showcase-status-row > span:last-child { display: none; }
   .showcase-try-link { flex-basis: 100%; text-align: center; }
 }
+
+/* 2026 identity consolidation: editorial, tactile, and legible. The product
+   uses opacity only where it communicates layering; core surfaces stay solid. */
+.fahim-os {
+  color: var(--text);
+  font-family: var(--font-body-en);
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
+}
+html[lang="ar"] .fahim-os {
+  font-family: var(--font-body-ar);
+  line-height: 1.75;
+}
+html[lang="ar"] .fahim-os :is(h1, h2, h3, h4) {
+  font-family: var(--font-display-ar);
+  font-weight: 760;
+  line-height: 1.38;
+}
+.fahim-os :is(p, li) { text-wrap: pretty; }
+.fahim-os .fahim-navigation {
+  background: color-mix(in srgb, var(--panel) 96%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom-color: var(--border);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--border) 75%, transparent), 0 10px 30px rgb(20 33 61 / 4%);
+}
+.dark .fahim-os .fahim-navigation { box-shadow: 0 1px 0 var(--border), 0 12px 30px rgb(0 0 0 / 18%); }
+.fahim-os .product-sidebar { background: var(--surface); }
+.fahim-os :is(.premium-card, .atlas-panel, .learning-panel, .workspace-form) {
+  background: var(--panel);
+  border-color: var(--border);
+  box-shadow: var(--shadow-sm);
+}
+.fahim-os :is(.premium-card, .atlas-panel, .learning-panel):hover {
+  border-color: color-mix(in srgb, var(--nile) 32%, var(--border));
+  box-shadow: var(--shadow-md);
+}
+.fahim-os svg:not(.recharts-surface) {
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.fahim-os :is(button, a, input, textarea, select) { touch-action: manipulation; }
+.fahim-os :is(button, a):active { transition-duration: 80ms; }
+.fahim-os :is(.atlas-kicker, .atlas-section-number, .section-kicker) {
+  color: var(--nile);
+  font-weight: 750;
+  letter-spacing: .025em;
+}
+html[lang="ar"] .fahim-os :is(.atlas-kicker, .atlas-section-number, .section-kicker) { letter-spacing: 0; }
+.fahim-os .atlas-display { color: var(--text); font-weight: 780; }
+.fahim-os :is(.atlas-primary, .premium-button, .workspace-start) {
+  background: var(--brand-solid);
+  color: var(--on-solid);
+}
+.fahim-os :is(.atlas-primary, .premium-button, .workspace-start):hover { background: var(--evidence-solid); }
+.fahim-os :is(.atlas-secondary, .premium-button-secondary) { border-color: var(--border-strong); }
+
+@media (prefers-contrast: more) {
+  .fahim-os :is(.premium-card, .atlas-panel, .learning-panel, .workspace-form, .atlas-field) { border-color: var(--text); }
+  .fahim-os :is(.text-link, a):focus-visible { outline-width: 4px; }
+}

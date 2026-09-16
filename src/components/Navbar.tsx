@@ -11,6 +11,7 @@ import {
   LogIn,
   LogOut,
   Menu,
+  Laptop,
   Moon,
   Sun,
   Tag,
@@ -220,7 +221,7 @@ export default function Navbar({
               ) : theme === "light" ? (
                 <Sun className="h-4 w-4" />
               ) : (
-                <span className="text-xs font-black">AUTO</span>
+                <Laptop className="h-4 w-4" />
               )}
             </button>
             <button

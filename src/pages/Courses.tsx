@@ -7,14 +7,14 @@ import { courseCatalog, courseMinutes, type CourseLevel } from '@/data/courseCat
 const copy = {
   ar: {
     eyebrow: 'مسارات فَهيم', title: 'تعلّم عبر مسار واضح، لا قائمة فيديوهات.',
-    body: 'تسعة مسارات مجانية بمخرجات قابلة للقياس، دروس قصيرة، ممارسة، ومشروع نهائي—مع ربط مباشر بفَهيم ومختبر الإتقان.',
+    body: 'تسعة مسارات مجانية بمخرجات قابلة للقياس، ودروس قصيرة، وممارسة، ومشروع نهائي يرتبط مباشرة بفَهيم ومختبر الإتقان.',
     search: 'ابحث في المسارات والمهارات', filters: 'تصفية', all: 'الكل', beginner: 'تأسيسي', intermediate: 'متوسط', advanced: 'متقدم',
     tracks: 'مسارات متاحة', free: 'مجاني بالكامل', learners: 'متعلم', lessons: 'درس', hours: 'ساعة', start: 'افتح المسار', outcomes: 'ستتقن',
     empty: 'لا توجد مسارات مطابقة. جرّب كلمة أخرى أو أزل التصفية.', clear: 'إزالة التصفية', quality: 'مصادر أصلية • تقدم محفوظ • تعلم نشط',
   },
   en: {
-    eyebrow: 'Fahim paths', title: 'Follow a learning path—not a video list.',
-    body: 'Nine free paths with measurable outcomes, focused lessons, practice, and a capstone—connected directly to Fahim and the mastery lab.',
+    eyebrow: 'Fahim paths', title: 'Follow a learning path, not a video list.',
+    body: 'Nine free paths with measurable outcomes, focused lessons, practice, and a capstone connected directly to Fahim and the mastery lab.',
     search: 'Search paths and skills', filters: 'Filter', all: 'All', beginner: 'Foundation', intermediate: 'Intermediate', advanced: 'Advanced',
     tracks: 'Available paths', free: 'Completely free', learners: 'learners', lessons: 'lessons', hours: 'hours', start: 'Open path', outcomes: 'You will master',
     empty: 'No matching paths. Try another term or clear the filter.', clear: 'Clear filters', quality: 'Primary resources • saved progress • active learning',

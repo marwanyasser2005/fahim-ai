@@ -26,7 +26,7 @@ type ExclusiveVideo = { id: string; title_ar: string; title_en: string; descript
 const copy = {
   ar: {
     eyebrow: "استوديو الفيديو التعليمي",
-    title: "شاهد، دوّن، واسأل—دون مغادرة فَهيم.",
+    title: "شاهد، دوّن، واسأل من داخل فَهيم.",
     body: "بحث YouTube تعليمي مرتب لجودة التعلم، مع تشغيل مضمّن وملاحظات وتفاعل مع فَهيم عند أي لحظة.",
     placeholder: "مثال: التفاضل للصف الثالث الثانوي",
     search: "بحث",
@@ -59,7 +59,7 @@ const copy = {
   },
   en: {
     eyebrow: "Video learning studio",
-    title: "Watch, take notes, and ask—without leaving Fahim.",
+    title: "Watch, take notes, and ask without leaving Fahim.",
     body: "YouTube education search ranked for learning quality, with embedded playback, timestamp notes, and Fahim at every moment.",
     placeholder: "Example: differentiation for grade 12",
     search: "Search",
