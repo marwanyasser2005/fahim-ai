@@ -1,4 +1,4 @@
-import { AIProviderExhaustedError, estimateAICostMicrousd, getAIStatus, hfModelCascade, pipeLearningAIStream, readLearningAIResponse, requestHFEmbeddings, requestLearningAI } from './ai-routing.mjs';
+import { AIProviderExhaustedError, estimateAICostMicrousd, getAIStatus, getRoutingFingerprint, hfModelCascade, pipeLearningAIStream, readLearningAIResponse, requestHFEmbeddings, requestLearningAI } from './ai-routing.mjs';
 import { bktObserve, bktExpectedCorrect, fsrsIsDue, fsrsSchedule, irtObserve, irtProbability, newBktState, newIrtState, selectNextItem } from './learning.mjs';
 
 /**
@@ -311,4 +311,21 @@ export class GatewayUnavailableError extends Error {
   }
 }
 
-export { newBktState, newIrtState, hfModelCascade };
+// Re-export the items imported from ai-routing.mjs and learning.mjs so that
+// api/ai.mjs can consume the whole gateway surface from a single module.
+// The symbols declared and exported inline above (TASKS, isHFConfigured,
+// getGatewayStatus, routeForTask, executeGatewayTask, GatewayUnavailableError)
+// are already exported at their declarations and must NOT be re-exported here.
+export {
+  AIProviderExhaustedError,
+  estimateAICostMicrousd,
+  getAIStatus,
+  getRoutingFingerprint,
+  hfModelCascade,
+  pipeLearningAIStream,
+  readLearningAIResponse,
+  requestLearningAI,
+  requestHFEmbeddings,
+  newBktState,
+  newIrtState,
+};

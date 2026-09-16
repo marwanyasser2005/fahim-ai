@@ -139,8 +139,7 @@ export default async function handler(request, response) {
     const result = await executeGatewayTask({
       task,
       ...body,
-      deadlineAt,
-    });
+    }, { deadlineAt });
 
     const zeroTokens = isLocal;
     response.setHeader('X-Fahim-Gateway', task);
