@@ -1,4 +1,4 @@
-import { getFreshSession } from '@/lib/supabase/client';
+import { authenticatedFetch } from '@/lib/supabase/client';
 
 export type TutorMode = 'explain' | 'plan' | 'quiz' | 'flashcards' | 'summary' | 'project' | 'teach' | 'recall';
 export interface TutorHistoryItem { role: 'user' | 'assistant'; text: string; }
@@ -32,8 +32,7 @@ const unavailableReply = ({ language }: TutorRequest, errorCode = 'not-configure
 
 export async function askFahim(request: TutorRequest): Promise<TutorReply> {
   try {
-    const headers = await authenticatedHeaders();
-    const response = await fetch('/api/chat', { method: 'POST', headers, body: JSON.stringify(request) });
+    const response = await authenticatedFetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(request) });
     const data = await response.json().catch(() => ({})) as { answer?: string; sources?: TutorSource[]; error?: string; generationId?: string };
     if (!response.ok || !data.answer) return unavailableReply(request, response.status === 503 ? 'not-configured' : 'provider-error');
     return { answer: data.answer, sources: data.sources || [], mode: 'ai', generationId: data.generationId };
@@ -45,10 +44,9 @@ export async function streamFahim(
   handlers: { onMeta?: (sources: TutorSource[], generationId: string) => void; onDelta: (text: string) => void },
   signal?: AbortSignal,
 ): Promise<void> {
-  const headers = await authenticatedHeaders();
-  const response = await fetch('/api/chat', {
+  const response = await authenticatedFetch('/api/chat', {
     method: 'POST',
-    headers,
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ ...request, stream: true }),
     signal,
   });
@@ -74,10 +72,4 @@ export async function streamFahim(
       if (event.type === 'error') throw new Error(event.error);
     }
   }
-}
-
-async function authenticatedHeaders() {
-  const { session, error } = await getFreshSession();
-  if (!session?.access_token) throw new Error(error || 'Authentication required');
-  return { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` };
 }

@@ -22,7 +22,7 @@ import {
   X,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/lib/supabase/client";
+import { authenticatedFetch, supabase } from "@/lib/supabase/client";
 import { displayLabel } from "@/lib/displayLabels";
 import type { Language } from "@/App";
 import type {
@@ -1512,12 +1512,9 @@ function CredentialOperations({ language, users }: { language: Language; users: 
 
   const request = async (method: "GET" | "POST", body?: Record<string, unknown>) => {
     if (!supabase) throw new Error(rtl ? "خدمة الحسابات غير مهيأة." : "Account service is not configured.");
-    const { data, error: sessionError } = await supabase.auth.getSession();
-    const token = data.session?.access_token;
-    if (sessionError || !token) throw new Error(rtl ? "انتهت الجلسة. سجّل الدخول مرة أخرى." : "Your session expired. Sign in again.");
-    const response = await fetch("/api/certificates", {
+    const response = await authenticatedFetch("/api/certificates", {
       method,
-      headers: { Authorization: `Bearer ${token}`, ...(body ? { "Content-Type": "application/json" } : {}) },
+      headers: body ? { "Content-Type": "application/json" } : undefined,
       body: body ? JSON.stringify(body) : undefined,
     });
     const payload = await response.json() as { error?: string; courses?: CredentialCourse[]; certificates?: IssuedCredential[]; certificate?: IssuedCredential; course?: CredentialCourse; verifyPath?: string; alreadyIssued?: boolean };

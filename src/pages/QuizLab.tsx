@@ -25,6 +25,7 @@ import { normalizeMisconception, saveLearningSession, scheduleReviewFromScore, t
 import { syncLearningSession } from '@/lib/supabase/learningEvidenceSync';
 import { useSearchParams } from 'react-router-dom';
 import LearningEvidencePanel from '@/components/learning/LearningEvidencePanel';
+import { AuthenticatedRequestError } from '@/lib/supabase/client';
 
 type Props = { language: 'ar' | 'en' };
 
@@ -76,6 +77,7 @@ const copy = {
     weakest: 'أضعف موضوع',
     noHistory: 'أكمل أول اختبار لتبدأ خريطة الإتقان.',
     error: 'تعذر إنشاء الاختبار الآن. حاول مجددًا بعد قليل.',
+    sessionExpired: 'انتهت جلسة الدخول. سجّل الدخول مرة أخرى، ثم أعد إنشاء الاختبار.',
     choose: 'اختر إجابة أولًا.',
     topicRequired: 'اكتب موضوعًا واضحًا من 3 أحرف على الأقل.',
     integrity: 'لا تُرسل الإجابات الصحيحة للواجهة قبل التصحيح، وتنتهي صلاحية كل سؤال تلقائيًا.',
@@ -137,6 +139,7 @@ const copy = {
     weakest: 'Weakest topic',
     noHistory: 'Complete your first quiz to start a mastery map.',
     error: 'The quiz could not be generated right now. Try again shortly.',
+    sessionExpired: 'Your sign-in session expired. Sign in again, then generate the quiz.',
     choose: 'Choose an answer first.',
     topicRequired: 'Enter a clear topic with at least 3 characters.',
     integrity: 'Correct answers stay off the client until grading, and every question expires automatically.',
@@ -197,8 +200,8 @@ export default function QuizLab({ language }: Props) {
       setReasonings([]);
       setCompletedSession(null);
       writeScopedJson('fahim-study-profile', { topic: topic.trim(), subject, grade });
-    } catch {
-      setError(t.error);
+    } catch (requestError) {
+      setError(requestError instanceof AuthenticatedRequestError ? t.sessionExpired : t.error);
     } finally {
       setLoading(false);
     }
@@ -220,8 +223,8 @@ export default function QuizLab({ language }: Props) {
       setResult(graded);
       setResults((items) => [...items, graded]);
       setReasonings((items) => [...items, reasoning.trim()]);
-    } catch {
-      setError(t.error);
+    } catch (requestError) {
+      setError(requestError instanceof AuthenticatedRequestError ? t.sessionExpired : t.error);
     } finally {
       setChecking(false);
     }

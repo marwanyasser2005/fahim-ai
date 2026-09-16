@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
-import { getFreshSession, isSupabaseConfigured, supabase } from '@/lib/supabase/client';
+import { authenticatedFetch, getFreshSession, isSupabaseConfigured, supabase } from '@/lib/supabase/client';
 import { setUserScope } from '@/lib/userScope';
 
 type AuthResult = { error?: string; needsVerification?: boolean };
@@ -115,18 +115,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updatePassword = useCallback(async (password: string): Promise<AuthResult> => {
-    const fresh = await getFreshSession();
-    if (!fresh.session) return { error: fresh.error || 'Authentication is required.' };
-    const response = await fetch('/api/auth-recovery', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${fresh.session.access_token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ action: 'update', password }),
-    });
-    const payload = await response.json() as { error?: string };
-    return response.ok ? {} : { error: payload.error || 'Password recovery failed safely.' };
+    try {
+      const response = await authenticatedFetch('/api/auth-recovery', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'update', password }),
+      });
+      const payload = await response.json() as { error?: string };
+      return response.ok ? {} : { error: payload.error || 'Password recovery failed safely.' };
+    } catch (requestError) {
+      return { error: requestError instanceof Error ? requestError.message : 'Password recovery failed safely.' };
+    }
   }, []);
 
   const signInWithOAuth = useCallback(async (provider: 'google' | 'github' | 'azure'): Promise<AuthResult> => {

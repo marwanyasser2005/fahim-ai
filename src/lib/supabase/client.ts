@@ -11,6 +11,16 @@ export const AUTH_REFRESH_FAILED = 'auth_refresh_failed';
 type SessionFailure = typeof AUTH_SESSION_EXPIRED | typeof AUTH_REFRESH_FAILED;
 export type FreshSessionResult = { session: Session | null; error: SessionFailure | null };
 
+export class AuthenticatedRequestError extends Error {
+  code: SessionFailure;
+
+  constructor(code: SessionFailure) {
+    super(code);
+    this.name = 'AuthenticatedRequestError';
+    this.code = code;
+  }
+}
+
 const SESSION_REFRESH_WINDOW_MS = 90_000;
 let supabaseClient: SupabaseClient | null = null;
 let refreshPromise: Promise<FreshSessionResult> | null = null;
@@ -77,6 +87,41 @@ export async function getFreshSession(options: { force?: boolean } = {}): Promis
   if (!data.session) return { session: null, error: AUTH_SESSION_EXPIRED };
   if (!options.force && !isSessionExpiring(data.session)) return { session: data.session, error: null };
   return refreshSessionOnce();
+}
+
+/**
+ * Sends a first-party API request with a current Supabase access token.
+ * A 401 triggers one forced refresh and one replay. It never weakens the
+ * server-side auth check and never loops when the refreshed token is rejected.
+ */
+export async function authenticatedFetch(input: RequestInfo | URL, init: RequestInit = {}) {
+  const initial = await getFreshSession();
+  if (!initial.session?.access_token) {
+    throw new AuthenticatedRequestError(initial.error || AUTH_SESSION_EXPIRED);
+  }
+
+  const firstInput = input instanceof Request ? input.clone() : input;
+  const retryInput = input instanceof Request ? input.clone() : input;
+  const requestHeaders = input instanceof Request ? input.headers : undefined;
+  const send = (target: RequestInfo | URL, accessToken: string) => {
+    const headers = new Headers(init.headers ?? requestHeaders);
+    headers.set('Authorization', `Bearer ${accessToken}`);
+    return fetch(target, { ...init, headers });
+  };
+
+  const response = await send(firstInput, initial.session.access_token);
+  if (response.status !== 401) return response;
+
+  const refreshed = await getFreshSession({ force: true });
+  if (!refreshed.session?.access_token) {
+    throw new AuthenticatedRequestError(refreshed.error || AUTH_SESSION_EXPIRED);
+  }
+  const retried = await send(retryInput, refreshed.session.access_token);
+  if (retried.status === 401) {
+    await clearLocalSession();
+    throw new AuthenticatedRequestError(AUTH_SESSION_EXPIRED);
+  }
+  return retried;
 }
 
 async function responseHasExpiredJwt(response: Response) {

@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, CheckCircle2, Clock3, Eye, EyeOff, Github, KeyRound, Loader2, LockKeyhole, Mail, RefreshCw, ShieldCheck, BrainCircuit, UserRound } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { AUTH_SESSION_EXPIRED, getAuthProviders, getFreshSession, supabase, type AuthProviders } from '@/lib/supabase/client';
+import { AUTH_SESSION_EXPIRED, authenticatedFetch, getAuthProviders, supabase, type AuthProviders } from '@/lib/supabase/client';
 import type { Language } from '@/App';
 
 type AuthMode = 'login' | 'register' | 'forgot' | 'reset';
@@ -90,18 +90,20 @@ export default function Auth({ language, mode }: Props) {
         return;
       }
 
-      const fresh = await getFreshSession();
-      if (!fresh.session) { if (active) setRecoveryState('invalid'); return; }
-      const response = await fetch('/api/auth-recovery', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${fresh.session.access_token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'status' }),
-      });
-      const payload = await response.json() as { expiresAt?: string; code?: string };
-      if (!active) return;
-      if (!response.ok) { setRecoveryState(response.status === 410 || payload.code === 'RECOVERY_WINDOW_EXPIRED' ? 'expired' : 'invalid'); return; }
-      setRecoveryExpiresAt(payload.expiresAt || '');
-      setRecoveryState('ready');
+      try {
+        const response = await authenticatedFetch('/api/auth-recovery', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'status' }),
+        });
+        const payload = await response.json() as { expiresAt?: string; code?: string };
+        if (!active) return;
+        if (!response.ok) { setRecoveryState(response.status === 410 || payload.code === 'RECOVERY_WINDOW_EXPIRED' ? 'expired' : 'invalid'); return; }
+        setRecoveryExpiresAt(payload.expiresAt || '');
+        setRecoveryState('ready');
+      } catch {
+        if (active) setRecoveryState('invalid');
+      }
     };
     void prepare();
     return () => { active = false; };

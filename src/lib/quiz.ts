@@ -1,4 +1,5 @@
 import type { TutorSource } from '@/lib/aiTutor';
+import { authenticatedFetch } from '@/lib/supabase/client';
 
 export type QuizDifficulty = 'easy' | 'medium' | 'hard';
 
@@ -30,7 +31,7 @@ export interface GradeResult {
 }
 
 async function postQuiz(body: Record<string, unknown>) {
-  const response = await fetch('/api/quiz', {
+  const response = await authenticatedFetch('/api/quiz', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
