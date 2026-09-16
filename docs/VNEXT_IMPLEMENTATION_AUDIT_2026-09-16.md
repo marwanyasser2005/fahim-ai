@@ -58,6 +58,7 @@ Executed from a clean production build path after the gateway changes:
 - Security check: passed; **0 source maps**, no detected committed secret, **25 migrations**, **65 RLS-enabled tables**.
 - Live Hugging Face chat probe: accepted and returned content.
 - Live multilingual embedding probe: accepted, **1024 dimensions**.
+- Vercel Hobby deployment budget: **12/12** serverless functions after consolidating the duplicate gateway and source-registry route into `/api/ai` and `/api/search?source=official`.
 
 ## Production dependency finding
 

@@ -130,7 +130,7 @@ npm run smoke:production   # public route/API smoke test
 npm run load:test          # controlled API load probe
 ```
 
-The repository currently contains 150 automated tests across 32 files, 25 Supabase migrations, 36 page components, and 14 top-level server API modules. Counts are implementation inventory—not claims of user impact.
+The repository currently contains 150 automated tests across 32 files, 25 Supabase migrations, 36 page components, and 12 top-level server API modules. Counts are implementation inventory—not claims of user impact.
 
 Of those tests, 19 files assert runtime behaviour (routing, deadline budgets, sealed-token grading, rate-limit buckets, spaced repetition, credential levels, master classes) and 13 assert source contracts by reading files. **There is no component or end-to-end test layer** — no `@testing-library/react`, no browser driver — so no test currently renders a React component or exercises a full user journey. The `evaluation:check` "12 controls" are source-contract substring checks, not behavioural verification.
 

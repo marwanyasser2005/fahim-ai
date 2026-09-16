@@ -95,7 +95,7 @@ const knowledgeResponse = await fetch(
 const knowledge = await knowledgeResponse.json();
 
 const sourcesResponse = await fetch(
-  `${base}/api/sources?q=${encodeURIComponent('فيزياء الصف الثالث الثانوي')}&language=ar&subject=${encodeURIComponent('فيزياء')}&grade=${encodeURIComponent('الصف الثالث الثانوي')}`,
+  `${base}/api/search?q=${encodeURIComponent('فيزياء الصف الثالث الثانوي')}&language=ar&source=official`,
 );
 const sources = await sourcesResponse.json();
 
