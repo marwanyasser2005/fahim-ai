@@ -1,8 +1,9 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { AlarmClock, BrainCircuit, Check, ChevronLeft, ChevronRight, Clock3, Layers3, Plus, RotateCcw, Trash2, TrendingUp, X } from 'lucide-react';
-import { createReviewCard, dueReviewCards, gradeReviewCard, loadReviewCards, removeReviewCard, type ReviewCard as ReviewCardType, type ReviewGrade } from '@/lib/spacedReview';
-import { syncEvidenceToReviewCards } from '@/lib/reviewBridge';
+import { createReviewCard, dueReviewCards, loadReviewCards, removeReviewCard, type ReviewCard as ReviewCardType, type ReviewGrade } from '@/lib/spacedReview';
+import { recordReviewOutcome, syncEvidenceToReviewCards } from '@/lib/reviewBridge';
+import { hydrateReviewCardsFromCloud, syncReviewCards } from '@/lib/supabase/reviewSync';
 import { recordStudyAction } from '@/lib/studyProgress';
 import MemoryTimeline from '@/components/learning/MemoryTimeline';
 
@@ -12,10 +13,10 @@ const copy = {
 } as const;
 
 const grades: { key: ReviewGrade; className: string }[] = [
-  { key: 'again', className: 'bg-[var(--danger)] text-white' },
-  { key: 'hard', className: 'bg-[var(--warning)] text-[#14213D]' },
-  { key: 'good', className: 'bg-[var(--nile)] text-white' },
-  { key: 'easy', className: 'bg-[var(--lapis)] text-white' },
+  { key: 'again', className: 'bg-[var(--danger-solid)] text-[var(--on-solid)]' },
+  { key: 'hard', className: 'bg-[var(--warning-solid)] text-[var(--on-solid)]' },
+  { key: 'good', className: 'bg-[var(--evidence-solid)] text-[var(--on-solid)]' },
+  { key: 'easy', className: 'bg-[var(--brand-solid)] text-[var(--on-solid)]' },
 ];
 
 export default function SpacedReview({ language }: { language: 'ar' | 'en' }) {
@@ -46,16 +47,24 @@ export default function SpacedReview({ language }: { language: 'ar' | 'en' }) {
 
   // Pick the starting card: ?topic= match first, then earliest due.
   useEffect(() => {
-    const synced = syncEvidenceToReviewCards();
-    setCards(synced);
-    if (activeId) return;
-    const normalized = topic.trim().toLowerCase();
-    const topicCard = normalized
-      ? synced.find((card) => new Date(card.dueAt) <= new Date() && (card.front.toLowerCase().includes(normalized) || card.subject.toLowerCase().includes(normalized)))
-      : undefined;
-    const first = topicCard || dueReviewCards()[0];
-    if (first) setActiveId(first.id);
-  }, [topic, activeId]);
+    let active = true;
+    void (async () => {
+      // Adopt reviews taken on another device before rendering the session.
+      await hydrateReviewCardsFromCloud();
+      if (!active) return;
+      const synced = syncEvidenceToReviewCards();
+      setCards(synced);
+      setActiveId((current) => {
+        if (current) return current;
+        const normalized = topic.trim().toLowerCase();
+        const topicCard = normalized
+          ? synced.find((card) => new Date(card.dueAt) <= new Date() && (card.front.toLowerCase().includes(normalized) || card.subject.toLowerCase().includes(normalized)))
+          : undefined;
+        return (topicCard || dueReviewCards()[0])?.id || '';
+      });
+    })();
+    return () => { active = false; };
+  }, [topic]);
 
   const active = cards.find((card) => card.id === activeId) || due[0];
   const reviewedInSession = due.length - dueReviewCards().length;
@@ -75,7 +84,9 @@ export default function SpacedReview({ language }: { language: 'ar' | 'en' }) {
 
   const grade = (value: ReviewGrade) => {
     if (!active) return;
-    gradeReviewCard(active.id, value);
+    // Closes the learning loop: this writes the measured recall back to the evidence session.
+    recordReviewOutcome(active.id, value);
+    void syncReviewCards();
     recordStudyAction('session', active.subject || active.front);
     const remaining = dueReviewCards().filter((card) => card.id !== active.id);
     setCards(loadReviewCards());
@@ -126,7 +137,7 @@ export default function SpacedReview({ language }: { language: 'ar' | 'en' }) {
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_20rem]">
         <section aria-label={t.session}>
-          {active && !sessionDone ? <article className="sticky top-24 min-h-[24rem] rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--panel)] p-6 shadow-[var(--shadow-lg)] sm:p-10">
+          {active && !sessionDone ? <article className="sticky top-[calc(var(--nav-height)+1.25rem)] min-h-[24rem] rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--panel)] p-6 shadow-[var(--shadow-lg)] sm:p-10">
             <div className="flex items-center justify-between gap-3">
               <span className="inline-flex items-center gap-2 rounded-full bg-[color-mix(in_srgb,var(--nile)_10%,var(--panel))] px-3 py-1 text-[10px] font-black uppercase tracking-widest text-[var(--nile)]">{active.subject || t.eyebrow}</span>
               <span className="text-[10px] font-bold text-[var(--muted)]">{new Date(active.dueAt).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-GB')}</span>

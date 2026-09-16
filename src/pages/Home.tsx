@@ -185,7 +185,7 @@ export default function Home({ language }: { language: Language }) {
                 >
                   {rtl
                     ? "ابدأ أول تقييم، 30 يومًا مجانًا"
-                    : "Start your first assessment، 30 days free"}
+                    : "Start your first assessment, 30 days free"}
                   <Arrow className="h-4 w-4" />
                 </Link>
                 <Link to="/showcase" className="atlas-secondary justify-center">

@@ -1,19 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase/client';
+import { resolveProfileRole, staffRoles, type ProfileRole } from '@/lib/roleResolution';
 
-export type ProfileRole = 'student' | 'teacher' | 'instructor' | 'admin' | 'moderator';
+export type { ProfileRole } from '@/lib/roleResolution';
 
-const staffRoles: ProfileRole[] = ['teacher', 'instructor', 'admin', 'moderator'];
-
-/** Module-level cache so Navbar and Sidebar share one profiles lookup per user. */
-let cachedRole: string | null = null;
+/** Module-level cache so Navbar and Sidebar share one role lookup per user. */
+let cachedRole: ProfileRole | null = null;
 let cachedUserId: string | null = null;
-const listeners = new Set<(role: string) => void>();
+const listeners = new Set<(role: ProfileRole) => void>();
 
 export function useProfileRole() {
   const { user } = useAuth();
-  const [role, setRole] = useState(cachedUserId === user?.id ? cachedRole || 'student' : 'student');
+  const [role, setRole] = useState<ProfileRole>(cachedUserId === user?.id && cachedRole ? cachedRole : 'student');
 
   useEffect(() => {
     let active = true;
@@ -30,18 +29,26 @@ export function useProfileRole() {
     setRole('student');
     if (supabase) {
       void supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .maybeSingle()
+        .from('user_roles')
+        .select('roles!inner(key)')
+        .eq('user_id', user.id)
         .then(({ data }) => {
           if (!active) return;
-          cachedRole = data?.role || 'student';
+          const rows = (data || []) as unknown as {
+            roles: { key: string } | { key: string }[] | null;
+          }[];
+          const keys = rows.flatMap((row) => {
+            if (!row.roles) return [];
+            return Array.isArray(row.roles) ? row.roles.map((entry) => entry.key) : [row.roles.key];
+          });
+          const resolved = resolveProfileRole(keys);
+          cachedRole = resolved;
           cachedUserId = user.id;
-          listeners.forEach((listener) => listener(cachedRole!));
+          setRole(resolved);
+          listeners.forEach((listener) => listener(resolved));
         });
     }
-    const listener = (value: string) => setRole(value);
+    const listener = (value: ProfileRole) => setRole(value);
     listeners.add(listener);
     return () => {
       active = false;
@@ -51,7 +58,7 @@ export function useProfileRole() {
 
   return {
     role,
-    isStaff: staffRoles.includes(role as ProfileRole),
+    isStaff: staffRoles.includes(role),
     isAdmin: role === 'admin',
   };
 }

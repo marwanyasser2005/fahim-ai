@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
-const migration = read('src/lib/supabase/migrations/20260829010000_evidence_badges.sql');
+const migration = read('supabase/migrations/20260829010000_evidence_badges.sql');
 
 describe('evidence-backed badge trail', () => {
   it('defines nine ordered stages before the completion credential', () => {

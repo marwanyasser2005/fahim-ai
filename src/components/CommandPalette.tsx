@@ -40,7 +40,7 @@ export default function CommandPalette({ language, theme, setTheme }: Props) {
       { path: user ? '/profile' : '/login', ar: user ? 'حسابي والإعدادات' : 'تسجيل الدخول', en: user ? 'My account and settings' : 'Sign in', icon: user ? School : Search },
     ];
     return [...shared, ...extras];
-  }, [language, isStaff, user]);
+  }, [isStaff, user]);
 
   const filtered = routes.filter((entry) => {
     const needle = query.toLowerCase();

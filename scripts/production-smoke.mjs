@@ -49,7 +49,7 @@ if (!cssPath || !jsPath) {
 const [cssResponse, jsResponse, healthResponse] = await Promise.all([
   fetch(`${base}${cssPath}`),
   fetch(`${base}${jsPath}`),
-  fetch(`${base}/api/health`),
+  fetch(`${base}/api/health?mode=ready`),
 ]);
 const health = await healthResponse.json();
 

@@ -1,7 +1,25 @@
 import { readScopedJson, writeScopedJson } from '@/lib/userScope';
+import type { MisconceptionCategory } from '@/lib/learningEvidence';
 
 export type ReviewGrade = 'again' | 'hard' | 'good' | 'easy';
-export type ReviewCard = { id: string; front: string; back: string; subject: string; createdAt: string; updatedAt: string; dueAt: string; intervalDays: number; ease: number; repetitions: number; lapses: number; lastGrade?: ReviewGrade };
+export type ReviewCard = {
+  id: string;
+  front: string;
+  back: string;
+  subject: string;
+  /** Set when the card was derived from a learning session, so recall can be written back. */
+  sessionId?: string;
+  /** The recorded misconception the prompt targets, when one exists. */
+  misconception?: MisconceptionCategory;
+  createdAt: string;
+  updatedAt: string;
+  dueAt: string;
+  intervalDays: number;
+  ease: number;
+  repetitions: number;
+  lapses: number;
+  lastGrade?: ReviewGrade;
+};
 
 const KEY = 'fahim-review-cards-v1';
 const MAX_CARDS = 2000;

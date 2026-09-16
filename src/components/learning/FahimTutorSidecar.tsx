@@ -55,8 +55,8 @@ export default function FahimTutorSidecar({
             {typeof hypothesis.confidence === "number"
               ? `${Math.round(hypothesis.confidence * (hypothesis.confidence <= 1 ? 100 : 1))}%`
               : ar
-                ? "غير متاحة"
-                : "Not available"}
+                ? "غير مقاسة بعد"
+                : "Not yet measured"}
           </p>
         </section>
       )}

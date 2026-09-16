@@ -6,7 +6,28 @@
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="canonical" href="https://fahim-ai-egypt.vercel.app/" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#14213D" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#14213D" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0c0d12" media="(prefers-color-scheme: dark)" />
+    <script>
+      (function () {
+        var root = document.documentElement;
+        try {
+          var theme = localStorage.getItem('fahim-theme') || 'system';
+          var dark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          var effective = dark ? 'dark' : 'light';
+          root.classList.toggle('dark', dark);
+          root.style.colorScheme = effective;
+          root.dataset.theme = effective;
+          var language = localStorage.getItem('fahim-language') === 'en' ? 'en' : 'ar';
+          root.lang = language;
+          root.dir = language === 'ar' ? 'rtl' : 'ltr';
+          root.dataset.lowBandwidth = String(localStorage.getItem('fahim-low-bandwidth') === 'true');
+        } catch (error) {
+          /* Storage can be blocked; the app re-applies theme and language after mount. */
+        }
+      })();
+    </script>
     <title>فَهيم | نظام تشغيل للفهم الموثق</title>
     <meta name="description" content="فَهيم يحول المحتوى الذي تدرسه إلى تجربة تعلم تقيس فهمك، تكتشف أخطاءك، وتبني دليلًا على تقدمك. تجربة كاملة 30 يومًا دون بطاقة." />
     <meta name="keywords" content="فهم موثق، تعليم مصر، تعلم تكيفي، مراجعة متباعدة، ذكاء اصطناعي تعليمي، مصادر موثقة، RAG عربي" />

@@ -245,7 +245,7 @@ export default function Support({ language }: { language: Language }) {
                       setActiveId(ticket.id);
                       setBody("");
                     }}
-                    className={`w-full border-b border-[var(--border)] p-4 text-start transition hover:bg-[var(--paper)] ${activeId === ticket.id ? "bg-[var(--paper)] shadow-[inset_3px_0_0_var(--vermilion)]" : ""}`}
+                    className={`w-full border-b border-[var(--border)] p-4 text-start transition hover:bg-[var(--paper)] ${activeId === ticket.id ? "bg-[var(--paper)] shadow-[var(--inset-inline-start)_var(--vermilion)]" : ""}`}
                   >
                     <span className="line-clamp-1 text-sm font-black">
                       {ticket.subject}

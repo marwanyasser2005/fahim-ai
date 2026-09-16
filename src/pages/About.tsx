@@ -45,21 +45,21 @@ const affiliations = [
   ["HCDG Giza", "Lead & Owner"],
   [
     "Digital Egypt Pioneers Initiative",
-    "AI & Data Science، Microsoft ML Engineer Track",
+    "AI & Data Science, Microsoft ML Engineer Track",
   ],
   ["Kader & Associates Designs", "Junior AI Expert"],
   ["QWorld", "Quantum Computing Programs"],
-  ["Helwan University", "Faculty of Science، Geology & Chemistry"],
+  ["Helwan University", "Faculty of Science, Geology & Chemistry"],
 ] as const;
 
 const achievements = [
   [
     "Huawei ICT Competition 2025–2026",
-    "Silver Medal، Cloud Track, National Phase",
+    "Silver Medal, Cloud Track, National Phase",
   ],
-  ["SOLE2025 BioHackathon", "3rd Place، Metagenomics & AI Track"],
+  ["SOLE2025 BioHackathon", "3rd Place, Metagenomics & AI Track"],
   ["EcoHack", "2nd Place"],
-  ["ITIDA GIGS", "Top Achiever، 3rd Place"],
+  ["ITIDA GIGS", "Top Achiever, 3rd Place"],
 ] as const;
 
 export default function About({ language }: { language: "ar" | "en" }) {

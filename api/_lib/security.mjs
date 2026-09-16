@@ -13,7 +13,32 @@ export function applyApiHeaders(request, response, { cacheControl = 'no-store' }
   response.setHeader('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'");
   response.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
   response.setHeader('X-Request-Id', requestId);
+  // Emit one structured line when the response finishes. Before this the backend produced no
+  // request logs at all, so a user-reported failure could not be correlated to an invocation
+  // and an outage was only ever discovered by complaint.
+  const startedAt = Date.now();
+  response.once('finish', () => {
+    logEvent('api_request', {
+      requestId,
+      route: String(request.url || '/').split('?')[0].slice(0, 200),
+      method: String(request.method || 'GET').slice(0, 10),
+      status: response.statusCode,
+      durationMs: Date.now() - startedAt,
+    });
+  });
   return requestId;
+}
+
+/**
+ * Single structured log helper. Plain JSON on one line so Vercel's log drain can index it
+ * without a parser. Never include request bodies, tokens, or learner content.
+ */
+export function logEvent(event, fields = {}) {
+  try {
+    console.log(JSON.stringify({ level: 'info', event, timestamp: new Date().toISOString(), ...fields }));
+  } catch {
+    // Logging must never take down a request.
+  }
 }
 
 export function clientIp(request) {
@@ -84,6 +109,9 @@ async function consumeDistributedRateLimit(request, { namespace, limit, windowMs
       source: 'distributed',
     };
   } catch {
+    // Degrading to per-instance buckets multiplies the effective limit by the number of
+    // warm instances, so the shift is logged rather than silent.
+    logEvent('rate_limit_memory_fallback', { namespace: String(namespace).slice(0, 80) });
     return { ...consumeMemoryRateLimit(request, { namespace, limit, windowMs }), source: 'memory-fallback' };
   }
 }

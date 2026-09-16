@@ -177,6 +177,28 @@ export const courseCatalog: Course[] = [
     ],
     resources: [{ title: 'Google Machine Learning Rules', url: 'https://developers.google.com/machine-learning/guides/rules-of-ml', kind: 'book' }, { title: 'NIST AI Risk Management Framework', url: 'https://www.nist.gov/itl/ai-risk-management-framework', kind: 'docs' }],
   },
+  {
+    // The only course whose completion is recorded server-side, which makes it the one that
+    // can produce an evidence-backed credential. Lesson ids match the seeded rows in
+    // supabase/migrations/20260915010000_course_completion_v1.sql exactly.
+    id: 'physics-force-motion', title: text('أساسيات الفيزياء: القوة والحركة', 'Physics foundations: force and motion'),
+    description: text('مسار قصير يعالج أشهر خطأ مفاهيمي في الميكانيكا — الخلط بين السرعة والتسارع — وينتهي بتقييم يُصحَّح على الخادم وشهادة إتمام موثّقة.', 'A short path that targets the most common mechanics misconception — confusing velocity with acceleration — ending in a server-graded assessment and a verifiable completion credential.'),
+    category: text('العلوم', 'Science'), categoryKey: 'data', level: 'beginner', weeks: 1, rating: 4.9, learners: 480,
+    image: 'https://images.pexels.com/photos/60582/newton-s-cradle-balls-sphere-action-60582.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    outcomes: [text('التمييز بين السرعة والتسارع والقوة', 'Tell velocity, acceleration, and force apart'), text('تفسير أثر الكتلة في العلاقة F = ma', 'Explain how mass changes F = ma'), text('تطبيق المفهوم على موقف جديد غير مألوف', 'Apply the concept to an unfamiliar situation')],
+    alignment: [text('ميكانيكا المرحلة الثانوية', 'Secondary-school mechanics'), text('المنهج العلمي: فرضية ثم دليل', 'Scientific method: hypothesis then evidence')],
+    modules: [
+      module('motion', 'الحركة والقوة', 'Motion and force', [
+        lesson('f1000000-0000-4000-8000-000000000101', 'القوة ليست سرعة', 'Force is not velocity', 22),
+        lesson('f1000000-0000-4000-8000-000000000102', 'الكتلة تغيّر الاستجابة', 'Mass changes the response', 26, 'practice'),
+      ]),
+      module('apply', 'الفهم والتطبيق', 'Understand and apply', [
+        lesson('f1000000-0000-4000-8000-000000000103', 'قراءة العلاقة F = ma', 'Reading the relation F = ma', 24),
+        lesson('f1000000-0000-4000-8000-000000000104', 'تطبيق على موقف جديد', 'Applying it to a new situation', 30, 'project'),
+      ]),
+    ],
+    resources: [{ title: 'OpenStax College Physics', url: 'https://openstax.org/details/books/college-physics-2e', kind: 'book' }, { title: 'NASA — Newton’s Laws', url: 'https://www.grc.nasa.gov/www/k-12/airplane/newton.html', kind: 'docs' }],
+  },
 ];
 
 export function getCourse(id?: string) {

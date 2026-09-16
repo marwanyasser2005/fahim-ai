@@ -160,8 +160,8 @@ html[lang="ar"] .fahim-os h1 {
   transform: none;
 }
 .dark .fahim-os :is(.atlas-primary, .premium-button, .workspace-start) {
-  background: #5b5ce2;
-  color: white;
+  background: var(--brand-solid);
+  color: var(--on-solid);
 }
 .fahim-os :is(.atlas-secondary, .premium-button-secondary) {
   min-height: 44px;
@@ -587,7 +587,7 @@ html[lang="ar"] .fahim-os h1 {
 .workspace-map {
   padding-top: 12px;
   position: sticky;
-  top: 100px;
+  top: calc(var(--nav-height) + 1.5rem);
 }
 .workspace-map a {
   display: flex;
@@ -902,7 +902,7 @@ html[lang="ar"] .fahim-os h1 {
   .workspace-mobile-tabs {
     display: flex;
     position: sticky;
-    top: 76px;
+    top: var(--nav-height);
     z-index: 30;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
@@ -1132,10 +1132,10 @@ html[lang="ar"] .fahim-os h1 {
   box-shadow: 5px 5px 0 color-mix(in srgb, var(--nile) 24%, transparent);
 }
 .fahim-os .next-action.is-review .next-action-icon {
-  background: var(--nile);
+  background: var(--evidence-solid);
 }
 .fahim-os .next-action.is-review > a {
-  background: var(--nile);
+  background: var(--evidence-solid);
 }
 .fahim-os .next-action.is-review > a:hover {
   background: color-mix(in srgb, var(--nile) 85%, var(--ink));

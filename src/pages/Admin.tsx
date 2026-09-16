@@ -180,7 +180,9 @@ export default function Admin({ language }: { language: Language }) {
         .select("*")
         .order("created_at", { ascending: false })
         .limit(100),
-      fetch("/api/health")
+      // `mode=ready` also probes Supabase and the AI provider, so this panel turns amber
+      // during a real dependency outage instead of always reporting green.
+      fetch("/api/health?mode=ready")
         .then((response) => response.json())
         .catch(() => ({})),
     ]);
@@ -634,7 +636,7 @@ function Payments({
                     setSelected(proof);
                     setNote(proof.review_note);
                   }}
-                  className={`w-full border-b border-[var(--border)] p-4 text-start ${selected?.id === proof.id ? "bg-[var(--paper)] shadow-[inset_3px_0_0_var(--vermilion)]" : "hover:bg-[var(--paper)]"}`}
+                  className={`w-full border-b border-[var(--border)] p-4 text-start ${selected?.id === proof.id ? "bg-[var(--paper)] shadow-[var(--inset-inline-start)_var(--vermilion)]" : "hover:bg-[var(--paper)]"}`}
                 >
                   <span className="text-[10px] font-black uppercase text-[var(--vermilion)]">
                     {displayLabel(proof.status, language)}
@@ -815,6 +817,26 @@ function Payments({
           <h3 className="font-black">
             {rtl ? "الوسائل المنشورة" : "Published methods"}
           </h3>
+          {/* Fahim deliberately never publishes a placeholder or demo account number, so a
+              fresh deployment leaves the paid flow closed until a real destination exists.
+              Say so here instead of letting it fail silently for every learner. */}
+          {!methods.some((method) => method.is_active) && (
+            <div
+              role="status"
+              className="atlas-notice mt-3 border-[var(--warning-border)] bg-[var(--warning-surface)] text-[var(--warning-text)]"
+            >
+              <strong>
+                {rtl
+                  ? "لا توجد وسيلة دفع نشطة — لن يتمكن أي متعلّم من الدفع."
+                  : "No active payment method — nobody can pay."}
+              </strong>
+              <p className="mt-1 font-normal">
+                {rtl
+                  ? "أضف رقمًا حقيقيًا لـ«فودافون كاش» أو «إنستاباي» من النموذج أعلاه. لا ننشر أي رقم تجريبي، لذا يبقى مسار الدفع مغلقًا حتى تُضاف وسيلة موثّقة."
+                  : "Add a real Vodafone Cash or InstaPay destination using the form above. Fahim never publishes a demo account, so the paid flow stays closed until a verified method exists."}
+              </p>
+            </div>
+          )}
           <div className="mt-3 space-y-2">
             {methods.map((method) => (
               <button
@@ -1276,7 +1298,7 @@ function SupportDesk({
               key={ticket.id}
               type="button"
               onClick={() => setActive(ticket)}
-              className={`w-full border-b p-4 text-start ${active?.id === ticket.id ? "bg-[var(--paper)] shadow-[inset_3px_0_0_var(--vermilion)]" : ""}`}
+              className={`w-full border-b p-4 text-start ${active?.id === ticket.id ? "bg-[var(--paper)] shadow-[var(--inset-inline-start)_var(--vermilion)]" : ""}`}
             >
               <b className="line-clamp-1 text-sm">{ticket.subject}</b>
               <span className="mt-2 flex justify-between text-[10px] text-[var(--muted)]">

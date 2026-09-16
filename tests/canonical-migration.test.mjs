@@ -2,7 +2,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-const migrationsDirectory = resolve('src/lib/supabase/migrations');
+const migrationsDirectory = resolve('supabase/migrations');
 const canonicalPath = resolve(migrationsDirectory, '20260810000000_canonical_product_foundation.sql');
 const migration = readFileSync(canonicalPath, 'utf8');
 const learningOsMigration = readFileSync(resolve(migrationsDirectory, '20260807000000_learning_os.sql'), 'utf8');
@@ -15,7 +15,7 @@ describe('canonical FAHIM product migration', () => {
   it('quarantines the overlapping owner_id learning model', () => {
     const active = readdirSync(migrationsDirectory);
     expect(active).not.toContain('20260807000100_fahim_learning_os.sql');
-    expect(existsSync(resolve('src/lib/supabase/legacy_migrations/20260807000100_fahim_learning_os.sql'))).toBe(true);
+    expect(existsSync(resolve('supabase/legacy_migrations/20260807000100_fahim_learning_os.sql'))).toBe(true);
   });
 
   it('starts the account trial once for exactly thirty days', () => {

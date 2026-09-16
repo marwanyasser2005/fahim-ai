@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 
-const migration = readFileSync(new URL('../src/lib/supabase/migrations/20260814000000_manual_commerce_support_content.sql', import.meta.url), 'utf8');
+const migration = readFileSync(new URL('../supabase/migrations/20260814000000_manual_commerce_support_content.sql', import.meta.url), 'utf8');
 const checkout = readFileSync(new URL('../api/billing-checkout.mjs', import.meta.url), 'utf8');
 
 describe('manual commerce operations', () => {

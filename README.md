@@ -8,11 +8,12 @@
     <a href="https://fahim-ai-egypt.vercel.app/showcase">90-second judge path</a> ·
     <a href="https://fahim-ai-egypt.vercel.app/evidence">Evidence room</a> ·
     <a href="docs/HACKATHON_READINESS_REPORT_2026.md">Hackathon readiness</a> ·
+    <a href="docs/VNEXT_IMPLEMENTATION_AUDIT_2026-09-16.md">vNext audit</a> ·
     <a href="docs/ARCHITECTURE.md">Architecture</a>
   </p>
 </div>
 
-![CI](https://img.shields.io/badge/quality%20gate-98%20tests-0f766e)
+![CI](https://img.shields.io/badge/quality%20gate-150%20tests-0f766e)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-173f5f)
 ![Supabase](https://img.shields.io/badge/Supabase-RLS-3ecf8e)
 ![Arabic first](https://img.shields.io/badge/UX-Arabic--first-f2b84b)
@@ -53,17 +54,18 @@ Open [`/evidence`](https://fahim-ai-egypt.vercel.app/evidence) to inspect the we
 
 | Learning system | What is implemented |
 |---|---|
-| Verified Learning Loop | Source, attempt, diagnosis, intervention, retry, evidence, scheduled recall |
-| AI tutor | Streaming Arabic/English instruction, teach-back, retrieval mode, source-aware explanations, provider failover |
-| Assessment | Adaptive quiz generation, server-signed grading, explanations, difficulty, evidence events |
-| Misconception Atlas | Normalized misconception events, learner patterns, teacher aggregates with privacy suppression |
-| Knowledge Vault | Private uploads, local extraction/chunking/retrieval, cited context; scanned OCR is explicitly limited |
-| Learning Passport | Evidence sessions, mistake portfolio, badges, completion credentials, public verification code |
+| Verified Learning Loop | Source, attempt, diagnosis, intervention, retry, evidence, scheduled recall — and the return leg: a graded review emits `review_recalled` and updates measured recall |
+| AI tutor | Streaming Arabic/English instruction, teach-back, retrieval mode, source-aware explanations, provider failover, per-provider deadline budget |
+| Assessment | Generated quizzes with server-sealed answers and server-side grading; one course is graded and recorded in the database end to end. Difficulty is chosen by the learner, not yet adapted from history |
+| Misconception Atlas | Normalized misconception events, learner patterns, teacher aggregates with privacy suppression. The category is a model label — an unvalidated hypothesis, so no numeric confidence is reported |
+| Knowledge Vault | Private uploads, local extraction/chunking and lexical retrieval (BM25 + Arabic/English bridge); the protected gateway now provides 1024-dimensional multilingual embeddings and cosine reranking, while vector persistence and OCR ingestion remain pending |
+| Learning Passport | Evidence sessions, mistake portfolio, badges, HMAC-SHA256 signed completion credentials with recomputed verification and admin revocation |
 | Teacher Cockpit | Organizations, classes, join codes, assignments, pilot measurements, cohort signals |
 | Discovery | Verified Egypt source registry, Wikimedia, OpenAlex, Crossref, YouTube Data API and embedded learning player |
-| Retention | SM-2 flashcards, memory queue, due reviews, continuity across devices |
+| Retention | Adaptive spaced repetition inspired by SM-2 (not SM-2 itself), memory queue, due reviews, synced to Supabase so the schedule survives a device change |
 | Trust | Supabase RLS, server authorization, CSP, rate controls, audit trail, claim labels and honest fallback states |
 | Access | Arabic/English, RTL/LTR, light/dark/system, reduced motion, low-bandwidth mode, responsive PWA |
+| Credential path | Exactly one catalog course (`physics-force-motion`) is server-backed, so it is the only one that can currently produce a credential. The other nine paths are device-local |
 
 ## Architecture
 
@@ -74,6 +76,7 @@ flowchart LR
   API --> AR[Provider-neutral AI router]
   AR --> G[Gemini]
   AR --> R[Agent Router]
+  AR --> HF[Hugging Face Inference]
   API --> Y[YouTube / Open knowledge APIs]
   UI --> S[Supabase Auth + Postgres + Storage]
   API --> S
@@ -111,7 +114,7 @@ Never put server secrets behind a `VITE_` prefix. The browser receives only the 
 |---|---|
 | Browser-safe | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` |
 | Server data | `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` |
-| AI routing | `AI_PROVIDER_ORDER`, `AGENT_ROUTER_*`, `GEMINI_*` |
+| AI routing | `AI_PROVIDER_ORDER`, `AGENT_ROUTER_*`, `GEMINI_*`, `HF_TOKEN`, `HF_FREE_FIRST`, `HF_EMBEDDING_MODEL` |
 | External search | `YOUTUBE_API_KEY` |
 | Integrity | `QUIZ_TOKEN_SECRET`, `FAHIM_ALLOWED_ORIGINS`, `PUBLIC_SITE_URL` |
 
@@ -127,20 +130,25 @@ npm run smoke:production   # public route/API smoke test
 npm run load:test          # controlled API load probe
 ```
 
-The repository currently contains 98 automated tests across 26 files, 22 Supabase migrations, 38 routed screens, and 12 top-level server API modules. Counts are implementation inventory—not claims of user impact.
+The repository currently contains 150 automated tests across 32 files, 25 Supabase migrations, 36 page components, and 14 top-level server API modules. Counts are implementation inventory—not claims of user impact.
+
+Of those tests, 19 files assert runtime behaviour (routing, deadline budgets, sealed-token grading, rate-limit buckets, spaced repetition, credential levels, master classes) and 13 assert source contracts by reading files. **There is no component or end-to-end test layer** — no `@testing-library/react`, no browser driver — so no test currently renders a React component or exercises a full user journey. The `evaluation:check` "12 controls" are source-contract substring checks, not behavioural verification.
 
 ## Repository map
 
 ```text
-api/                 Vercel API routes and server-only integrations
-public/brand/        Source SVG identity and reproducible PNG exports
-scripts/             Quality, security, load and production smoke tooling
-src/components/      Shared product and evidence UI
-src/pages/           Public, learner, teacher, admin and trust journeys
-src/services/        Supabase, learning sync and domain services
-supabase/functions/  Edge functions and email templates
-supabase/migrations/ Canonical relational schema, RPCs and RLS
-docs/                Architecture, pilot, demo and hackathon evidence
+api/                     Vercel serverless routes and server-only integrations
+api/_lib/                AI routing, security, auth, billing and ranking helpers
+public/brand/            Source SVG identity and reproducible PNG exports
+scripts/                 Quality, security, load and production smoke tooling
+src/components/          Shared product, learning and evidence UI
+src/pages/               Public, learner, teacher, admin and trust journeys
+src/lib/                 Domain logic plus Supabase clients and sync layers
+src/lib/supabase/        Auth client, cloud sync and migration audit
+supabase/migrations/     Canonical relational schema, RPCs and RLS
+supabase/templates/      Branded auth email templates
+supabase/legacy_migrations/  Quarantined migration, kept for audit only
+docs/                    Architecture, pilot, demo and hackathon evidence
 ```
 
 ## Hackathon positioning
@@ -152,7 +160,7 @@ The recommended narrative is not “chat + videos + quizzes.” It is:
 
 > Fahim is the Arabic-first operating system that converts learning into evidence a learner, teacher, and parent can inspect—without exposing private conversations or pretending that completion equals mastery.
 
-Current evidence-backed readiness is scored internally at **85/100** against the supplied judging weights. This is not a jury result. The product can reach a competitive 90+ range only after real pilot evidence, human-reviewed AI evaluation, and operational performance proof. See the full [Hackathon Readiness Report](docs/HACKATHON_READINESS_REPORT_2026.md).
+The previously published internal readiness figure of **85/100** predates the 2026-09-15 hardening pass and must be treated as stale. Several gaps it was scored against have since closed (signed and verified credentials, admin revocation, a closed learning loop, a server-graded course assessment, metered quiz spend, a single migration tree, security headers on the only deploy config), while others remain open and must still be scored honestly: there is no component or E2E test layer, one course is server-backed rather than the whole catalogue, manual payment methods must be configured with real account details before the paid flow can run, and no pilot or learning-gain measurement exists. **Re-derive the score from the current repository before citing any number.** See the [Hackathon Readiness Report](docs/HACKATHON_READINESS_REPORT_2026.md).
 
 ## Evidence policy
 
@@ -166,6 +174,7 @@ Current evidence-backed readiness is scored internally at **85/100** against the
 ## Documentation
 
 - [Hackathon Readiness Report](docs/HACKATHON_READINESS_REPORT_2026.md)
+- [vNext implementation audit — 16 September 2026](docs/VNEXT_IMPLEMENTATION_AUDIT_2026-09-16.md)
 - [AI evaluation protocol](docs/AI_EVALUATION_PROTOCOL.md)
 - [Judge evidence index](docs/JUDGE_EVIDENCE_INDEX.md)
 - [Architecture and trust boundaries](docs/ARCHITECTURE.md)

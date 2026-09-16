@@ -42,6 +42,8 @@ import {
   type Conversation,
 } from "@/lib/conversations";
 import { recordStudyAction } from "@/lib/studyProgress";
+import { findSessionForConcept, recordTransferApplied } from "@/lib/reviewBridge";
+import { syncLearningSession } from "@/lib/supabase/learningEvidenceSync";
 import RichMessage from "@/components/RichMessage";
 import type { Language } from "@/App";
 import { useAuth } from "@/contexts/AuthContext";
@@ -316,6 +318,24 @@ export default function AiTutor({ language }: { language: Language }) {
     setLoading(false);
   };
 
+  /**
+   * A finished teach-back is the learner restating a concept in their own words, which is
+   * the new-context application the evidence model calls `transfer_applied`. It is only
+   * recorded when an existing learning record can be linked, so the event stays traceable
+   * back to a real session instead of being invented by the tutor.
+   */
+  const recordTeachBackTransfer = (text: string) => {
+    if (active.tutorMode !== "teach" && active.tutorMode !== "recall") return;
+    const session = findSessionForConcept(text) || (active.subject ? findSessionForConcept(active.subject) : null);
+    if (!session) return;
+    if (session.events.some((item) => item.type === "transfer_applied" && item.conceptKey === session.conceptKey)) return;
+    const updated = recordTransferApplied(session, {
+      title: language === "ar" ? "تطبيق المفهوم في سياق جديد" : "Applied the concept in a new context",
+      summary: text.slice(0, 1200),
+    });
+    void syncLearningSession(updated);
+  };
+
   const submit = async (
     event?: FormEvent,
     override?: string,
@@ -377,6 +397,7 @@ export default function AiTutor({ language }: { language: Language }) {
       active.tutorMode === "quiz" ? "quiz" : "explain",
       question,
     );
+    recordTeachBackTransfer(question);
     const controller = new AbortController();
     abortRef.current = controller;
     let streamed = "";
@@ -482,7 +503,7 @@ export default function AiTutor({ language }: { language: Language }) {
       <div className="p-3">
         <button
           onClick={addConversation}
-          className="flex h-11 w-full items-center justify-between rounded-lg bg-[var(--lapis)] px-3 text-xs font-black text-white hover:bg-[var(--nile)]"
+          className="flex h-11 w-full items-center justify-between rounded-lg bg-[var(--brand-solid)] px-3 text-xs font-black text-[var(--on-solid)] hover:bg-[var(--evidence-solid)]"
         >
           <span className="flex items-center gap-2">
             <MessageSquarePlus className="h-4 w-4" />
@@ -563,6 +584,8 @@ export default function AiTutor({ language }: { language: Language }) {
 
   return (
     <main className="h-[calc(100vh-65px)] min-h-[42rem] overflow-hidden bg-[var(--surface)]">
+      {/* The immersive tutor had no top-level heading, so assistive tech had no page title. */}
+      <h1 className="sr-only">{language === "ar" ? "مساعد فَهيم التعليمي" : "Fahim learning assistant"}</h1>
       <div
         className={`mx-auto grid h-full max-w-[100rem] ${sidebar ? "lg:grid-cols-[17rem_1fr]" : "grid-cols-1"}`}
       >
@@ -691,7 +714,7 @@ export default function AiTutor({ language }: { language: Language }) {
               {loading &&
                 active.messages[active.messages.length - 1]?.text === "" && (
                   <div className="flex gap-3 py-5">
-                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[var(--lapis)] text-white">
+                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[var(--brand-solid)] text-[var(--on-solid)]">
                       <Bot className="h-4 w-4" />
                     </span>
                     <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 dark:border-white/10 dark:bg-white/[.04]">
@@ -720,7 +743,7 @@ export default function AiTutor({ language }: { language: Language }) {
                         tutorMode: item,
                       }))
                     }
-                    className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[10px] font-black transition ${active.tutorMode === item ? "bg-[var(--lapis)] text-white" : "bg-slate-100 text-slate-600 hover:bg-teal-50 dark:bg-white/[.06] dark:text-slate-300"}`}
+                    className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[10px] font-black transition ${active.tutorMode === item ? "bg-[var(--brand-solid)] text-[var(--on-solid)]" : "bg-slate-100 text-slate-600 hover:bg-teal-50 dark:bg-white/[.06] dark:text-slate-300"}`}
                   >
                     {modeLabels[language][item]}
                   </button>
@@ -779,7 +802,7 @@ export default function AiTutor({ language }: { language: Language }) {
                   ) : (
                     <button
                       disabled={input.trim().length < 3}
-                      className="inline-flex h-10 items-center gap-2 rounded-lg bg-[var(--vermilion)] px-4 text-xs font-black text-white hover:brightness-95 disabled:bg-slate-300 dark:disabled:bg-slate-700"
+                      className="inline-flex h-10 items-center gap-2 rounded-lg bg-[var(--brand-solid)] px-4 text-xs font-black text-[var(--on-solid)] hover:brightness-95 disabled:bg-slate-300 dark:disabled:bg-slate-700"
                     >
                       <Send className="h-4 w-4" />
                       {t.send}
@@ -834,7 +857,7 @@ function MessageBubble({
       className={`group flex gap-3 py-5 ${user ? "flex-row-reverse" : ""}`}
     >
       <span
-        className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl text-xs font-black ${user ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : "bg-[var(--lapis)] text-white"}`}
+        className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl text-xs font-black ${user ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : "bg-[var(--brand-solid)] text-[var(--on-solid)]"}`}
       >
         {user ? language === "ar" ? "أ" : "Y" : <Bot className="h-4 w-4" />}
       </span>

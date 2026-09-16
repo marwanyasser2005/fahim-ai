@@ -13,6 +13,7 @@ import {
   applyApiHeaders,
   consumeRateLimit,
   isSameOrigin,
+  logEvent,
   parseJsonBody,
   rejectRateLimit,
   RequestBodyError,
@@ -173,7 +174,7 @@ function ndjson(response, value) {
 }
 
 export default async function handler(request, response) {
-  applyApiHeaders(request, response);
+  const requestId = applyApiHeaders(request, response);
   if (request.method !== 'POST') {
     response.setHeader('Allow', 'POST');
     return send(response, 405, { error: 'Method not allowed' });
@@ -192,6 +193,11 @@ export default async function handler(request, response) {
     return send(response, 500, { error: 'Authentication could not be verified.' });
   }
   if (!getAIStatus().configured) return send(response, 503, { error: 'AI is not configured yet.' });
+
+  // The function is capped at 60s by vercel.json, and the reference lookup below can spend 6s of it.
+  // Leaving the router an unbounded budget let the failover chain outlive the function, which
+  // truncated the stream after the entitlement had already been consumed.
+  const deadlineAt = Date.now() + 45_000;
 
   let body;
   try { body = parseJsonBody(request, { maxBytes: 48_000 }); }
@@ -301,8 +307,9 @@ export default async function handler(request, response) {
     return send(response, 500, { error: 'The generation could not be recorded.' });
   }
 
+  let streamedText = '';
   try {
-    const route = await requestLearningAI({ ...aiRequest, stream });
+    const route = await requestLearningAI({ ...aiRequest, stream, deadlineAt });
     await admin.from('ai_generations').update({ provider: route.provider, model: route.model }).eq('id', generationId);
     if (stream) {
       response.writeHead(200, {
@@ -312,7 +319,10 @@ export default async function handler(request, response) {
         'X-Accel-Buffering': 'no',
       });
       ndjson(response, { type: 'meta', sources: publicSources, generationId });
-      const { text: answer, usage } = await pipeLearningAIStream(route, (text) => ndjson(response, { type: 'delta', text }));
+      const { text: answer, usage } = await pipeLearningAIStream(route, (text) => {
+        streamedText += text;
+        ndjson(response, { type: 'delta', text });
+      });
       if (!answer) throw new Error('empty_response');
       await admin.from('ai_generations').update({
         status: 'complete', result_text: answer,
@@ -335,8 +345,20 @@ export default async function handler(request, response) {
     }).eq('id', generationId);
     return send(response, 200, { answer, sources: publicSources, generationId });
   } catch (error) {
-    await admin.from('ai_generations').update({ status: 'error', error_code: error?.name || 'provider_error', completed_at: new Date().toISOString() }).eq('id', generationId);
-    if (!response.headersSent) await admin.rpc('refund_entitlement_v1', { target_user: auth.user.id, target_key: 'ai_sessions_month', amount: 1 });
+    // Alertable: the failover chain failed, so this is the signal an operator needs.
+    logEvent('ai_generation_failed', {
+      requestId, code: error?.name || 'provider_error',
+      partialChars: streamedText.length,
+      attempts: Array.isArray(error?.attempts) ? error.attempts.slice(0, 4) : undefined,
+    });
+    await admin.from('ai_generations').update({
+      status: 'error', error_code: error?.name || 'provider_error',
+      // Keep whatever the learner already saw so a retry can reuse it instead of paying again.
+      result_text: streamedText || null,
+      completed_at: new Date().toISOString(),
+    }).eq('id', generationId);
+    // Refund only when the learner received nothing; a truncated answer still delivered value.
+    if (!streamedText) await admin.rpc('refund_entitlement_v1', { target_user: auth.user.id, target_key: 'ai_sessions_month', amount: 1 });
     if (!response.headersSent) return send(response, 502, { error: 'The learning assistant is temporarily unavailable.' });
     ndjson(response, { type: 'error', error: 'The stream was interrupted.' });
     return response.end();

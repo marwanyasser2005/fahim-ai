@@ -25,6 +25,8 @@ export type PublicCredential = {
   };
   registry_fingerprint?: string;
   fingerprint_algorithm?: string;
+  /** Recomputed at verification time: does the stored signature match the record? */
+  signature_valid?: boolean;
   verification_path?: string;
   non_accredited?: boolean;
 };

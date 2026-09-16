@@ -1,7 +1,7 @@
-import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
-import { getAIStatus, readLearningAIResponse, requestLearningAI } from './_lib/ai-routing.mjs';
+import { createCipheriv, createDecipheriv, createHash, randomBytes, randomUUID } from 'node:crypto';
+import { estimateAICostMicrousd, getAIStatus, readLearningAIResponse, requestLearningAI } from './_lib/ai-routing.mjs';
 import { rankVerifiedSources } from './_lib/source-ranking.mjs';
-import { AuthenticationError, requireAuthenticatedUser, ServerConfigurationError } from './_lib/supabase-auth.mjs';
+import { AuthenticationError, createAdminClient, requireAuthenticatedUser, ServerConfigurationError } from './_lib/supabase-auth.mjs';
 import {
   applyApiHeaders,
   consumeRateLimit,
@@ -92,7 +92,13 @@ function mergeQuizQuestions(primary, additional, count) {
   return merged;
 }
 
-async function generateQuiz(body, secret) {
+function recordUsage(meter, usage) {
+  if (!usage) return;
+  meter.inputTokens += Number(usage.inputTokens) || 0;
+  meter.outputTokens += Number(usage.outputTokens) || 0;
+}
+
+async function generateQuiz(body, secret, meter) {
   const deadlineAt = Date.now() + 52_000;
   const language = body.language === 'en' ? 'en' : 'ar';
   const topic = String(body.topic || '').trim().slice(0, 240);
@@ -141,7 +147,10 @@ ${sourceContext}`;
   } catch {
     return { status: 502, body: { error: 'Quiz generation is temporarily unavailable.' } };
   }
-  let { text: raw } = await readLearningAIResponse(route);
+  meter.provider = route.provider;
+  meter.model = route.model;
+  let { text: raw, usage } = await readLearningAIResponse(route);
+  recordUsage(meter, usage);
   if (!raw) return { status: 502, body: { error: 'The quiz model returned no content.' } };
   let quiz = parseStructuredJson(raw);
   let questions = validatedQuizQuestions(quiz, count);
@@ -165,7 +174,10 @@ ${existingStems ? `- Do not repeat these already-valid question stems:\n- ${exis
         structured: true,
         deadlineAt,
       });
-      ({ text: raw } = await readLearningAIResponse(retry));
+      meter.provider = retry.provider;
+      meter.model = retry.model;
+      ({ text: raw, usage } = await readLearningAIResponse(retry));
+      recordUsage(meter, usage);
       const retryQuiz = parseStructuredJson(raw);
       const retryQuestions = validatedQuizQuestions(retryQuiz, missingCount);
       questions = mergeQuizQuestions(questions, retryQuestions, count);
@@ -249,8 +261,9 @@ export default async function handler(request, response) {
     return send(response, 405, { error: 'Method not allowed' });
   }
   if (!isSameOrigin(request)) return send(response, 403, { error: 'Origin not allowed' });
+  let auth;
   try {
-    await requireAuthenticatedUser(request);
+    auth = await requireAuthenticatedUser(request);
   } catch (error) {
     if (error instanceof AuthenticationError || error instanceof ServerConfigurationError) return send(response, error.status, { error: error.message });
     return send(response, 500, { error: 'Authentication could not be verified.' });
@@ -272,9 +285,77 @@ export default async function handler(request, response) {
   const secret = process.env.QUIZ_TOKEN_SECRET || process.env.QUIZ_SIGNING_SECRET;
   if (!secret || secret.length < 32) return send(response, 503, { error: 'Secure quiz grading is not configured.' });
   if (!isGrade && !getAIStatus().configured) return send(response, 503, { error: 'Quiz AI is not configured.' });
+  // Validate before metering so an obviously invalid request never spends an entitlement.
+  if (!isGrade && String(body.topic || '').trim().length < 3) {
+    return send(response, 400, { error: 'Topic must be at least 3 characters.' });
+  }
+
+  // Generation spends real model budget, so it consumes the same entitlement as chat and
+  // records a generation row. Grading is local and stays unmetered.
+  let admin = null;
+  let generationId = null;
+  const meter = { provider: null, model: null, inputTokens: 0, outputTokens: 0 };
+  if (!isGrade) {
+    try {
+      admin = createAdminClient();
+    } catch {
+      return send(response, 503, { error: 'Quiz metering is not configured.' });
+    }
+    const { data: consumed, error: entitlementError } = await auth.client.rpc('consume_entitlement_v1', { target_key: 'ai_sessions_month', amount: 1 });
+    if (entitlementError) return send(response, 503, { error: 'AI entitlements are not configured.' });
+    if (!consumed) return send(response, 429, { error: 'Your AI session allowance is exhausted. Review your plan or wait for the next reset.' });
+
+    generationId = randomUUID();
+    const promptHash = createHash('sha256').update(JSON.stringify({
+      promptVersion: 'fahim-assessment-contract-1',
+      topic: String(body.topic || '').slice(0, 240),
+      subject: String(body.subject || '').slice(0, 80),
+      grade: String(body.grade || '').slice(0, 80),
+      difficulty: String(body.difficulty || 'medium'),
+      count: Number(body.count) || 5,
+      language: body.language === 'en' ? 'en' : 'ar',
+    })).digest('hex');
+    const { error: generationError } = await admin.from('ai_generations').insert({
+      id: generationId,
+      user_id: auth.user.id,
+      task_type: 'quiz',
+      provider: 'fahim_router',
+      model: 'pending',
+      prompt_text: String(body.topic || '').slice(0, 12000),
+      prompt_hash: promptHash,
+      status: 'pending',
+    });
+    if (generationError) {
+      await auth.client.rpc('refund_entitlement_v1', { target_user: auth.user.id, target_key: 'ai_sessions_month', amount: 1 });
+      return send(response, 500, { error: 'The quiz generation could not be recorded.' });
+    }
+  }
+
   const result = body.action === 'grade'
     ? gradeAnswer(body, secret)
-    : await generateQuiz(body, secret);
+    : await generateQuiz(body, secret, meter);
+
+  if (generationId) {
+    const succeeded = result.status === 200;
+    await admin.from('ai_generations').update({
+      provider: meter.provider || 'fahim_router',
+      model: meter.model || 'unavailable',
+      status: succeeded ? 'complete' : 'error',
+      error_code: succeeded ? null : `quiz_${result.status}`,
+      input_tokens: meter.inputTokens,
+      output_tokens: meter.outputTokens,
+      estimated_cost_microusd: estimateAICostMicrousd(
+        { inputTokens: meter.inputTokens, outputTokens: meter.outputTokens },
+        meter.provider,
+      ),
+      completed_at: new Date().toISOString(),
+    }).eq('id', generationId);
+    // No usable quiz means the learner received nothing, so the entitlement is returned.
+    if (!succeeded) {
+      await auth.client.rpc('refund_entitlement_v1', { target_user: auth.user.id, target_key: 'ai_sessions_month', amount: 1 });
+    }
+  }
+
   return send(response, result.status, result.body);
 }
 

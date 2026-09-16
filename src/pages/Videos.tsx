@@ -173,7 +173,7 @@ export default function Videos({ language }: { language: Language }) {
             {t.body}
           </p>
         </div>
-        {originals.length > 0 && <section className="mt-10 border border-[var(--band)] bg-[var(--panel)] p-4 shadow-[6px_6px_0_var(--saffron)] sm:p-6"><div className="flex flex-wrap items-end justify-between gap-4"><div><p className="atlas-kicker"><Star className="h-4 w-4" />FAHIM ORIGINALS</p><h2 className="mt-3 text-2xl font-black">{language === 'ar' ? 'دروس حصرية من داخل فَهيم' : 'Exclusive lessons made for Fahim'}</h2><p className="mt-2 text-sm text-[var(--muted)]">{language === 'ar' ? 'محتوى يراجعه فريق المنصة ويُشغّل دون مغادرة مساحة التعلم.' : 'Platform-reviewed content that plays without leaving your learning space.'}</p></div></div>{playingOriginal && <div className="mt-6 overflow-hidden border border-[var(--band)] bg-black"><video src={playingOriginal.signedUrl} poster={playingOriginal.posterUrl} controls playsInline className="aspect-video w-full" onPlay={() => recordStudyAction('video', playingOriginal.title_en)} /></div>}<div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{originals.map((video) => <button type="button" key={video.id} onClick={() => setPlayingOriginal(video)} className={`group overflow-hidden border text-start transition hover:-translate-y-1 ${playingOriginal?.id === video.id ? 'border-[var(--vermilion)] shadow-[4px_4px_0_var(--saffron)]' : 'border-[var(--border)]'}`}><div className="relative aspect-video bg-[var(--lapis)]">{video.posterUrl ? <img src={video.posterUrl} alt="" loading="lazy" className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-white"><Play className="h-8 w-8" /></div>}<span className="absolute bottom-2 end-2 bg-black/80 px-2 py-1 text-[10px] font-black text-white">{video.duration_seconds ? `${Math.ceil(video.duration_seconds / 60)} min` : 'FAHIM'}</span></div><div className="p-3"><b className="line-clamp-2 text-sm leading-6">{video[`title_${language}`]}</b><span className="mt-2 block text-[10px] font-bold text-[var(--muted)]">{video.subject} · {video.education_level}</span></div></button>)}</div></section>}
+        {originals.length > 0 && <section className="mt-10 border border-[var(--band)] bg-[var(--panel)] p-4 shadow-[6px_6px_0_var(--saffron)] sm:p-6"><div className="flex flex-wrap items-end justify-between gap-4"><div><p className="atlas-kicker"><Star className="h-4 w-4" />FAHIM ORIGINALS</p><h2 className="mt-3 text-2xl font-black">{language === 'ar' ? 'دروس حصرية من داخل فَهيم' : 'Exclusive lessons made for Fahim'}</h2><p className="mt-2 text-sm text-[var(--muted)]">{language === 'ar' ? 'محتوى يراجعه فريق المنصة ويُشغّل دون مغادرة مساحة التعلم.' : 'Platform-reviewed content that plays without leaving your learning space.'}</p></div></div>{playingOriginal && <div className="mt-6 overflow-hidden border border-[var(--band)] bg-black"><video src={playingOriginal.signedUrl} poster={playingOriginal.posterUrl} controls playsInline className="aspect-video w-full" onPlay={() => recordStudyAction('video', playingOriginal.title_en)} /></div>}<div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{originals.map((video) => <button type="button" key={video.id} onClick={() => setPlayingOriginal(video)} className={`group overflow-hidden border text-start transition hover:-translate-y-1 ${playingOriginal?.id === video.id ? 'border-[var(--vermilion)] shadow-[4px_4px_0_var(--saffron)]' : 'border-[var(--border)]'}`}><div className="relative aspect-video bg-[var(--brand-solid)]">{video.posterUrl ? <img src={video.posterUrl} alt="" loading="lazy" className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-white"><Play className="h-8 w-8" /></div>}<span className="absolute bottom-2 end-2 bg-black/80 px-2 py-1 text-[10px] font-black text-white">{video.duration_seconds ? `${Math.ceil(video.duration_seconds / 60)} min` : 'FAHIM'}</span></div><div className="p-3"><b className="line-clamp-2 text-sm leading-6">{video[`title_${language}`]}</b><span className="mt-2 block text-[10px] font-bold text-[var(--muted)]">{video.subject} · {video.education_level}</span></div></button>)}</div></section>}
         <form
           onSubmit={submit}
           className="mx-auto mt-9 max-w-5xl rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-xl shadow-slate-950/5 dark:border-white/10 dark:bg-white/[.04]"
@@ -185,7 +185,7 @@ export default function Videos({ language }: { language: Language }) {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 maxLength={120}
-                className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 pe-4 ps-12 text-sm font-semibold outline-none focus:border-violet-400 focus:ring-4 focus:ring-violet-100 dark:border-white/10 dark:bg-black/20 dark:focus:ring-violet-500/10"
+                className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 pe-4 ps-12 text-sm font-semibold outline-none focus:border-[var(--brand-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--brand-primary)_18%,transparent)] dark:border-white/10 dark:bg-black/20 dark:focus:ring-[color-mix(in_srgb,var(--brand-primary)_18%,transparent)]"
                 placeholder={t.placeholder}
               />
             </label>
@@ -335,7 +335,7 @@ export default function Videos({ language }: { language: Language }) {
                         setSelected(item);
                         recordStudyAction("video", item.title);
                       }}
-                      className="mt-4 inline-flex items-center gap-1 text-xs font-black text-violet-700 dark:text-violet-300"
+                      className="mt-4 inline-flex items-center gap-1 text-xs font-black text-[var(--brand-secondary)] dark:text-[var(--brand-primary)]"
                     >
                       <Play className="h-3.5 w-3.5" />
                       {t.watch}
@@ -373,7 +373,7 @@ function Toggle({
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 ${active ? "bg-violet-600 text-white" : "bg-slate-100 text-slate-600 dark:bg-white/[.06] dark:text-slate-300"}`}
+      className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 ${active ? "bg-[var(--brand-solid)] text-white" : "bg-slate-100 text-slate-600 dark:bg-white/[.06] dark:text-slate-300"}`}
     >
       {children}
     </button>

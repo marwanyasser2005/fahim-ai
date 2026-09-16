@@ -96,9 +96,76 @@ export function normalizeMisconception(value: string): MisconceptionCategory {
   return 'concept_confusion';
 }
 
-export function scheduleReviewFromScore(score: number, from = new Date()) {
+/**
+ * How much a misconception type should compress the next review interval. Gaps in the
+ * underlying model (confusion, reversed causality) need to be revisited sooner than
+ * surface issues such as a unit slip or a terminology gap, which recover faster.
+ */
+const misconceptionUrgency: Record<MisconceptionCategory, number> = {
+  concept_confusion: 0.6,
+  causal_reversal: 0.6,
+  formula_without_meaning: 0.75,
+  procedure_gap: 0.85,
+  unit_reasoning: 1,
+  language_bridge: 1,
+};
+
+export function scheduleReviewFromScore(score: number, from = new Date(), misconception?: MisconceptionCategory | null) {
   const days = score >= 90 ? 7 : score >= 75 ? 3 : score >= 55 ? 1 : 10 / 1_440;
-  return new Date(from.getTime() + days * 86_400_000).toISOString();
+  const urgency = misconception ? misconceptionUrgency[misconception] : 1;
+  // Never schedule sooner than ten minutes; a misconception compresses but does not erase spacing.
+  const adjusted = Math.max(10 / 1_440, days * urgency);
+  return new Date(from.getTime() + adjusted * 86_400_000).toISOString();
+}
+
+export type ReviewOutcome = {
+  grade: 'again' | 'hard' | 'good' | 'easy';
+  /** The gap that was just tested, in days — the card's interval before this rating. */
+  elapsedDays: number;
+  /** The interval the card is scheduled for next. */
+  nextIntervalDays: number;
+  repetitions: number;
+  occurredAt?: string;
+};
+
+/**
+ * A successful spaced retrieval is the only evidence that learning survived the gap, so it
+ * is what writes `recall` back onto the session. Before this, the review page graded cards
+ * that were never linked back to the learning record, so `recall` stayed at zero forever
+ * and the `review_recalled` events the badge ladder depends on were never emitted.
+ */
+export function applyReviewOutcome(session: LearningSession, outcome: ReviewOutcome): LearningSession {
+  const occurredAt = outcome.occurredAt || new Date().toISOString();
+  const measuredRecall =
+    outcome.grade === 'easy' ? 100 : outcome.grade === 'good' ? 85 : outcome.grade === 'hard' ? 55 : 20;
+  const recalled = outcome.grade === 'good' || outcome.grade === 'easy';
+  const gap = Math.round(outcome.elapsedDays * 10) / 10;
+  const retained = recalled && outcome.repetitions >= 3 && gap >= 7;
+
+  let next: LearningSession = {
+    ...session,
+    mastery: { ...session.mastery, recall: measuredRecall },
+    status: retained ? 'retained' : 'review_due',
+    updatedAt: occurredAt,
+  };
+
+  if (recalled) {
+    const recallCount = session.events.filter((event) => event.type === 'review_recalled').length;
+    next = appendLearningEvent(next, {
+      id: `recall-${session.id}-${recallCount + 1}`,
+      sessionId: session.id,
+      type: 'review_recalled',
+      conceptKey: session.conceptKey,
+      title: session.conceptAr || session.conceptEn,
+      summary:
+        `استُرجِع من الذاكرة بعد ${gap} يوم بتقييم «${outcome.grade}»، والمراجعة القادمة بعد ${Math.round(outcome.nextIntervalDays)} يوم.` +
+        ` Recalled from memory after ${gap} days with a "${outcome.grade}" rating; next review in ${Math.round(outcome.nextIntervalDays)} days.`,
+      occurredAt,
+      payload: { grade: outcome.grade, elapsedDays: gap, nextIntervalDays: outcome.nextIntervalDays, repetitions: outcome.repetitions },
+    });
+  }
+
+  return saveLearningSession(next);
 }
 
 export function appendLearningEvent(session: LearningSession, input: Omit<LearningEvent, 'sequence'>) {

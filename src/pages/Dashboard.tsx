@@ -23,7 +23,7 @@ import LearningChanges from '@/components/learning/LearningChanges';
 import { useBadgeProgress } from '@/hooks/useBadgeProgress';
 import { getStudyEvents, type StudyEvent } from '@/lib/studyProgress';
 import { learningEvidenceStats, loadLearningSessions, type LearningSession } from '@/lib/learningEvidence';
-import { hydrateLearningSessionsFromCloud } from '@/lib/supabase/learningEvidenceSync';
+import { hydrateLearningSessionsFromCloud, syncPendingLearningSessions } from '@/lib/supabase/learningEvidenceSync';
 import { dueReviewCards } from '@/lib/spacedReview';
 import { syncEvidenceToReviewCards } from '@/lib/reviewBridge';
 import { clearDemoJourney, isDemoJourneyLoaded, seedDemoJourney } from '@/lib/demoJourney';
@@ -93,11 +93,14 @@ export default function Dashboard({ language }: Props) {
     };
     refresh();
     // Signed-in learners pick up their cloud evidence so Today is accurate on
-    // any device، this is what makes a demo account portable for reviewers.
+    // any device, this is what makes a demo account portable for reviewers.
     if (user) {
-      void hydrateLearningSessionsFromCloud().then((cloudSessions) => {
-        if (cloudSessions.length) refresh();
-      });
+      // Retry anything a previous offline session could not upload, then hydrate.
+      void syncPendingLearningSessions()
+        .then(() => hydrateLearningSessionsFromCloud())
+        .then((cloudSessions) => {
+          if (cloudSessions.length) refresh();
+        });
     }
     window.addEventListener('fahim-evidence', refresh);
     window.addEventListener('fahim-progress', refresh);

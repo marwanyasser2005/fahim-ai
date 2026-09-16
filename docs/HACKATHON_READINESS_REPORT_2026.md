@@ -1,5 +1,37 @@
 # Fahim — GenAI for Education Hackathon 2026 Readiness Report
 
+> **Status update — 2026-09-15.** This report predates the 2026-09-15 hardening pass and the
+> 85/100 estimate below is **stale: re-derive it from the current repository before citing it.**
+> Several gaps this report scored against have closed since:
+> - Credentials are now signed with HMAC-SHA256 using a key generated inside the database, and
+>   `verify_certificate_v3` recomputes the signature and returns `signature_valid` instead of
+>   echoing the stored value. Admin-only revocation (`revoke_certificate_v1`) exists.
+> - Public verification no longer returns internal reviewer notes; the evidence object is an
+>   allowlist projection.
+> - The learning loop is closed: a graded review emits `review_recalled` and updates measured
+>   recall; a completed teach-back emits `transfer_applied`. The memory badges are now earnable.
+> - One course (`physics-force-motion`) is completable end to end, with lesson completion
+>   written to `public.progress` and the assessment graded and recorded by database RPCs, so
+>   `my_certificate_eligibility_v2` and `path_finisher` can return real results.
+> - Quiz generation consumes the AI entitlement and records token usage and estimated cost.
+> - `api/chat.mjs` passes a deadline budget to the AI router, so the failover chain can no
+>   longer outlive the platform function limit.
+> - The unauthenticated edge functions carrying the service-role key were deleted, and there is
+>   now a single migration tree and a single deploy configuration.
+> - Structured per-request logging and a real readiness probe exist.
+>
+> What this report should still score **against**, and what remains genuinely unproven:
+> - There is still **no component or end-to-end test layer**; the "12 guard controls" are
+>   source-contract substring checks, and no test renders a React component.
+> - Exactly one catalog course is server-backed. The other nine paths record progress only on
+>   the device and cannot produce a credential.
+> - The manual transfer flow cannot run until an administrator publishes a real payment
+>   destination; the product deliberately ships none.
+> - No pilot, learning-gain, accuracy, retention or cost-per-cycle measurement exists. That
+>   bottleneck is unchanged.
+> - Misconception diagnostic accuracy is unmeasured, and the product no longer reports a
+>   confidence value for a misconception label because none has been calibrated.
+
 **Assessment date:** 1 September 2026
 **Basis:** submitted hackathon slides, FAQ, education landscape workshop, persona/JTBD material, business-model guide, pitch template, storytelling workshop, live product inventory, migrations, tests, production smoke evidence and design review.  
 **Scoring rule:** only demonstrable product evidence is scored. No pilot result, accuracy claim, partnership, commitment or accreditation is inferred.

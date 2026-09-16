@@ -21,7 +21,7 @@ import {
 import { generateQuiz, gradeQuizAnswer, type GeneratedQuiz, type GradeResult, type QuizDifficulty } from '@/lib/quiz';
 import { getMasteryStats, saveQuizAttempt, type QuizAttempt } from '@/lib/mastery';
 import { recordStudyAction } from '@/lib/studyProgress';
-import { normalizeMisconception, saveLearningSession, scheduleReviewFromScore, type LearningEvent, type LearningSession } from '@/lib/learningEvidence';
+import { normalizeMisconception, saveLearningSession, scheduleReviewFromScore, type LearningEvent, type LearningSession, type MisconceptionCategory } from '@/lib/learningEvidence';
 import { syncLearningSession } from '@/lib/supabase/learningEvidenceSync';
 import { useSearchParams } from 'react-router-dom';
 import LearningEvidencePanel from '@/components/learning/LearningEvidencePanel';
@@ -291,10 +291,10 @@ export default function QuizLab({ language }: Props) {
               <section className="premium-card p-5 sm:p-8">
                 <label className="block">
                   <span className="text-xs font-black text-[var(--muted)]">{t.topic}</span>
-                  <textarea value={topic} onChange={(event) => setTopic(event.target.value)} rows={3} maxLength={240} placeholder={t.topicHint} className="mt-2 w-full resize-none rounded-2xl border border-[var(--border)] bg-[var(--soft)] px-4 py-3 text-sm font-bold leading-7 text-[var(--text)] outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10" />
+                  <textarea value={topic} onChange={(event) => setTopic(event.target.value)} rows={3} maxLength={240} placeholder={t.topicHint} className="mt-2 w-full resize-none rounded-2xl border border-[var(--border)] bg-[var(--soft)] px-4 py-3 text-sm font-bold leading-7 text-[var(--text)] outline-none focus:border-[var(--brand-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--brand-primary)_18%,transparent)]" />
                 </label>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {t.suggestions.map((item) => <button key={item} type="button" onClick={() => setTopic(item)} className="rounded-full border border-[var(--border)] bg-[var(--panel)] px-3 py-1.5 text-[10px] font-black text-[var(--muted)] hover:border-violet-400 hover:text-violet-700">{item}</button>)}
+                  {t.suggestions.map((item) => <button key={item} type="button" onClick={() => setTopic(item)} className="rounded-full border border-[var(--border)] bg-[var(--panel)] px-3 py-1.5 text-[10px] font-black text-[var(--muted)] hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)]">{item}</button>)}
                 </div>
                 <div className="mt-5 grid gap-4 sm:grid-cols-2">
                   <Field label={t.subject} value={subject} onChange={setSubject} placeholder={t.subjectHint} />
@@ -304,7 +304,7 @@ export default function QuizLab({ language }: Props) {
                   <legend className="text-xs font-black text-[var(--muted)]">{t.difficulty}</legend>
                   <div className="mt-2 grid grid-cols-3 gap-2">
                     {(['easy', 'medium', 'hard'] as QuizDifficulty[]).map((item) => (
-                      <button key={item} type="button" aria-pressed={difficulty === item} onClick={() => setDifficulty(item)} className={`rounded-2xl border px-3 py-3 text-xs font-black transition ${difficulty === item ? 'border-violet-600 bg-violet-600 text-white shadow-lg shadow-violet-600/15' : 'border-[var(--border)] bg-[var(--soft)] text-[var(--muted)] hover:border-violet-300'}`}>{t[item]}</button>
+                      <button key={item} type="button" aria-pressed={difficulty === item} onClick={() => setDifficulty(item)} className={`rounded-2xl border px-3 py-3 text-xs font-black transition ${difficulty === item ? 'border-[var(--brand-solid)] bg-[var(--brand-solid)] text-white shadow-lg shadow-[color:color-mix(in_srgb,var(--brand-primary)_22%,transparent)]' : 'border-[var(--border)] bg-[var(--soft)] text-[var(--muted)] hover:border-[var(--brand-primary)]'}`}>{t[item]}</button>
                     ))}
                   </div>
                 </fieldset>
@@ -327,13 +327,13 @@ export default function QuizLab({ language }: Props) {
               </div>
               <div className="min-w-48">
                 <div className="flex justify-between text-[10px] font-black text-[var(--muted)]"><span>{Math.round(((index + 1) / quiz.questions.length) * 100)}%</span><span>{question.difficulty}</span></div>
-                <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--soft)]"><div className="h-full rounded-full bg-gradient-to-r from-violet-700 to-teal-500 transition-all" style={{ width: `${((index + 1) / quiz.questions.length) * 100}%` }} /></div>
+                <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--soft)]"><div className="h-full rounded-full bg-gradient-to-r from-[var(--brand-secondary)] to-teal-500 transition-all" style={{ width: `${((index + 1) / quiz.questions.length) * 100}%` }} /></div>
               </div>
             </header>
 
             <section className="premium-card mt-7 p-5 sm:p-8">
               <div className="flex items-start gap-3">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-violet-100 text-sm font-black text-violet-700 dark:bg-violet-500/10 dark:text-violet-300">{index + 1}</span>
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-[color-mix(in_srgb,var(--brand-primary)_14%,var(--panel))] text-sm font-black text-[var(--brand-secondary)] dark:bg-[color-mix(in_srgb,var(--brand-primary)_16%,transparent)] dark:text-[var(--brand-primary)]">{index + 1}</span>
                 <div>
                   <p className="text-lg font-black leading-8 text-[var(--text)] sm:text-xl">{question.question}</p>
                   <p className="mt-2 text-[10px] font-black uppercase tracking-wider text-[var(--muted)]">{t.skill}: {question.skill}</p>
@@ -355,11 +355,11 @@ export default function QuizLab({ language }: Props) {
                       className={`flex items-center gap-3 rounded-2xl border p-4 text-start text-sm font-bold leading-7 transition ${
                         isCorrect ? 'border-teal-500 bg-teal-50 text-teal-950 dark:bg-teal-500/10 dark:text-teal-100'
                           : isWrongSelection ? 'border-rose-500 bg-rose-50 text-rose-950 dark:bg-rose-500/10 dark:text-rose-100'
-                            : isSelected ? 'border-violet-600 bg-violet-50 text-violet-950 dark:bg-violet-500/10 dark:text-violet-100'
-                              : 'border-[var(--border)] bg-[var(--soft)] text-[var(--text)] hover:border-violet-300'
+                            : isSelected ? 'border-[var(--brand-solid)] bg-[color-mix(in_srgb,var(--brand-primary)_10%,var(--panel))] text-[var(--brand-secondary)] dark:bg-[color-mix(in_srgb,var(--brand-primary)_16%,transparent)] dark:text-[var(--brand-primary)]'
+                              : 'border-[var(--border)] bg-[var(--soft)] text-[var(--text)] hover:border-[var(--brand-primary)]'
                       }`}
                     >
-                      <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl border text-xs font-black ${isCorrect ? 'border-teal-500 bg-teal-500 text-white' : isWrongSelection ? 'border-rose-500 bg-rose-500 text-white' : isSelected ? 'border-violet-600 bg-violet-600 text-white' : 'border-[var(--border)] bg-[var(--panel)] text-[var(--muted)]'}`}>
+                      <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl border text-xs font-black ${isCorrect ? 'border-teal-500 bg-teal-500 text-white' : isWrongSelection ? 'border-rose-500 bg-rose-500 text-white' : isSelected ? 'border-[var(--brand-solid)] bg-[var(--brand-solid)] text-white' : 'border-[var(--border)] bg-[var(--panel)] text-[var(--muted)]'}`}>
                         {isCorrect ? <Check className="h-4 w-4" /> : isWrongSelection ? <X className="h-4 w-4" /> : String.fromCharCode(65 + optionIndex)}
                       </span>
                       {option}
@@ -428,6 +428,7 @@ function createQuizEvidenceSession(quiz: GeneratedQuiz, results: GradeResult[], 
   const sessionId = crypto.randomUUID();
   const now = new Date();
   const wrong = results.find((item) => !item.correct && item.misconception);
+  let wrongCategory: MisconceptionCategory | null = null;
   const occurredAt = () => new Date(now.getTime() + events.length * 10).toISOString();
   const events: LearningEvent[] = [];
   const add = (input: Omit<LearningEvent, 'id' | 'sessionId' | 'sequence' | 'conceptKey' | 'occurredAt'>) => events.push({
@@ -447,10 +448,14 @@ function createQuizEvidenceSession(quiz: GeneratedQuiz, results: GradeResult[], 
     payload: { reasonings: reasonings.slice(0, quiz.questions.length), correct: results.map((item) => item.correct) },
   });
   if (wrong) {
-    add({ type: 'misconception_detected', title: language === 'ar' ? 'التباس محتمل' : 'Likely misconception', summary: wrong.misconception.slice(0, 800), misconception: normalizeMisconception(wrong.misconception), confidence: 0.7 });
+    // The category steers scheduling below. Confidence stays null: the model's
+    // misconception label is an unvalidated hypothesis, so a fixed percentage would
+    // assert precision the product cannot measure.
+    wrongCategory = normalizeMisconception(wrong.misconception);
+    add({ type: 'misconception_detected', title: language === 'ar' ? 'التباس محتمل' : 'Likely misconception', summary: wrong.misconception.slice(0, 800), misconception: wrongCategory, payload: { hypothesis: 'unvalidated_model_label' } });
     add({ type: 'intervention_completed', title: language === 'ar' ? 'تفسير موجّه' : 'Targeted explanation', summary: wrong.explanation.slice(0, 1_000) });
     // A real retry = a correct answer to a question that came after the first
-    // wrong one, i.e. post-intervention evidence، never inferred from
+    // wrong one, i.e. post-intervention evidence, never inferred from
     // unrelated correct answers elsewhere in the quiz.
     const firstWrongIndex = results.findIndex((item) => !item.correct);
     const postInterventionCorrect = firstWrongIndex >= 0 ? results.slice(firstWrongIndex + 1).filter((item) => item.correct).length : 0;
@@ -459,7 +464,7 @@ function createQuizEvidenceSession(quiz: GeneratedQuiz, results: GradeResult[], 
     }
   }
   add({ type: 'evidence_created', title: language === 'ar' ? 'دليل تقييم تكويني' : 'Formative assessment evidence', summary: language === 'ar' ? 'نتيجة مصححة على الخادم مع المهارات المقاسة.' : 'Server-graded result with measured skills.' });
-  const reviewDueAt = scheduleReviewFromScore(mastery, now);
+  const reviewDueAt = scheduleReviewFromScore(mastery, now, wrongCategory);
   add({ type: 'review_scheduled', title: language === 'ar' ? 'مراجعة مجدولة' : 'Review scheduled', summary: new Intl.DateTimeFormat(language === 'ar' ? 'ar-EG' : 'en-US', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(reviewDueAt)), payload: { dueAt: reviewDueAt } });
   return {
     id: sessionId,
@@ -478,7 +483,7 @@ function createQuizEvidenceSession(quiz: GeneratedQuiz, results: GradeResult[], 
 }
 
 function Field({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (value: string) => void; placeholder: string }) {
-  return <label><span className="text-xs font-black text-[var(--muted)]">{label}</span><input value={value} onChange={(event) => onChange(event.target.value)} maxLength={80} placeholder={placeholder} className="mt-2 h-12 w-full rounded-2xl border border-[var(--border)] bg-[var(--soft)] px-4 text-sm font-bold text-[var(--text)] outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10" /></label>;
+  return <label><span className="text-xs font-black text-[var(--muted)]">{label}</span><input value={value} onChange={(event) => onChange(event.target.value)} maxLength={80} placeholder={placeholder} className="mt-2 h-12 w-full rounded-2xl border border-[var(--border)] bg-[var(--soft)] px-4 text-sm font-bold text-[var(--text)] outline-none focus:border-[var(--brand-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--brand-primary)_18%,transparent)]" /></label>;
 }
 
 function ErrorMessage({ text }: { text: string }) {
@@ -497,7 +502,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 function SourceStrip({ quiz, language }: { quiz: GeneratedQuiz; language: 'ar' | 'en' }) {
   const t = copy[language];
-  return <section className="mt-6 rounded-3xl border border-[var(--border)] bg-[var(--panel)] p-5"><div className="flex items-center gap-2"><BookOpenCheck className="h-4 w-4 text-violet-600" /><h2 className="text-xs font-black text-[var(--text)]">{t.sources}</h2></div><p className="mt-2 text-[10px] leading-5 text-[var(--muted)]">{t.sourcesNote}</p><div className="mt-4 grid gap-2 sm:grid-cols-3">{quiz.sources.map((source) => <a key={source.url} href={source.url} target="_blank" rel="noreferrer" className="flex items-center justify-between gap-2 rounded-2xl border border-[var(--border)] bg-[var(--soft)] p-3 text-xs font-black text-[var(--text)] hover:border-violet-400"><span className="line-clamp-2">{source.title}</span><ExternalLink className="h-3.5 w-3.5 shrink-0 text-violet-600" /></a>)}</div></section>;
+  return <section className="mt-6 rounded-3xl border border-[var(--border)] bg-[var(--panel)] p-5"><div className="flex items-center gap-2"><BookOpenCheck className="h-4 w-4 text-[var(--brand-primary)]" /><h2 className="text-xs font-black text-[var(--text)]">{t.sources}</h2></div><p className="mt-2 text-[10px] leading-5 text-[var(--muted)]">{t.sourcesNote}</p><div className="mt-4 grid gap-2 sm:grid-cols-3">{quiz.sources.map((source) => <a key={source.url} href={source.url} target="_blank" rel="noreferrer" className="flex items-center justify-between gap-2 rounded-2xl border border-[var(--border)] bg-[var(--soft)] p-3 text-xs font-black text-[var(--text)] hover:border-[var(--brand-primary)]"><span className="line-clamp-2">{source.title}</span><ExternalLink className="h-3.5 w-3.5 shrink-0 text-[var(--brand-primary)]" /></a>)}</div></section>;
 }
 
 function ResultPanel({ attempt, session, language, onRetry, onNew }: { attempt: QuizAttempt; session?: LearningSession; language: 'ar' | 'en'; onRetry: () => void; onNew: () => void }) {

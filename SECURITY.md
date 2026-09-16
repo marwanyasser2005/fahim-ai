@@ -22,11 +22,15 @@
 
 ## Supabase database gate
 
-The canonical base model is `src/lib/supabase/migrations/20260807000000_learning_os.sql`; product, billing, evidence, organizations, source registry, review, misconception, and AI-generation tables are added by `20260810000000_canonical_product_foundation.sql`. Distributed rate-limit storage and its service-only RPC are added by `20260810010000_operational_hardening.sql`. The conflicting `owner_id` / `chat_messages` model is preserved for audit under `legacy_migrations` and must not be applied. Conversation sync now uses the canonical `user_id` / `chat_history` model.
+The canonical base model is `supabase/migrations/20260807000000_learning_os.sql`; product, billing, evidence, organizations, source registry, review, misconception, and AI-generation tables are added by `20260810000000_canonical_product_foundation.sql`. Distributed rate-limit storage and its service-only RPC are added by `20260810010000_operational_hardening.sql`. The conflicting `owner_id` / `chat_messages` model is preserved for audit under `supabase/legacy_migrations` and must not be applied. Conversation sync now uses the canonical `user_id` / `chat_history` model.
+
+There is exactly **one** migration tree, `supabase/migrations/`. The former duplicate under `src/lib/supabase/migrations/` has been deleted, and `scripts/security-check.mjs` fails the build if a second tree or a second deploy configuration reappears. The same check fails on an RLS policy that authorises from the client-writable `user_metadata` claim, and on any `public` table created without row level security.
 
 Apply these migrations first in a staging branch, generate database types from that deployed schema, run the RLS test matrix as student/instructor/admin/anonymous, take a backup, and only then promote to production. OAuth providers still require real provider credentials and exact redirect URLs in Supabase Auth settings.
 
-Trial activation is a security-definer RPC and is one-time per account. Payment orders cannot be activated from the browser: `/api/billing-checkout` creates a hosted Stripe Checkout Session, while only `/api/stripe-webhook` can activate access after raw-body signature, amount, currency, paid-state, replay-window, and idempotency checks. Activation and entitlement changes run through a service-role-only database function.
+Trial activation is a security-definer RPC and is one-time per account. Payment cannot be activated from the browser. Hosted card checkout is **retired**: `/api/billing-checkout`, `/api/stripe-webhook`, and `/api/paymob-webhook` are static `410` endpoints, and the provider helpers in `api/_lib/stripe.mjs` and `api/_lib/paymob.mjs` have no live caller, so `STRIPE_*` credentials are not required to run this repository. The only live billing path is manual transfer review: a learner uploads proof of a Vodafone Cash, InstaPay, or bank transfer, and `review_manual_payment_v1` — gated on `has_permission('payments.review')` or `has_role('admin')` — records the decision, writes the subscription and entitlements, and appends an immutable event. The transfer amount is derived server-side by trigger, never accepted from the client.
+
+Because no payment destination is invented, `manual_payment_methods` ships empty. Nothing can be purchased until an administrator publishes a real account using the admin form; the admin payment panel states this explicitly, and the pricing page refuses to render a placeholder account number.
 
 ## Dependency audit
 
@@ -56,10 +60,12 @@ VITE_SUPABASE_ANON_KEY=<public, RLS-protected anon key>
 SUPABASE_URL=<server-side Supabase project URL>
 SUPABASE_ANON_KEY=<server-side public anon key used to validate sessions>
 SUPABASE_SERVICE_ROLE_KEY=<server-only service key>
-STRIPE_SECRET_KEY=<server-only Stripe test or live secret key>
-STRIPE_WEBHOOK_SECRET=<signing secret for the exact production webhook endpoint>
 PUBLIC_SITE_URL=<canonical HTTPS origin>
 FAHIM_ALLOWED_ORIGINS=<comma-separated production and preview origins>
 ```
 
-After setting them for Production and Preview, redeploy and verify `/api/health` reports configuration booleans without exposing any secret.
+`STRIPE_*` and `PAYMOB_*` credentials are not part of this list because hosted checkout is retired.
+
+After setting them for Production and Preview, redeploy and verify `/api/health?mode=ready` returns `200` with `checks.database` reachable. `mode=live` is a liveness probe that performs no I/O; `mode=ready` additionally probes PostgREST and reports `503` with `status: not_ready` when a dependency is down. Deployment configuration booleans are returned only to same-origin callers or a caller presenting the service-role secret.
+
+The credential signing key is generated inside the database and stored in `credential_signing_keys`, which has row level security enabled, no policies, and revoked grants for `anon` and `authenticated`, so it is reachable only by the owner and the service role. Rotating it invalidates every existing signature, so rotation is a deliberate manual operation.

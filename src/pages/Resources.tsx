@@ -63,7 +63,7 @@ export default function Resources({ language }: ResourcesProps) {
         </label>
         <div className="flex items-center gap-2 overflow-x-auto" role="group" aria-label={language === 'ar' ? 'تصفية المصادر' : 'Filter sources'}>
           <Filter className="h-4 w-4 shrink-0 text-[var(--muted)]" aria-hidden="true" />
-          {categories.map((item) => <button key={item} type="button" onClick={() => setCategory(item)} aria-pressed={category === item} className={`whitespace-nowrap rounded-lg px-3 py-2 text-xs font-black ${category === item ? 'bg-[var(--lapis)] text-white' : 'bg-[var(--soft)] text-[var(--muted)] hover:text-[var(--text)]'}`}>{t.categories[item]}</button>)}
+          {categories.map((item) => <button key={item} type="button" onClick={() => setCategory(item)} aria-pressed={category === item} className={`whitespace-nowrap rounded-lg px-3 py-2 text-xs font-black ${category === item ? 'bg-[var(--brand-solid)] text-[var(--on-solid)]' : 'bg-[var(--soft)] text-[var(--muted)] hover:text-[var(--text)]'}`}>{t.categories[item]}</button>)}
         </div>
       </div>
 
@@ -80,7 +80,7 @@ export default function Resources({ language }: ResourcesProps) {
             <div className="flex items-center justify-between gap-3"><dt className="font-black text-[var(--muted)]">{t.coverage}</dt><dd className="text-end font-bold text-[var(--text)]">{item.stages.join(' · ')}</dd></div>
             <div className="flex items-center justify-between gap-3"><dt className="font-black text-[var(--muted)]">{t.verified}</dt><dd className="font-bold text-teal-700 dark:text-teal-300"><time dateTime={item.verifiedAt}>{item.verifiedAt}</time></dd></div>
           </dl>
-          <a href={item.url} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--lapis)] px-4 py-3 text-sm font-black text-white hover:bg-[var(--nile)]">{t.open}<ExternalLink className="h-4 w-4" /></a>
+          <a href={item.url} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--brand-solid)] px-4 py-3 text-sm font-black text-[var(--on-solid)] hover:bg-[var(--evidence-solid)]">{t.open}<ExternalLink className="h-4 w-4" /></a>
         </article>)}
       </div>
       {!visible.length && <p className="mt-12 text-center text-sm text-[var(--muted)]">{t.empty}</p>}

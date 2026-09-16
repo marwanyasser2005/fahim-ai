@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 const app = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8');
 const showcase = readFileSync(new URL('../src/pages/Showcase.tsx', import.meta.url), 'utf8');
 const scenario = readFileSync(new URL('../src/data/showcaseScenario.ts', import.meta.url), 'utf8');
-const migration = readFileSync(new URL('../src/lib/supabase/migrations/20260825000000_learning_event_spine.sql', import.meta.url), 'utf8');
+const migration = readFileSync(new URL('../supabase/migrations/20260825000000_learning_event_spine.sql', import.meta.url), 'utf8');
 const ai = readFileSync(new URL('../api/chat.mjs', import.meta.url), 'utf8');
 
 describe('hackathon competition contract', () => {

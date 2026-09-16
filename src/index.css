@@ -184,28 +184,14 @@
   unicode-range: U+0000-024F, U+1E00-1EFF, U+2000-206F, U+20A0-20CF, U+2100-214F, U+2190-21FF, U+FEFF, U+FFFD;
 }
 
+/* The palette that lived in these :root blocks is now owned by
+   src/styles/tokens.css (imported immediately after this file in main.tsx).
+   index.css keeps only the genuinely local declarations it still owns:
+   the page-enter animation, the skeleton shimmer, and a few component-local
+   aliases. Every colour, shadow and radius token is read from tokens.css so
+   there is exactly one source of truth. */
 :root {
   --fahim-release: 9;
-  --surface: #f4f7f6;
-  --paper: #fffaf1;
-  --panel: #ffffff;
-  --soft: #eaf1ef;
-  --text: #14213d;
-  --ink: #14213d;
-  --muted: #536273;
-  --border: rgba(20, 33, 61, .16);
-  --lapis: #173f5f;
-  --nile: #0f766e;
-  --saffron: #f2b84b;
-  --vermilion: #d95d39;
-  --font-display-ar: "Noto Kufi Arabic", "Cairo", Tahoma, sans-serif;
-  --font-body-ar: "Cairo", Tahoma, Arial, sans-serif;
-  --shadow-sm: 0 1px 2px rgba(20,33,61,.03), 0 10px 30px rgba(20,33,61,.055);
-  --shadow-lg: 0 2px 4px rgba(20,33,61,.03), 0 24px 64px rgba(20,33,61,.1);
-  --shadow-xl: 0 4px 10px rgba(20,33,61,.04), 0 36px 100px rgba(20,33,61,.14);
-  --radius-control: .875rem;
-  --radius-button: 1rem;
-  --radius-card: 1.5rem;
   --ease-premium: cubic-bezier(.22, 1, .36, 1);
   font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
   color: var(--text);
@@ -214,21 +200,11 @@
   text-rendering: optimizeLegibility;
 }
 html { scroll-behavior: smooth; }
-html.dark {
-  --surface: #091018;
-  --paper: #0e1721;
-  --panel: #121e29;
-  --soft: rgba(255, 255, 255, .055);
-  --text: #f8f4ea;
-  --ink: #f8f4ea;
-  --muted: #b6c0cb;
-  --border: rgba(244, 235, 221, .14);
-  --shadow-xl: 0 30px 80px rgba(0, 0, 0, .35);
-  color: var(--text);
-  background: var(--surface);
-}
+/* Dark-mode shadow uplift for the evidence-room hero is token-owned; this
+   block is intentionally a no-op so index.css no longer re-declares the
+   palette. */
 html[lang="ar"] { font-family: var(--font-body-ar); }
-html[lang="en"] { font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif; }
+html[lang="en"] { font-family: var(--font-body-en); }
 body { min-width: 320px; margin: 0; background: inherit; overflow-x: hidden; font-family: inherit; font-size: 1rem; line-height: 1.65; -webkit-font-smoothing: antialiased; }
 * { box-sizing: border-box; }
 button, input, textarea, select { font: inherit; }
@@ -242,7 +218,7 @@ button:disabled { cursor: not-allowed; }
 .dark .premium-card { box-shadow: 5px 5px 0 rgba(242, 184, 75, .09); }
 .eyebrow { display: inline-flex; align-items: center; gap: .5rem; border: 0; border-inline-start: 3px solid var(--vermilion); border-radius: 0; background: transparent; padding: .15rem 0 .15rem .7rem; color: var(--lapis); font-size: .7rem; font-weight: 900; letter-spacing: .08em; }
 [dir="rtl"] .eyebrow { padding: .15rem .7rem .15rem 0; }
-.dark .eyebrow { color: #9cc8de; }
+.dark .eyebrow { color: var(--dark-lapis); }
 .icon-button { display: grid; height: 2.75rem; width: 2.75rem; flex: 0 0 auto; place-items: center; border: 1px solid var(--border); border-radius: var(--radius-button); color: var(--muted); transition: background-color .18s var(--ease-premium), border-color .18s var(--ease-premium), color .18s var(--ease-premium), transform .18s var(--ease-premium); }
 .icon-button:hover { border-color: rgba(15, 118, 110, .45); background: var(--soft); color: var(--text); transform: translateY(-1px); }
 .compact-field { height: 2.25rem; max-width: 12rem; border: 1px solid var(--border); border-radius: .7rem; background: var(--panel); padding-inline: .7rem; color: var(--text); font-size: .7rem; font-weight: 800; outline: none; }
@@ -297,7 +273,7 @@ main [class*="shadow-violet-"], main [class*="shadow-indigo-"] { --tw-shadow-col
 .dark .atlas-grid { background-image: linear-gradient(rgba(244,235,221,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(244,235,221,.045) 1px, transparent 1px); }
 .atlas-display { max-width: 100%; overflow-wrap: normal; color: var(--text); font-weight: 850; letter-spacing: -.042em; line-height: 1.06; text-wrap: balance; word-break: normal; }
 .atlas-kicker { display: inline-flex; min-height: 1.75rem; align-items: center; gap: .5rem; border-inline-start: 3px solid var(--vermilion); padding-inline-start: .7rem; color: var(--lapis); font-size: .75rem; font-weight: 850; letter-spacing: .06em; line-height: 1.5; }
-.dark .atlas-kicker { color: #9cc8de; }
+.dark .atlas-kicker { color: var(--dark-lapis); }
 .atlas-section-number { color: var(--vermilion); font-size: .75rem; font-weight: 850; letter-spacing: .14em; line-height: 1.5; }
 .atlas-index { display: grid; height: 2.35rem; width: 2.35rem; flex: 0 0 auto; place-items: center; border: 1px solid var(--border); color: var(--vermilion); font-size: .65rem; font-weight: 900; }
 .atlas-primary { display: inline-flex; min-height: 3rem; align-items: center; gap: .55rem; border: 1px solid var(--band); border-radius: var(--radius-button); background: var(--lapis); padding: .75rem 1.15rem; color: white; font-size: .875rem; font-weight: 850; box-shadow: 3px 3px 0 var(--saffron); transition: transform .18s var(--ease-premium), box-shadow .18s var(--ease-premium), background-color .18s var(--ease-premium); }
@@ -369,10 +345,10 @@ main [class*="shadow-violet-"], main [class*="shadow-indigo-"] { --tw-shadow-col
 .prose-fahim ol { list-style: decimal; }
 .prose-fahim li { margin: .25rem 0; }
 .prose-fahim a { color: var(--nile); font-weight: 800; text-decoration: underline; text-decoration-color: var(--saffron); text-decoration-thickness: 2px; text-underline-offset: 3px; }
-.dark .prose-fahim a { color: #69d4c9; }
+.dark .prose-fahim a { color: var(--dark-nile); }
 .prose-fahim blockquote { border-inline-start: 3px solid var(--vermilion); border-radius: 0; background: rgba(217, 93, 57, .055); padding: .6rem 1rem; color: var(--muted); }
 .inline-code { border-radius: .2rem; background: rgba(15, 118, 110, .09); padding: .12rem .35rem; color: var(--nile); font-family: Consolas, monospace; font-size: .86em; }
-.dark .inline-code { color: #69d4c9; }
+.dark .inline-code { color: var(--dark-nile); }
 .code-shell { direction: ltr; margin: 1rem 0; overflow: hidden; border: 1px solid rgba(148, 163, 184, .22); border-radius: 1rem; background: #0b0e16; color: #e2e8f0; text-align: left; }
 .code-toolbar { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255, 255, 255, .08); padding: .55rem .8rem; color: #94a3b8; font-size: .68rem; font-weight: 800; }
 .code-toolbar button { display: inline-flex; align-items: center; gap: .3rem; border-radius: .45rem; padding: .3rem .5rem; color: #cbd5e1; }

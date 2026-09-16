@@ -93,7 +93,7 @@ function AppShell({ language, setLanguage, theme, setTheme, lowBandwidth, setLow
     {product && <ProductSidebar language={language} />}
     <Navbar language={language} setLanguage={setLanguage} theme={theme} setTheme={setTheme} lowBandwidth={lowBandwidth} setLowBandwidth={setLowBandwidth} />
     <TrialBanner language={language} />
-    <div id="main-content" className="min-w-0 flex-1">
+    <div id="main-content" tabIndex={-1} className="min-w-0 flex-1 outline-none">
         <div key={location.pathname} className="page-enter">
           <Suspense fallback={<PageSkeleton />}>
             <Routes location={location}>

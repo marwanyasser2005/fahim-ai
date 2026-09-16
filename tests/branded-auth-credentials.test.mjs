@@ -18,7 +18,7 @@ describe('branded authentication and verifiable credentials', () => {
   });
 
   it('enforces the ten-minute product recovery window on the server', () => {
-    const migration = read('src/lib/supabase/migrations/20260827010000_branded_auth_and_auto_credentials.sql');
+    const migration = read('supabase/migrations/20260827010000_branded_auth_and_auto_credentials.sql');
     const endpoint = read('api/auth-recovery.mjs');
     expect(migration).toContain("interval '10 minutes'");
     expect(migration).toContain('auth.users');
@@ -27,7 +27,7 @@ describe('branded authentication and verifiable credentials', () => {
   });
 
   it('issues completion credentials only from real completion and assessment evidence', () => {
-    const migration = read('src/lib/supabase/migrations/20260827010000_branded_auth_and_auto_credentials.sql');
+    const migration = read('supabase/migrations/20260827010000_branded_auth_and_auto_credentials.sql');
     expect(migration).toContain('issue_my_completion_certificate_v2');
     expect(migration).toContain('completed_lessons <> total_lessons');
     expect(migration).toContain('final_score < 70');
@@ -44,7 +44,7 @@ describe('branded authentication and verifiable credentials', () => {
   });
 
   it('attaches evidence-based achievement levels without claiming accreditation', () => {
-    const migration = read('src/lib/supabase/migrations/20260829000000_credential_achievement_levels.sql');
+    const migration = read('supabase/migrations/20260829000000_credential_achievement_levels.sql');
     const center = read('src/pages/CertificateCenter.tsx');
     expect(migration).toContain("when coalesce(score, 0) >= 90 then 'mastery'");
     expect(migration).toContain("'levelIsAccreditation', false");

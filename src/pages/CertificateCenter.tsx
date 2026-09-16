@@ -46,7 +46,7 @@ export default function CertificateCenter({ language }: { language: Language }) 
     }
     setEligibility(rows);
     const verified = await Promise.all(rows.filter((item) => item.certificateNumber).map(async (item) => {
-       const result = await client.rpc('verify_certificate_v2', { certificate_identifier: item.certificateNumber! });
+       const result = await client.rpc('verify_certificate_v3', { certificate_identifier: item.certificateNumber! });
       return result.error ? null : result.data as PublicCredential;
     }));
     setCredentials(verified.filter(Boolean) as PublicCredential[]);

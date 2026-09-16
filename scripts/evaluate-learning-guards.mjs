@@ -11,7 +11,7 @@ const sources = Object.fromEntries(await Promise.all([
   'api/_lib/security.mjs',
   'src/pages/QuizLab.tsx',
   'src/pages/Showcase.tsx',
-  'src/lib/supabase/migrations/20260825000000_learning_event_spine.sql',
+  'supabase/migrations/20260825000000_learning_event_spine.sql',
   'supabase/migrations/20260827010000_branded_auth_and_auto_credentials.sql',
   'supabase/migrations/20260830010000_competition_evidence_teacher_cockpit.sql',
 ].map(async (file) => [file, await read(file)])));
@@ -95,7 +95,7 @@ const controls = [
     titleAr: 'سجل التعلّم معزول بسياسات ملكية',
     titleEn: 'Learning records are owner-scoped by RLS',
     evidence: '20260825000000_learning_event_spine.sql',
-    pass: sources['src/lib/supabase/migrations/20260825000000_learning_event_spine.sql'].includes('user_id = auth.uid()') && sources['src/lib/supabase/migrations/20260825000000_learning_event_spine.sql'].includes('enable row level security'),
+    pass: sources['supabase/migrations/20260825000000_learning_event_spine.sql'].includes('user_id = auth.uid()') && sources['supabase/migrations/20260825000000_learning_event_spine.sql'].includes('enable row level security'),
   },
   {
     id: 'cohort-privacy-gate',

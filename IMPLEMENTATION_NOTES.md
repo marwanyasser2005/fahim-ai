@@ -1,3 +1,16 @@
+> **متجاوَز — Superseded 2026-09-15.** هذا المستند يصف حالة أقدم ولا يعكس المنتج الحالي. المصادر المعتمدة الآن: [README.md](README.md)، [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)، [docs/HACKATHON_READINESS_REPORT_2026.md](docs/HACKATHON_READINESS_REPORT_2026.md)، و[UPDATED_PRODUCT_REVIEW_2026-09-10.md](UPDATED_PRODUCT_REVIEW_2026-09-10.md). أبرز ما تغيّر بعد تاريخ هذا المستند: توقيع الشهادات صار HMAC-SHA256 مع تحقق يُعيد الحساب وإلغاء إداري؛ حلقة التعلّم أُغلقت (إصدار `review_recalled` و`transfer_applied`)؛ الاختبار يُصحَّح ويُسجَّل على الخادم لمسار كامل قابل للإنجاز؛ استهلاك توليد الاختبارات يُقاس ويُقيَّد؛ شجرة الإضافات صارت واحدة تحت `supabase/migrations/`؛ ولا توجد طبقة اختبارات مكوّنات أو E2E بعد.
+>
+> **Superseded — 2026-09-15.** This document describes an earlier state and no longer
+> reflects the product. Authoritative sources today: [README.md](README.md),
+> [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md),
+> [docs/HACKATHON_READINESS_REPORT_2026.md](docs/HACKATHON_READINESS_REPORT_2026.md), and
+> [UPDATED_PRODUCT_REVIEW_2026-09-10.md](UPDATED_PRODUCT_REVIEW_2026-09-10.md). Since this
+> document was written: credentials are signed with HMAC-SHA256 and verification recomputes
+> the signature, with admin revocation; the learning loop is closed (`review_recalled` and
+> `transfer_applied` are emitted); one course is graded and recorded server-side end to end;
+> quiz generation spend is metered; there is a single migration tree under
+> `supabase/migrations/`; and there is still no component or E2E test layer.
+
 # Fahim AI — implementation and launch notes
 
 ## Product audit and design decisions

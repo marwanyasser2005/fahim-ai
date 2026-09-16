@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 
-const migration = readFileSync(new URL('../src/lib/supabase/migrations/20260830010000_competition_evidence_teacher_cockpit.sql', import.meta.url), 'utf8');
+const migration = readFileSync(new URL('../supabase/migrations/20260830010000_competition_evidence_teacher_cockpit.sql', import.meta.url), 'utf8');
 const cockpit = readFileSync(new URL('../src/pages/TeacherCockpit.tsx', import.meta.url), 'utf8');
 const classSignal = readFileSync(new URL('../src/components/teacher/ClassSignalCard.tsx', import.meta.url), 'utf8');
 const pilotEvidence = readFileSync(new URL('../src/components/teacher/PilotEvidenceCard.tsx', import.meta.url), 'utf8');
