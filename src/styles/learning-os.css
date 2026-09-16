@@ -278,15 +278,15 @@ html[lang="ar"] .fahim-os h1 {
   border: 0;
 }
 .fahim-os .page-enter {
+  opacity: 1;
+  filter: none;
   animation: os-enter 180ms ease-out;
 }
 @keyframes os-enter {
   from {
-    opacity: 0.8;
     transform: translateY(3px);
   }
   to {
-    opacity: 1;
     transform: none;
   }
 }

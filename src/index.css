@@ -16,7 +16,8 @@
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src: url("/fonts/noto-kufi-arabic-variable.ttf") format("truetype-variations");
+  src: url("/fonts/noto-kufi-arabic.woff2") format("woff2");
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FEFC;
 }
 
 /* Hackathon showcase — an editorial learning narrative, not a generic AI dashboard. */
@@ -363,10 +364,12 @@ main [class*="shadow-violet-"], main [class*="shadow-indigo-"] { --tw-shadow-col
 
 @keyframes fahim-pulse { 0%, 80%, 100% { opacity: .25; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
 @keyframes skeleton-shimmer { 100% { transform: translateX(100%); } }
-@keyframes page-enter { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes page-enter { from { transform: translateY(5px); } to { transform: translateY(0); } }
 @keyframes palette-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes palette-enter { from { opacity: 0; transform: translateY(-10px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
-.page-enter { animation: page-enter .18s ease-out both; }
+.page-enter { opacity: 1; filter: none; animation: page-enter .18s ease-out both; }
+.fahim-band-hero .atlas-display { color: #fff !important; }
+.fahim-band-hero :is(h1, h2, h3) { text-shadow: 0 1px 1px rgba(0, 0, 0, .12); }
 .palette-backdrop { animation: palette-fade .16s ease-out both; }
 .palette-panel { animation: palette-enter .18s ease-out both; }
 .typing-dot { display: inline-block; height: .4rem; width: .4rem; border-radius: 999px; background: var(--nile); animation: fahim-pulse 1.2s infinite ease-in-out; }
@@ -391,7 +394,8 @@ html[lang="ar"] :is(p, li) { line-height: 1.85; }
 
 /* Product content must remain readable; the old 7–11px metadata scale was too small. */
 body :is([class*="text-[7px]"], [class*="text-[8px]"], [class*="text-[9px]"], [class*="text-[10px]"], [class*="text-[11px]"]) {
-  font-size: .75rem !important;
+  font-size: .8125rem !important;
+  font-weight: 650;
 }
 
 .fahim-brand-lockup { display: flex; min-width: 0; align-items: center; gap: .75rem; }
@@ -921,11 +925,11 @@ html[lang="ar"] .trust-hero-headline { max-width: 20ch; line-height: 1.45; lette
 .trust-policy-section li p { color: var(--muted); font-size: .82rem; line-height: 1.8; }
 
 /* Explainable retrieval confidence. */
-.vault-confidence { display: inline-flex; min-height: 1.75rem; align-items: center; gap: .3rem; border: 1px solid var(--border); border-radius: 999px; background: var(--panel); padding: .3rem .55rem; color: var(--muted); font-size: .55rem; font-weight: 900; }
+.vault-confidence { display: inline-flex; min-height: 1.75rem; align-items: center; gap: .3rem; border: 1px solid var(--border); border-radius: 999px; background: var(--panel); padding: .3rem .55rem; color: var(--muted); font-size: .68rem; font-weight: 800; }
 .vault-confidence-high { border-color: color-mix(in srgb,var(--nile) 38%,var(--border)); background: color-mix(in srgb,var(--nile) 8%,var(--panel)); color: var(--nile); }
 .vault-confidence-medium { border-color: color-mix(in srgb,var(--saffron) 55%,var(--border)); color: var(--text); }
 .vault-confidence-low { border-style: dashed; }
-.vault-reason { display: inline-flex; min-height: 1.75rem; align-items: center; gap: .3rem; border-radius: .55rem; background: var(--soft); padding: .3rem .5rem; color: var(--muted); font-size: .55rem; font-weight: 850; }
+.vault-reason { display: inline-flex; min-height: 1.75rem; align-items: center; gap: .3rem; border-radius: .55rem; background: var(--soft); padding: .3rem .55rem; color: var(--muted); font-size: .68rem; font-weight: 750; }
 
 @media (max-width: 900px) {
   .teacher-overview-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
@@ -961,7 +965,6 @@ html[lang="ar"] .trust-hero-headline { max-width: 20ch; line-height: 1.45; lette
 /* Fahim Release 8 — calm evidence-first identity. */
 html[lang="ar"] :is(h1, h2, h3, .atlas-display, .showcase-title, .showcase-section-head h2, .trust-policy-header h1) {
   font-family: var(--font-display-ar);
-  font-variation-settings: "wght" 780;
 }
 body { background-color: var(--surface); }
 .fahim-navigation { background: color-mix(in srgb, var(--panel) 92%, transparent); }

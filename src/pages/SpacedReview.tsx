@@ -110,22 +110,24 @@ export default function SpacedReview({ language }: { language: 'ar' | 'en' }) {
   const ArrowBack = language === 'ar' ? ChevronRight : ChevronLeft;
 
   return <main className="min-h-[80vh] bg-[var(--surface)] pb-20">
-    <section className="atlas-grid border-b border-[var(--border)] bg-[var(--paper)] py-12 sm:py-16"><div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <p className="atlas-kicker"><BrainCircuit className="h-4 w-4" />{t.eyebrow}</p>
-      <div className="mt-5 grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+    <section className="fahim-band-hero relative overflow-hidden border-b border-[var(--band)] bg-[var(--band)] py-14 text-white sm:py-20">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_85%_10%,rgba(15,118,110,.38),transparent_24rem),radial-gradient(circle_at_10%_90%,rgba(242,184,75,.13),transparent_20rem)]" aria-hidden="true" />
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <p className="flex w-fit items-center gap-2.5 rounded-full border border-white/15 bg-white/[.06] px-4 py-2 text-xs font-bold text-[var(--saffron)]"><BrainCircuit className="h-4 w-4" />{t.eyebrow}</p>
+      <div className="mt-7 grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
         <div>
-          <h1 className="atlas-display max-w-4xl text-4xl sm:text-5xl">{t.title}</h1>
-          <p className="mt-4 max-w-3xl leading-8 text-[var(--muted)]">{t.body}</p>
-          <p className="mt-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[var(--nile)]"><BrainCircuit className="h-3.5 w-3.5" />{t.method}</p>
+          <h1 className="atlas-display max-w-4xl text-4xl text-white sm:text-6xl">{t.title}</h1>
+          <p className="mt-5 max-w-3xl text-base leading-8 text-[#c8d3df] sm:text-lg">{t.body}</p>
+          <p className="mt-5 flex items-center gap-2 text-xs font-bold text-[var(--saffron)]"><BrainCircuit className="h-4 w-4" />{t.method}</p>
         </div>
-        <button type="button" onClick={() => setAdding((value) => !value)} className="atlas-secondary"><Plus className="h-4 w-4" />{t.add}</button>
+        <button type="button" onClick={() => setAdding((value) => !value)} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white px-5 py-3 text-sm font-black text-[#14213d] shadow-[3px_3px_0_#f2b84b] transition hover:-translate-y-0.5"><Plus className="h-4 w-4" />{t.add}</button>
       </div>
     </div></section>
 
     <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
       {due.length > 0 && <div className="mb-6"><div className="flex items-center justify-between text-xs font-black text-[var(--muted)]"><span>{t.session}</span><span>{reviewedInSession}/{due.length} {t.progress}</span></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--soft)]"><div className="h-full rounded-full bg-[var(--nile)] transition-all" style={{ width: `${sessionProgress}%` }} /></div></div>}
 
-      {stats.due + stats.tomorrow + stats.mature > 0 && <section className="grid border-y border-[var(--border)] sm:grid-cols-4">{[[t.due, stats.due, AlarmClock], [t.tomorrow, stats.tomorrow, Clock3], [t.mature, stats.mature, TrendingUp], [t.total, stats.total, Layers3]].map(([labelText, value, Icon], index) => { const MetricIcon = Icon as typeof AlarmClock; return <div key={String(labelText)} className={`p-5 ${index ? 'border-t border-[var(--border)] sm:border-s sm:border-t-0' : ''}`}><MetricIcon className="h-4 w-4 text-[var(--vermilion)]" /><p className="mt-5 text-3xl font-black text-[var(--text)]">{String(value)}</p><p className="mt-1 text-[10px] font-black uppercase tracking-widest text-[var(--muted)]">{String(labelText)}</p></div>; })}</section>}
+      {stats.due + stats.tomorrow + stats.mature > 0 && <section className="grid overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--panel)] shadow-[var(--shadow-sm)] sm:grid-cols-4">{[[t.due, stats.due, AlarmClock], [t.tomorrow, stats.tomorrow, Clock3], [t.mature, stats.mature, TrendingUp], [t.total, stats.total, Layers3]].map(([labelText, value, Icon], index) => { const MetricIcon = Icon as typeof AlarmClock; return <div key={String(labelText)} className={`p-5 ${index ? 'border-t border-[var(--border)] sm:border-s sm:border-t-0' : ''}`}><span className="grid h-9 w-9 place-items-center rounded-xl bg-[color-mix(in_srgb,var(--vermilion)_10%,var(--panel))]"><MetricIcon className="h-[1.125rem] w-[1.125rem] text-[var(--vermilion)]" /></span><p className="mt-4 text-3xl font-black text-[var(--text)]">{String(value)}</p><p className="mt-1 text-xs font-bold text-[var(--muted)]">{String(labelText)}</p></div>; })}</section>}
 
       {adding && <form onSubmit={add} className="mt-8 grid gap-4 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--panel)] p-5 md:grid-cols-2">
         <div className="md:col-span-2 flex items-center justify-between"><strong className="text-sm font-black text-[var(--text)]">{t.add}</strong><button type="button" onClick={() => setAdding(false)} className="icon-button" aria-label={t.cancel}><X className="h-4 w-4" /></button></div>
