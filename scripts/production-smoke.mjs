@@ -49,7 +49,7 @@ if (!cssPath || !jsPath) {
 const [cssResponse, jsResponse, healthResponse] = await Promise.all([
   fetch(`${base}${cssPath}`),
   fetch(`${base}${jsPath}`),
-  fetch(`${base}/api/health?mode=ready`),
+  fetch(`${base}/api/health?mode=ready`, { headers: { origin: base } }),
 ]);
 const health = await healthResponse.json();
 
@@ -240,8 +240,8 @@ const failures = [
     ? 'AI provider redundancy'
     : null,
   !health.youtubeConfigured ? 'YouTube configuration' : null,
-  !health.quizSecurityConfigured ? 'quiz token security configuration' : null,
-  !health.supabaseConfigured || !health.serverAuthorizationConfigured
+  health.checks?.quizSigning !== 'configured' ? 'quiz token security configuration' : null,
+  health.checks?.database !== 'reachable' || !health.serverAuthorizationConfigured
     ? 'Supabase server configuration'
     : null,
   requireBilling && (!health.billingConfigured || health.billingProvider !== 'manual-review')
