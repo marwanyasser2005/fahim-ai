@@ -1,0 +1,11 @@
+.deck-build/
+deliverables/
+public/brand/explorations/
+.bolt/
+tests/
+docs/
+design-system/
+supabase/
+*.pptx
+*.pdf
+*.zip
