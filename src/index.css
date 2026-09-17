@@ -198,15 +198,26 @@
   color: var(--text);
   background: var(--surface);
   font-synthesis: none;
-  text-rendering: optimizeLegibility;
+  /* `optimizeLegibility` forced extra kerning/ligature lookups that render
+     Arabic glyph runs fuzzy on Windows ClearType. The browser default keeps
+     subpixel antialiasing intact on every platform. */
+  text-rendering: auto;
+  font-kerning: normal;
 }
 html { scroll-behavior: smooth; }
 /* Dark-mode shadow uplift for the evidence-room hero is token-owned; this
    block is intentionally a no-op so index.css no longer re-declares the
    palette. */
-html[lang="ar"] { font-family: var(--font-body-ar); }
+html[lang="ar"] { font-family: var(--font-body-ar); font-weight: 500; }
 html[lang="en"] { font-family: var(--font-body-en); }
-body { min-width: 320px; margin: 0; background: inherit; overflow-x: hidden; font-family: inherit; font-size: 1rem; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+body { min-width: 320px; margin: 0; background: inherit; overflow-x: hidden; font-family: inherit; font-size: 1rem; line-height: 1.65; }
+/* Grayscale antialiasing is a macOS/iOS refinement; on Windows it disables
+   ClearType subpixel rendering and makes both scripts look washed out. */
+@supports (-webkit-touch-callout: none) {
+  body { -webkit-font-smoothing: antialiased; }
+}
+html[lang="ar"] :is(p, li, dd, blockquote, figcaption, .prose-fahim) { font-weight: 500; }
+html[lang="ar"] :is(small, .atlas-label, .dashboard-welcome, time) { font-weight: 650; }
 * { box-sizing: border-box; }
 button, input, textarea, select { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
@@ -1058,7 +1069,13 @@ html[lang="en"] .workspace-title { max-width: 14ch; font-family: "Segoe UI Varia
 .fahim-footer-mark { overflow: hidden; border: 1px solid rgba(255,255,255,.2); border-radius: 1.05rem; background: #fffdf8; box-shadow: 4px 4px 0 rgba(242,184,75,.9); transition: transform .2s var(--ease-premium), box-shadow .2s var(--ease-premium); }
 .fahim-footer-mark img { width: 2.7rem; height: 2.7rem; object-fit: contain; }
 .fahim-footer-brand:hover .fahim-footer-mark { transform: translateY(-2px); box-shadow: 6px 6px 0 rgba(242,184,75,.9); }
-img[src*="/brand/fahim-icon"] { image-rendering: auto; }
+img[src*="/brand/fahim-icon"] {
+  box-sizing: border-box;
+  border-radius: .62rem .86rem .62rem .62rem;
+  background: #fffdf8;
+  padding: .1rem;
+  image-rendering: auto;
+}
 :is(.premium-button, .premium-button-secondary, .atlas-primary, .atlas-secondary, .nav-primary-cta, .workspace-start):active { transform: translateY(0) scale(.985); }
 @media (max-width: 420px) {
   .fahim-navigation nav { height: 4.35rem; padding-inline: .75rem; }

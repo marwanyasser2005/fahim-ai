@@ -8,7 +8,10 @@ export default function ProtectedRoute({ children, requireOnboarding = true }: {
   const access = useProductAccess();
   const location = useLocation();
 
-  if (loading || (user && access.loading)) {
+  // The auth check is the only hard gate. Product access is revalidated in the
+  // background, so once a learner is known to be onboarded the page keeps
+  // rendering instead of flashing back to a spinner on every token refresh.
+  if (loading) {
     return <main className="grid min-h-[70vh] place-items-center" aria-busy="true">
       <Loader2 className="h-7 w-7 animate-spin text-[var(--nile)]" />
     </main>;
@@ -16,6 +19,13 @@ export default function ProtectedRoute({ children, requireOnboarding = true }: {
   if (!configured || !user) {
     return <Navigate to="/login" replace state={{ from: `${location.pathname}${location.search}` }} />;
   }
-  if (requireOnboarding && !access.onboardingComplete) return <Navigate to="/onboarding" replace state={{ from: location.pathname }} />;
+  if (requireOnboarding && !access.onboardingComplete) {
+    if (access.loading) {
+      return <main className="grid min-h-[70vh] place-items-center" aria-busy="true">
+        <Loader2 className="h-7 w-7 animate-spin text-[var(--nile)]" />
+      </main>;
+    }
+    return <Navigate to="/onboarding" replace state={{ from: location.pathname }} />;
+  }
   return children;
 }

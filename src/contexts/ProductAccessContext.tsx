@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { AUTH_SESSION_EXPIRED, getFreshSession, isExpiredJwtError, supabase } from '@/lib/supabase/client';
 import type { PlanCode } from '@/config/plans';
@@ -80,18 +80,26 @@ export function ProductAccessProvider({ children }: { children: ReactNode }) {
   const { user, loading: authLoading, configured } = useAuth();
   const [access, setAccess] = useState<ProductAccess>(guestAccess);
   const [loading, setLoading] = useState(false);
+  // Supabase hands back a fresh user object on every auth event (token refresh
+  // included). Keying on the id keeps `refresh` stable so a background
+  // revalidation cannot remount the page the learner is reading, and the
+  // loading flag is raised only for the first resolution of a given user.
+  const userId = user?.id ?? null;
+  const loadedUserId = useRef<string | null>(null);
 
   const refresh = useCallback(async () => {
     if (authLoading) return;
-    if (!configured || !user || !supabase) {
+    if (!configured || !userId || !supabase) {
       setAccess(guestAccess);
+      loadedUserId.current = null;
       setLoading(false);
       return;
     }
-    setLoading(true);
+    if (loadedUserId.current !== userId) setLoading(true);
     const auth = await getFreshSession();
     if (!auth.session) {
       setAccess({ ...guestAccess, status: 'setup_required', error: auth.error });
+      loadedUserId.current = userId;
       setLoading(false);
       return;
     }
@@ -101,8 +109,9 @@ export function ProductAccessProvider({ children }: { children: ReactNode }) {
     } else {
       setAccess(normalizeAccess(data));
     }
+    loadedUserId.current = userId;
     setLoading(false);
-  }, [authLoading, configured, user]);
+  }, [authLoading, configured, userId]);
 
   useEffect(() => { void refresh(); }, [refresh]);
 

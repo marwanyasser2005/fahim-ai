@@ -17,7 +17,7 @@ export default function ProductSidebar({
   return (
     <aside className="product-sidebar">
       <Link className="sidebar-brand" to="/dashboard">
-        <img src="/brand/fahim-icon.svg" width="36" height="36" alt="" />
+        <span className="sidebar-brand-mark"><img src="/brand/fahim-icon.svg" width="36" height="36" alt="" /></span>
         <div>
           <strong>فَهيم</strong>
           <small>{ar ? "نظام الفهم الموثّق" : "Verified Learning OS"}</small>

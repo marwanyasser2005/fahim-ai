@@ -1,15 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 326 64" role="img" aria-label="فَهيم — FAHIM">
-  <g transform="scale(.94) translate(2 2)">
-    <path d="M6 18c9.5-2.8 18.5-1.8 26 4.5V54C24.5 48.3 15.8 46.8 6 49.5Z" fill="#17212A" stroke="#F4EBDD" stroke-width="3.25" stroke-linejoin="round"/>
-    <path d="M58 18c-9.5-2.8-18.5-1.8-26 4.5V54c7.5-5.7 16.2-7.2 26-4.5Z" fill="#101820" stroke="#F4EBDD" stroke-width="3.25" stroke-linejoin="round"/>
-    <path d="M32 22.5V54" stroke="#F2B84B" stroke-width="3.25" stroke-linecap="round"/>
-    <path d="m12.5 39 6.3-7 5.4 4.2 5.2-7.4" fill="none" stroke="#69D4C9" stroke-width="3.25" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="18.8" cy="32" r="2.4" fill="#69D4C9"/>
-    <path d="m40.5 35.5 5.2 5.2 10-12.5" fill="none" stroke="#E97854" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="20" cy="16" r="4" fill="#69D4C9" stroke="#101820" stroke-width="1.5"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 88" role="img" aria-label="فَهيم، نظام الفهم الموثق">
+  <g transform="translate(4 8) scale(.14)">
+    <path fill="#F7F0E4" fill-rule="evenodd" d="M362 172v-25c0-33 24-55 57-55h7c8 0 12 5 12 13v191c0 96-74 160-175 160-105 0-187-53-187-137 0-86 84-147 198-147h88ZM274 242c-74 0-126 34-126 78 0 40 48 66 113 66 64 0 106-36 106-90v-54h-93Z"/>
+    <path fill="#5EEAD4" d="M80 363c53 6 111-4 155-32 46-28 75-70 73-116 23 6 44 17 61 33-9 55-40 103-89 139-45 32-101 50-144 44-27-15-47-39-56-68Z"/>
+    <circle cx="302" cy="96" r="40" fill="#F2B84B"/>
   </g>
-  <text x="76" y="38" fill="#F4EBDD" font-family="Cairo, 'Segoe UI', sans-serif" font-size="31" font-weight="900">فَهيم</text>
-  <path d="M174 13v38" stroke="#F2B84B" stroke-width="2"/>
-  <text x="190" y="27" fill="#F4EBDD" font-family="Cairo, 'Segoe UI', sans-serif" font-size="14" font-weight="900" letter-spacing="2.8">FAHIM</text>
-  <text x="190" y="44" fill="#A6ACB5" font-family="Cairo, 'Segoe UI', sans-serif" font-size="7.5" font-weight="800" letter-spacing=".65">VERIFIED LEARNING OS</text>
+  <text x="86" y="49" fill="#F7F0E4" font-family="'Noto Kufi Arabic',Cairo,Tahoma,sans-serif" font-size="35" font-weight="850">فَهيم</text><text x="88" y="70" fill="#69D4C9" font-family="'Segoe UI Variable','Segoe UI',Arial,sans-serif" font-size="9" font-weight="800" letter-spacing="2.1">VERIFIED LEARNING</text>
+  <path d="M262 22v43" stroke="#F2B84B" stroke-width="2.5" stroke-linecap="round"/><text x="278" y="48" fill="#F7F0E4" font-family="'Segoe UI Variable','Segoe UI',Arial,sans-serif" font-size="17" font-weight="900" letter-spacing="2">FAHIM</text>
 </svg>

@@ -1,0 +1,128 @@
+/* Fahim Release 11 — editorial polish layer.
+   Loaded after learning-os.css, so it can retune the shared class vocabulary
+   that the normaliser already owns, without touching product-specific rules.
+   Everything here is expressed against classes the whole site already uses
+   (atlas-*, fahim-*, learning-*), which is what makes one file reach every
+   route: public pages, the product shell, and the credential surfaces. */
+
+/* ------------------------------------------------------------------
+   1. Typography — Arabic reads thinner than Latin at the same weight, so
+   the UI floor is lifted and display headings are set heavier and tighter.
+   ------------------------------------------------------------------ */
+html[lang="ar"] .fahim-os {
+  /* learning-os.css pins the shell to 400, which renders Arabic UI text
+     noticeably faint on Windows; 500 restores stroke weight without
+     reading as bold. */
+  font-weight: 500;
+}
+
+html[lang="ar"] .fahim-os :is(h1, h2, h3, h4) {
+  font-family: var(--font-display-ar);
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.42;
+}
+
+/* Display headings carry the page identity: heavier, tighter, no orphan line. */
+html[lang="ar"] .fahim-os :is(h1, h2):is(.atlas-display, .workspace-title, .showcase-title) {
+  font-weight: 800;
+  line-height: 1.34;
+}
+html[lang="ar"] .fahim-os h1:is(.atlas-display, .workspace-title, .showcase-title) { line-height: 1.3; }
+.fahim-os h1:is(.atlas-display, .workspace-title, .showcase-title),
+.fahim-os :is(.evidence-room-hero, .dashboard-hero) h1 { font-weight: 800; }
+
+/* Metadata that anchors every section header must stay legible at 100% zoom. */
+.fahim-os :is(.atlas-kicker, .atlas-section-number, .section-kicker, .atlas-label) {
+  font-size: 0.8125rem;
+  font-weight: 800;
+  line-height: 1.6;
+}
+html[lang="ar"] .fahim-os :is(.atlas-kicker, .atlas-section-number, .section-kicker, .atlas-label) {
+  letter-spacing: 0;
+}
+
+/* Long-form copy: avoid single-word last lines without changing rhythm. */
+.fahim-os :is(p, li, dd, blockquote) { text-wrap: pretty; }
+.fahim-os :is(h1, h2, h3) { text-wrap: balance; }
+
+/* Arabic glyphs run visually smaller than Latin at the same nominal size, so
+   the 12px tier is lifted one step for Arabic only. */
+html[lang="ar"] .fahim-os [class~="text-xs"] { font-size: 0.8125rem; }
+
+.atlas-label { color: var(--muted); font-size: 0.8125rem; font-weight: 700; }
+.atlas-field {
+  min-height: 3rem;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.7;
+}
+.atlas-field::placeholder { color: color-mix(in srgb, var(--muted) 78%, transparent); font-weight: 500; }
+textarea.atlas-field { min-height: 5.5rem; }
+
+.atlas-notice { border-radius: var(--radius-card); font-size: 0.875rem; font-weight: 600; line-height: 1.85; }
+.atlas-empty { border-radius: var(--radius-card); }
+.atlas-empty span { font-size: 0.875rem; }
+
+/* ------------------------------------------------------------------
+   2. Surfaces — one radius/shadow language across every card family.
+   ------------------------------------------------------------------ */
+.fahim-os :is(.premium-card, .atlas-panel, .learning-panel, .atlas-metric, .atlas-ledger-row) {
+  border-radius: var(--radius-card);
+}
+.fahim-os :is(.atlas-primary, .premium-button, .workspace-start, .atlas-secondary, .premium-button-secondary, .atlas-tab, .atlas-filter) {
+  font-weight: 800;
+}
+.fahim-os .atlas-search { border-radius: var(--radius-panel); }
+.fahim-os .atlas-search input { font-weight: 600; }
+.fahim-os .atlas-index { border-radius: 0.85rem; font-weight: 800; }
+
+/* Interactive surfaces share one hover language: a short lift, never a jump. */
+@media (hover: hover) {
+  .fahim-os :is(.atlas-metric, .learning-metric, .workspace-step-card, .badge-trail-grid > li) {
+    transition: transform 0.18s var(--ease-premium), border-color 0.18s var(--ease-premium),
+      box-shadow 0.18s var(--ease-premium);
+  }
+  .fahim-os :is(.atlas-metric, .learning-metric):hover { transform: translateY(-3px); }
+}
+
+/* ------------------------------------------------------------------
+   3. Interaction — visible, consistent feedback everywhere.
+   ------------------------------------------------------------------ */
+.fahim-os :is(a, button, [role="button"], summary, input, textarea, select):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--nile) 62%, transparent);
+  outline-offset: 2px;
+  border-radius: var(--radius-control);
+}
+.fahim-os :is(button, a) { -webkit-tap-highlight-color: transparent; }
+
+::selection { background: var(--saffron); color: #14213d; }
+
+/* Slim, theme-aware scrollbars keep dense product panes calm. */
+* { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--muted) 55%, transparent) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-clip: content-box;
+  background-color: color-mix(in srgb, var(--muted) 45%, transparent);
+}
+::-webkit-scrollbar-thumb:hover { background-color: color-mix(in srgb, var(--muted) 70%, transparent); }
+
+/* Anchor targets must clear the sticky navigation. */
+:target { scroll-margin-top: calc(var(--nav-height) + 1.5rem); }
+
+/* ------------------------------------------------------------------
+   4. Media & data — predictable sizing and aligned figures.
+   ------------------------------------------------------------------ */
+.fahim-os img { max-width: 100%; height: auto; }
+.fahim-os :is(svg, img) { flex-shrink: 0; }
+.fahim-os :is(table, .fahim-certificate-meta, .tabular-nums) { font-variant-numeric: tabular-nums; }
+
+/* ------------------------------------------------------------------
+   5. Motion — every animation becomes opt-in, never a barrier.
+   ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .fahim-os * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

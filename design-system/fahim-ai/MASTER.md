@@ -2,6 +2,16 @@
 
 ## Active specification — 10 September 2026
 
+### Brand mark — 16 September 2026
+
+The Fahim identity uses a refined Arabic **ف** learning loop with a generous counter and a short rounded terminal. The navy body communicates rigor, the teal page-shaped path communicates progress, and the pure saffron dot represents the moment of understanding. Do not add a miniature check inside the dot. The canonical assets and usage rules are documented in `BRAND_IDENTITY.md`.
+
+- Primary icon: `public/brand/fahim-icon.svg`
+- Light and dark lockups: `public/brand/fahim-logo.svg`, `public/brand/fahim-logo-dark.svg`
+- App icon: `public/brand/fahim-app-icon.svg`
+- Certificate seal: `public/brand/fahim-certificate-mark.svg`
+- Do not reintroduce the former generic open-book/person symbol.
+
 The current user-requested UI overhaul supersedes the historical 2.0 palette below. Use `src/styles/tokens.css` as the source of truth and `src/styles/learning-os.css` for shared product surfaces. The older sections are retained as migration context, not instructions to restore the previous cream/navy interface.
 
 - App: `#F7F8FC` light / `#0C0D12` dark.

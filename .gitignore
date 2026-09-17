@@ -40,3 +40,19 @@ dist-ssr
 .zcode/
 artifacts_*.txt
 docs/PITCH_DECK_SCRIPT.md
+
+# Presentation build workspace; keep only reproducible source inputs
+/.deck-build/*
+!/.deck-build/build_fahim_pitch.mjs
+!/.deck-build/product/
+!/.deck-build/product/*.png
+
+# Keep the current competition deck and its authored assets
+/deliverables/fahim-hackathon-2026/*
+!/deliverables/fahim-hackathon-2026/assets/
+!/deliverables/fahim-hackathon-2026/assets/*.png
+!/deliverables/fahim-hackathon-2026/Fahim_AI_Hackathon_2026_Identity_v3.pptx
+!/deliverables/fahim-hackathon-2026/Fahim_AI_Hackathon_2026_Identity_v3_Contact_Sheet.png
+
+/.bolt/
+/public/brand/explorations/fahim-logo-concept-*.png

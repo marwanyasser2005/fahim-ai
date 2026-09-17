@@ -1,5 +1,5 @@
-const CACHE = 'fahim-shell-v3';
-const SHELL = ['/', '/mobile-app', '/manifest.webmanifest', '/brand/fahim-icon.svg', '/brand/fahim-icon-transparent.png', '/fonts/cairo-arabic.woff2', '/fonts/cairo-latin.woff2', '/fonts/noto-kufi-arabic-variable.ttf'];
+const CACHE = 'fahim-shell-v4-brand';
+const SHELL = ['/', '/mobile-app', '/manifest.webmanifest', '/brand/fahim-icon.svg', '/brand/fahim-icon-transparent.png', '/brand/fahim-app-icon.svg', '/brand/fahim-app-icon-512.png', '/fonts/cairo-arabic.woff2', '/fonts/cairo-latin.woff2', '/fonts/noto-kufi-arabic-variable.ttf'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()));
