@@ -416,10 +416,32 @@
   .showcase-deck__count { display: none; }
   .showcase-deck__data-label { display: none; }
   .showcase-deck__viewport { padding-top: 38px; }
-  .showcase-stage { grid-template-columns: minmax(0,1.12fr) minmax(18rem,.88fr); }
+  .showcase-stage { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1.18fr) minmax(12rem, .82fr); }
+  .showcase-stage__narrative { padding: 1.4rem 1.6rem; }
+  .showcase-stage__narrative h1 { font-size: clamp(1.8rem, 4.8vw, 3.2rem); }
+  .showcase-stage__body { margin-top: .75rem; line-height: 1.65; }
+  .showcase-stage__signal { margin-top: .85rem; }
   .showcase-focus-scene__heading { column-gap: 1.5rem; }
+  .proof-engine { grid-template-columns: 1fr; grid-template-rows: minmax(18rem, 1.25fr) minmax(10rem, .75fr); }
+  .proof-engine__detail { padding: 1.4rem 1.6rem; }
+  .proof-engine__detail > svg { margin-top: .7rem; }
+  .proof-engine__detail h2 { margin-top: .55rem; font-size: clamp(1.4rem, 3.8vw, 2.3rem); }
+  .proof-engine__detail > div { margin-top: .8rem; padding-top: .8rem; }
   .proof-engine__map > button { max-width: 10.5rem; }
   .proof-engine__map > button:nth-of-type(5) { top: 50%; right: 1%; }
+  .responsible-flow,
+  .trust-console { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
+  .responsible-flow__rail,
+  .trust-console__list { display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem; }
+  .responsible-flow__rail button { grid-template-columns: 2.35rem 1fr; gap: .55rem; padding: .55rem; }
+  .responsible-flow__rail button:not(:last-child)::after { top: 50%; bottom: auto; inset-inline-start: calc(100% + 1px); width: .5rem; height: 2px; }
+  .responsible-flow__rail button > span { width: 2.35rem; height: 2.35rem; }
+  .responsible-flow__stage { padding: 1.5rem 2rem; }
+  .trust-console__list button { grid-template-columns: 2rem 1fr; padding: .55rem; }
+  .trust-console__list button > svg:last-child { display: none; }
+  .trust-console__record { padding: 1.5rem 2rem; }
+  .product-proof { grid-template-columns: 1fr; grid-template-rows: auto auto auto; }
+  .product-proof__cta { grid-column: 1; }
 }
 
 @media (max-width: 767px) {
