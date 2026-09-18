@@ -10,22 +10,10 @@
   "theme_color": "#14213D",
   "icons": [
     {
-      "src": "/brand/fahim-icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
       "src": "/brand/fahim-icon-transparent.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "/brand/fahim-app-icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
     },
     {
       "src": "/brand/fahim-app-icon-512.png",

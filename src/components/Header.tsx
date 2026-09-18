@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Menu, X, Globe, User, LogIn, LogOut, ChevronDown } from 'lucide-react';
 import { Link } from 'react-router-dom'; // Assuming React Router is used; fallback to <a> if not
 import { supabase } from '@/lib/supabase';
+import FahimBrand from '@/components/brand/FahimBrand';
 
 interface HeaderProps {
   language: 'ar' | 'en';
@@ -64,11 +65,7 @@ const Header: React.FC<HeaderProps> = ({ language, setLanguage, user, onAuthClic
         <div className="flex justify-between items-center h-16 lg:h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 rtl:space-x-reverse group">
-            <img
-              src="/brand/fahim-logo.svg"
-              alt={language === 'ar' ? 'فَهيم، نظام الفهم الموثق' : 'Fahim verified learning'}
-              className="h-11 w-auto max-w-[12rem] object-contain transition-transform duration-300 group-hover:-translate-y-0.5 lg:h-12"
-            />
+            <FahimBrand language={language} />
           </Link>
 
           {/* Desktop Navigation */}

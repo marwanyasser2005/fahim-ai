@@ -84,15 +84,16 @@ function AppShell({ language, setLanguage, theme, setTheme, lowBandwidth, setLow
   const location = useLocation();
   const { user } = useAuth();
   const product = Boolean(user && /^\/(dashboard|workspace|ask-fahim|review|passport|knowledge-vault|library|teacher|admin|profile|support|quiz-lab|learning|course\/|certificates|videos|studio|generation\/)/.test(location.pathname));
-  const immersive = location.pathname === '/ask-fahim';
+  const showcaseMode = location.pathname === '/showcase';
+  const immersive = location.pathname === '/ask-fahim' || showcaseMode;
   useEffect(() => { if (!immersive) window.scrollTo({ top: 0, behavior: 'auto' }); }, [immersive, location.pathname]);
 
   return <div className={`fahim-os flex min-h-screen flex-col bg-[var(--surface)] text-[var(--text)] transition-colors ${product ? 'has-product-sidebar' : ''}`}>
     <RouteMetadata language={language} pathname={location.pathname} />
     <a href="#main-content" className="skip-link">{language === 'ar' ? 'انتقل إلى المحتوى' : 'Skip to content'}</a>
     {product && <ProductSidebar language={language} />}
-    <Navbar language={language} setLanguage={setLanguage} theme={theme} setTheme={setTheme} lowBandwidth={lowBandwidth} setLowBandwidth={setLowBandwidth} />
-    <TrialBanner language={language} />
+    {!showcaseMode && <Navbar language={language} setLanguage={setLanguage} theme={theme} setTheme={setTheme} lowBandwidth={lowBandwidth} setLowBandwidth={setLowBandwidth} />}
+    {!showcaseMode && <TrialBanner language={language} />}
     <div id="main-content" tabIndex={-1} className="min-w-0 flex-1 outline-none">
         <div key={location.pathname} className="page-enter">
           <Suspense fallback={<PageSkeleton />}>
@@ -101,7 +102,7 @@ function AppShell({ language, setLanguage, theme, setTheme, lowBandwidth, setLow
               <Route path="/how-it-works" element={<HowItWorks language={language} />} />
               <Route path="/pricing" element={<Pricing language={language} />} />
               <Route path="/about" element={<About language={language} />} />
-              <Route path="/showcase" element={<Showcase language={language} />} />
+              <Route path="/showcase" element={<Showcase language={language} setLanguage={setLanguage} theme={theme} setTheme={setTheme} />} />
               <Route path="/evidence" element={<EvidenceRoom language={language} />} />
               <Route path="/demo" element={<Navigate to="/showcase" replace />} />
               <Route path="/verify/:certificateId" element={<CertificateVerify language={language} />} />

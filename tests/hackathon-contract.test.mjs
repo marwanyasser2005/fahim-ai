@@ -19,8 +19,8 @@ describe('hackathon competition contract', () => {
   it('shows the complete verified learning loop', () => {
     for (const term of ['diagnostic_started', 'attempt_submitted', 'misconception_detected', 'intervention_completed', 'retry_submitted', 'evidence_created', 'review_scheduled']) expect(scenario).toContain(term);
     expect(scenario).toContain('not real student data');
-    expect(showcase).toContain('Completion without fake accreditation');
-    expect(showcase).toContain('Academic accreditation appears only after a documented partnership');
+    expect(showcase).toContain('Verifiable completion credential');
+    expect(showcase).toContain('Academic accreditation only after a documented partnership');
   });
 
   it('stores ordered owner-scoped events and protects teacher insight', () => {

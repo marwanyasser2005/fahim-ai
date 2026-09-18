@@ -126,3 +126,55 @@ textarea.atlas-field { min-height: 5.5rem; }
 @media (prefers-reduced-motion: reduce) {
   .fahim-os * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* ------------------------------------------------------------------
+   6. Brand Identity V3.2 — exact symbol, responsive bilingual lockup.
+   ------------------------------------------------------------------ */
+.fahim-v32-lockup { display: inline-flex; min-width: 0; align-items: center; gap: .72rem; color: var(--text); line-height: 1; }
+.fahim-v32-symbol { display: grid; width: 3rem; height: 3rem; flex: 0 0 auto; place-items: center; border-radius: .9rem; transition: transform var(--motion-fast) var(--ease-premium); }
+.fahim-v32-symbol img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.fahim-v32-copy { display: grid; min-width: 0; gap: .22rem; }
+.fahim-v32-copy strong { color: currentColor; font-family: var(--font-brand-ar); font-size: 1.28rem; font-weight: 850; letter-spacing: 0; line-height: 1.15; white-space: nowrap; }
+.fahim-v32-copy strong[lang="en"] { font-family: var(--font-display-en); font-size: 1.18rem; font-weight: 900; letter-spacing: -.035em; }
+.fahim-v32-copy strong[lang="en"] span { color: var(--muted); font-weight: 650; }
+.fahim-v32-copy small { overflow: hidden; color: var(--muted); font-family: var(--font-body-ar); font-size: .62rem; font-weight: 700; line-height: 1.45; text-overflow: ellipsis; white-space: nowrap; }
+[dir="ltr"] .fahim-v32-copy small { font-family: var(--font-body-en); letter-spacing: .08em; }
+.fahim-v32-lockup.is-compact .fahim-v32-symbol { width: 2.75rem; height: 2.75rem; }
+.fahim-v32-lockup.on-dark { color: #fff; }
+.fahim-v32-lockup.on-dark .fahim-v32-symbol { width: 3.55rem; height: 3.55rem; border: 1px solid rgba(255,255,255,.18); background: #f6f4ee; padding: .42rem; box-shadow: 4px 4px 0 #f2b84b; }
+.fahim-v32-lockup.on-dark .fahim-v32-copy small { color: #8fe1dc; }
+.fahim-brand-lockup:hover .fahim-v32-symbol,
+.sidebar-brand:hover .fahim-v32-symbol,
+.fahim-footer-brand:hover .fahim-v32-symbol { transform: translateY(-2px); }
+.sidebar-brand .fahim-v32-symbol { width: 2.7rem; height: 2.7rem; }
+.sidebar-brand .fahim-v32-copy strong { font-size: 1.08rem; }
+.sidebar-brand .fahim-v32-copy small { max-width: 9rem; font-size: .56rem; }
+[dir="ltr"] :is(.atlas-display, .showcase-title, .showcase-section-head h2, .showcase-stage h3) { font-family: var(--font-display-en); }
+html[lang="ar"] :is(h1, h2, h3, .atlas-display) { font-family: var(--font-display-ar); }
+html[lang="ar"] :is(h1, h2, h3) { letter-spacing: 0 !important; }
+
+@media (max-width: 420px) {
+  .fahim-brand-lockup > .fahim-v32-lockup { display: inline-flex; }
+  .fahim-brand-lockup .fahim-v32-copy,
+  .sidebar-brand .fahim-v32-copy { display: none; }
+  .fahim-v32-symbol { width: 2.7rem; height: 2.7rem; }
+}
+
+/* Credentials inherit the V3.2 seal instead of the retired multi-colour mark. */
+.fahim-certificate { background: #f6f4ee; border-color: rgba(20,33,61,.24); }
+.fahim-certificate::after { background: radial-gradient(circle at 10% 12%, rgba(242,184,75,.17), transparent 28%), radial-gradient(circle at 88% 80%, rgba(15,139,131,.13), transparent 30%), radial-gradient(rgba(20,33,61,.055) .8px, transparent .8px); background-size: auto, auto, 24px 24px; }
+.fahim-certificate-rail { background: linear-gradient(90deg,#14213d 0 48%,#0f8b83 48% 78%,#f2b84b 78%); }
+.fahim-certificate-seal { display: grid; width: 4.5rem; height: 4.5rem; flex: 0 0 auto; place-items: center; border: 1px solid rgba(20,33,61,.18); border-radius: 999px; background: #f6f4ee; padding: .45rem; box-shadow: 0 0 0 4px rgba(242,184,75,.2); }
+.fahim-certificate-seal img { width: 100%; height: 100%; object-fit: contain; }
+.fahim-certificate-level { border-color: rgba(15,139,131,.3); background: rgba(15,139,131,.08); color: #0b6f69 !important; }
+.fahim-certificate-evidence { border-color: rgba(15,139,131,.26); background: rgba(15,139,131,.075); color: #0b6f69; }
+.fahim-certificate-award h3,
+.fahim-certificate-url { color: #0b6f69; }
+.fahim-certificate-award h2::after { background: linear-gradient(90deg,transparent,#f2b84b,#0f8b83,transparent); }
+.fahim-badge-emblem { filter: drop-shadow(0 12px 18px rgba(20,33,61,.16)); }
+.badge-trail-grid > li:not(.is-locked) { border-color: color-mix(in srgb,var(--nile) 28%,var(--border)); background: linear-gradient(145deg,color-mix(in srgb,var(--saffron) 5%,var(--panel)),var(--panel)); }
+
+@media print {
+  .fahim-certificate { background: #f6f4ee !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .fahim-certificate-seal img { width: 100% !important; height: 100% !important; }
+}

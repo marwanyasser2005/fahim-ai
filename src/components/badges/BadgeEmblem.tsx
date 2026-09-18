@@ -1,10 +1,10 @@
 import type { BadgeColorKey, BadgeIconKey } from '@/lib/badges';
 
 const colors: Record<BadgeColorKey, { main: string; dark: string; pale: string }> = {
-  lapis: { main: '#173F5F', dark: '#14213D', pale: '#E7EEF4' },
-  nile: { main: '#0F766E', dark: '#0B514C', pale: '#E4F2F0' },
-  saffron: { main: '#F2B84B', dark: '#8C5708', pale: '#FFF3D2' },
-  vermilion: { main: '#D95D39', dark: '#87321D', pale: '#FCE9E3' },
+  lapis: { main: '#29466F', dark: '#14213D', pale: '#E8EDF4' },
+  nile: { main: '#0F8B83', dark: '#086A65', pale: '#E3F5F2' },
+  saffron: { main: '#F2B84B', dark: '#A56508', pale: '#FFF3D2' },
+  vermilion: { main: '#42658E', dark: '#14213D', pale: '#EDF2F7' },
 };
 
 function BadgeGlyph({ iconKey, earned }: { iconKey: BadgeIconKey; earned: boolean }) {
@@ -26,12 +26,13 @@ function BadgeGlyph({ iconKey, earned }: { iconKey: BadgeIconKey; earned: boolea
 export default function BadgeEmblem({ iconKey, colorKey, earned, label, size = 'large' }: { iconKey: BadgeIconKey; colorKey: BadgeColorKey; earned: boolean; label: string; size?: 'small' | 'large' }) {
   const palette = colors[colorKey];
   return <svg className={`fahim-badge-emblem is-${size}`} viewBox="0 0 96 112" role="img" aria-label={label}>
-    <path d="m24 75-8 30 17-8 11 13 5-32Z" fill={earned ? palette.dark : '#64748B'} />
-    <path d="m72 75 8 30-17-8-11 13-5-32Z" fill={earned ? palette.main : '#94A3B8'} />
-    <path d="M48 4 61 9l13 1 5 12 10 8-3 13 4 12-9 9-3 13-13 3-10 9-12-5-12 5-10-9-13-3-3-13-9-9 4-12-3-13 10-8 5-12 13-1Z" fill={earned ? palette.main : '#CBD5E1'} stroke={earned ? palette.dark : '#64748B'} strokeWidth="2.5" strokeLinejoin="round" />
-    <circle cx="48" cy="47" r="31" fill={earned ? palette.pale : '#F1F5F9'} stroke={earned ? '#FFFDF8' : '#94A3B8'} strokeWidth="3" />
-    <circle cx="48" cy="47" r="26.5" fill="#FFFDF8" stroke={earned ? palette.dark : '#64748B'} strokeWidth="1.5" strokeDasharray={earned ? '2 4' : '4 4'} />
+    <path d="m27 76-9 30 19-8 11 12V76Z" fill={earned ? '#14213D' : '#94A3B8'} />
+    <path d="m69 76 9 30-19-8-11 12V76Z" fill={earned ? '#0F8B83' : '#CBD5E1'} />
+    <path d="M48 5 61 9l12 1 6 11 9 9-3 12 3 12-9 9-4 12-12 3-10 8-12-4-12 4-10-8-12-3-4-12-9-9 3-12-3-12 9-9 6-11 12-1Z" fill={earned ? '#14213D' : '#CBD5E1'} stroke={earned ? palette.main : '#64748B'} strokeWidth="2.4" strokeLinejoin="round" />
+    <circle cx="48" cy="47" r="31" fill={earned ? '#F6F4EE' : '#F1F5F9'} stroke={earned ? '#F2B84B' : '#94A3B8'} strokeWidth="2.5" />
+    <circle cx="48" cy="47" r="25.5" fill={earned ? palette.pale : '#F8FAFC'} stroke={earned ? palette.main : '#94A3B8'} strokeWidth="1.2" strokeDasharray="2 4" />
+    {earned && <><path d="M24 58c11 2 21-1 29-7 8-6 13-14 14-23 5 2 8 4 11 7-2 11-8 20-18 27-10 7-22 10-33 7Z" fill="#0F8B83" opacity=".95" /><circle cx="53" cy="18" r="4" fill="#F2B84B" /></>}
     <g transform="translate(16 15)" color={earned ? palette.dark : '#64748B'}><BadgeGlyph iconKey={iconKey} earned={earned} /></g>
-    {earned && <g aria-hidden="true"><circle cx="39" cy="75" r="2.4" fill="#D95D39" /><circle cx="48" cy="77" r="2.4" fill="#F2B84B" /><circle cx="57" cy="75" r="2.4" fill="#0F766E" /></g>}
+    {earned && <text x="48" y="86" textAnchor="middle" fill="#F6F4EE" fontFamily="Cairo,Arial,sans-serif" fontSize="6" fontWeight="800" letterSpacing="1">FAHIM</text>}
   </svg>;
 }

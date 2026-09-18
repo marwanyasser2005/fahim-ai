@@ -1,7 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
-  <title id="title">علامة فَهيم</title>
-  <desc id="desc">حرف ف عربي يتحول إلى حلقة تعلم ومسار صاعد، مع نقطة ذهبية ترمز إلى لحظة الفهم.</desc>
-  <path fill="#14213D" fill-rule="evenodd" d="M362 172v-25c0-33 24-55 57-55h7c8 0 12 5 12 13v191c0 96-74 160-175 160-105 0-187-53-187-137 0-86 84-147 198-147h88ZM274 242c-74 0-126 34-126 78 0 40 48 66 113 66 64 0 106-36 106-90v-54h-93Z"/>
-  <path fill="#0F8B83" d="M80 363c53 6 111-4 155-32 46-28 75-70 73-116 23 6 44 17 61 33-9 55-40 103-89 139-45 32-101 50-144 44-27-15-47-39-56-68Z"/>
-  <circle cx="302" cy="96" r="40" fill="#F2B84B"/>
+  <title id="title">علامة فَهيم V3.2</title>
+  <desc id="desc">حرف ف عربي يشكّل حلقة فهم، ومسار تعلم صاعد، ونقطة ذهبية تمثل لحظة الفهم.</desc>
+  <image href="/brand/fahim-symbol-v32.png" width="512" height="512" preserveAspectRatio="xMidYMid meet"/>
 </svg>

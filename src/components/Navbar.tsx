@@ -25,6 +25,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useProductAccess } from "@/contexts/ProductAccessContext";
 import { useProfileRole } from "@/hooks/useProfileRole";
 import CommandPalette from "@/components/CommandPalette";
+import FahimBrand from "@/components/brand/FahimBrand";
 import { hint, label, productNav, publicNav } from "@/lib/appNavigation";
 import type { NavEntry } from "@/lib/appNavigation";
 
@@ -169,25 +170,7 @@ export default function Navbar({
             className="fahim-brand-lockup shrink-0"
             onClick={() => setOpen(false)}
           >
-            <span className="fahim-brand-mark">
-              <img
-                src="/brand/fahim-icon.svg"
-                alt=""
-                width="40"
-                height="40"
-                className="h-10 w-10"
-              />
-            </span>
-            <span className="min-w-0">
-              <strong className="block text-xl font-black leading-tight text-[var(--text)]">
-                فَهيم
-              </strong>
-              <small className="fahim-brand-subtitle hidden sm:block">
-                {language === "ar"
-                  ? "نظام الفهم الموثّق"
-                  : "Verified learning system"}
-              </small>
-            </span>
+            <FahimBrand language={language} />
           </Link>
           <div className="ms-6 hidden items-center lg:flex">
             {items.map((item) => (

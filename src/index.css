@@ -223,7 +223,7 @@ button, input, textarea, select { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 button { cursor: pointer; }
 button:disabled { cursor: not-allowed; }
-:focus-visible { outline: 3px solid rgba(217, 93, 57, .5); outline-offset: 3px; }
+:focus-visible { outline: 3px solid rgba(15, 139, 131, .5); outline-offset: 3px; }
 ::selection { background: #f2b84b; color: #14213d; }
 .premium-card { position: relative; border: 1px solid var(--border); border-radius: var(--radius-card); background: color-mix(in srgb, var(--panel) 98%, transparent); box-shadow: var(--shadow-sm); transition: border-color .2s var(--ease-premium), box-shadow .2s var(--ease-premium), transform .2s var(--ease-premium); }
 .premium-card:hover { border-color: color-mix(in srgb, var(--nile) 48%, var(--border)); box-shadow: 7px 7px 0 rgba(242, 184, 75, .28); }

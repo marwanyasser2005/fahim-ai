@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ExternalLink, MapPin, ShieldCheck } from "lucide-react";
+import FahimBrand from "@/components/brand/FahimBrand";
 
 export default function Footer({ language }: { language: "ar" | "en" }) {
   const rtl = language === "ar";
@@ -37,17 +38,7 @@ export default function Footer({ language }: { language: "ar" | "en" }) {
       <div className="mx-auto grid max-w-7xl gap-12 px-4 py-14 sm:px-6 md:grid-cols-2 xl:grid-cols-[1.25fr_.7fr_.7fr_.8fr] lg:px-8">
         <div>
           <Link to="/" className="fahim-footer-brand inline-flex items-center gap-3">
-            <span className="fahim-footer-mark grid h-14 w-14 place-items-center">
-              <img src="/brand/fahim-icon.svg" width="42" height="42" alt="" />
-            </span>
-            <span>
-              <strong className="block text-2xl font-black text-white">
-                فَهيم
-              </strong>
-              <small className="text-[8px] font-black tracking-[.18em] text-[#F2B84B]">
-                VERIFIED LEARNING OS
-              </small>
-            </span>
+            <FahimBrand language={language} onDark />
           </Link>
           <p className="mt-5 max-w-md text-sm leading-8 text-blue-100">
             {rtl

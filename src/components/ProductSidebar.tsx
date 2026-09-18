@@ -3,6 +3,7 @@ import { Headphones, LogOut, Settings } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfileRole } from "@/hooks/useProfileRole";
 import { hint, label, productNav } from "@/lib/appNavigation";
+import FahimBrand from "@/components/brand/FahimBrand";
 
 export default function ProductSidebar({
   language,
@@ -17,11 +18,7 @@ export default function ProductSidebar({
   return (
     <aside className="product-sidebar">
       <Link className="sidebar-brand" to="/dashboard">
-        <span className="sidebar-brand-mark"><img src="/brand/fahim-icon.svg" width="36" height="36" alt="" /></span>
-        <div>
-          <strong>فَهيم</strong>
-          <small>{ar ? "نظام الفهم الموثّق" : "Verified Learning OS"}</small>
-        </div>
+        <FahimBrand language={language} />
       </Link>
       <p className="os-eyebrow">
         {ar ? "مساحتك للتعلّم" : "Your learning space"}

@@ -132,7 +132,7 @@ export default function HowItWorks({ language }: { language: "ar" | "en" }) {
   return (
     <main className="bg-[var(--surface)]">
       {/* ——— Hero ——— */}
-      <section className="fahim-band-hero relative overflow-hidden border-b border-[var(--band)] bg-[var(--band)] px-4 py-20 text-white sm:px-6 lg:py-28">
+      <section className="fahim-band-hero relative min-h-[calc(100dvh-10rem)] overflow-hidden border-b border-[var(--band)] bg-[var(--band)] px-4 py-14 text-white sm:px-6 lg:grid lg:place-items-center lg:py-16">
         <div
           className="pointer-events-none absolute inset-0"
           style={{
@@ -148,7 +148,7 @@ export default function HowItWorks({ language }: { language: "ar" | "en" }) {
           </p>
           <div className="mt-8 grid gap-10 lg:grid-cols-[1.2fr_.8fr] lg:items-end">
             <div>
-              <h1 className="atlas-display max-w-[16ch] text-5xl text-white sm:text-7xl">
+              <h1 className="atlas-display max-w-[16ch] text-4xl text-white sm:text-6xl">
                 {rtl
                   ? "عملية واحدة تنتهي بدليل، لا محتوى أكثر."
                   : "One process that ends in evidence—not more content."}
@@ -158,6 +158,15 @@ export default function HowItWorks({ language }: { language: "ar" | "en" }) {
                   ? "كل جلسة لها هدف وسياق ومحاولة وتغذية راجعة وتصحيح وتطبيق ودليل وخطوة تالية. المعلّم الذكي جزء من هذا السياق، وليس الصفحة الأولى للمنتج."
                   : "Every session has a goal, context, attempt, feedback, correction, application, evidence, and a next action. The AI tutor belongs inside that context; it is not the product homepage."}
               </p>
+              <div className="mt-7 flex flex-wrap gap-3">
+                <Link to="/showcase" className="atlas-primary">
+                  {rtl ? "شاهد الرحلة تفاعليًا" : "Watch the interactive story"}
+                  <Arrow className="h-4 w-4" />
+                </Link>
+                <Link to="/evidence" className="atlas-secondary border-white/30 text-white hover:bg-white/10">
+                  {rtl ? "افحص الدليل" : "Inspect the evidence"}
+                </Link>
+              </div>
             </div>
             <dl className="grid grid-cols-3 gap-3 sm:gap-4 lg:grid-cols-1">
               {[

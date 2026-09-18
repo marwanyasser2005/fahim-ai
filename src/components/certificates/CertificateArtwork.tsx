@@ -57,6 +57,18 @@ function courseName(credential: PublicCredential, language: Language) {
     : credential.course_title?.[language] || credential.course_title?.en || credential.course_title?.ar || 'Fahim learning path';
 }
 
+async function imageAssetDataUrl(path: string) {
+  const response = await fetch(path, { cache: 'force-cache' });
+  if (!response.ok) throw new Error('Certificate brand asset is unavailable.');
+  const blob = await response.blob();
+  return await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error('Certificate brand asset could not be read.'));
+    reader.readAsDataURL(blob);
+  });
+}
+
 export default function CertificateArtwork({ credential, language, compact = false }: { credential: PublicCredential; language: Language; compact?: boolean }) {
   const rtl = language === 'ar';
   const title = courseName(credential, language);
@@ -71,7 +83,7 @@ export default function CertificateArtwork({ credential, language, compact = fal
 
   useEffect(() => {
     let active = true;
-    void QRCode.toDataURL(verificationUrl, { errorCorrectionLevel: 'H', margin: 1, width: 420, color: { dark: '#14213D', light: '#FFFDF8' } })
+    void QRCode.toDataURL(verificationUrl, { errorCorrectionLevel: 'H', margin: 1, width: 420, color: { dark: '#14213D', light: '#F6F4EE' } })
       .then((value) => { if (active) setQrDataUrl(value); });
     return () => { active = false; };
   }, [verificationUrl]);
@@ -83,6 +95,7 @@ export default function CertificateArtwork({ credential, language, compact = fal
       const height = 1697;
       const completion = credential.evidence?.completionPercent ?? 100;
       const score = credential.evidence?.finalAssessmentScore;
+      const brandMarkDataUrl = await imageAssetDataUrl('/brand/fahim-symbol-v32.png');
       const learnerLines = wrapCertificateText(credential.learner_name, 30);
       const courseLines = wrapCertificateText(title, 46);
       const evidenceLine = score == null
@@ -91,23 +104,23 @@ export default function CertificateArtwork({ credential, language, compact = fal
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
         <defs>
           <pattern id="grid" width="58" height="58" patternUnits="userSpaceOnUse"><path d="M58 0H0V58" fill="none" stroke="#14213D" stroke-opacity=".045" stroke-width="2"/></pattern>
-          <linearGradient id="ink" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#14213D"/><stop offset="1" stop-color="#173F5F"/></linearGradient>
+          <linearGradient id="ink" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#071B38"/><stop offset="1" stop-color="#14213D"/></linearGradient>
         </defs>
-        <rect width="2400" height="1697" rx="42" fill="#FFFDF8"/>
+        <rect width="2400" height="1697" rx="42" fill="#F6F4EE"/>
         <rect width="2400" height="1697" rx="42" fill="url(#grid)"/>
         <path d="M0 0H520L250 1697H0Z" fill="url(#ink)"/>
-        <path d="M2140 0H2400V1697H1880Z" fill="#F2B84B" opacity=".92"/>
+        <path d="M2140 0H2400V1697H1880Z" fill="#F2B84B" opacity=".82"/>
         <rect x="58" y="58" width="2284" height="1581" rx="30" fill="none" stroke="#14213D" stroke-width="4"/>
-        <rect x="82" y="82" width="2236" height="1533" rx="22" fill="none" stroke="#0F766E" stroke-width="2" stroke-dasharray="8 14"/>
-        <g transform="translate(160 140)"><rect width="150" height="150" rx="28" fill="#FFFDF8"/><g transform="scale(2.34375)"><path d="M5 18.5C15.5 16.5 24.5 18.5 31.5 25.5V57C24 51 15.5 49.2 5 51.5Z" fill="#14213D"/><path d="M59 18.5C48.5 16.5 39.5 18.5 32.5 25.5V57C40 51 48.5 49.2 59 51.5Z" fill="#0F766E"/><path d="M15 40.5c6.5-5.5 10.2-2.1 14.2-7.4 3.9-5.2 2.4-10.8 8.8-15.6" fill="none" stroke="#FFFDF8" stroke-width="3.3" stroke-linecap="round"/><circle cx="15" cy="40.5" r="3.25" fill="#D95D39" stroke="#FFFDF8" stroke-width="1.5"/><circle cx="29.2" cy="33.1" r="3.25" fill="#F2B84B" stroke="#FFFDF8" stroke-width="1.5"/><circle cx="39.2" cy="13" r="4.25" fill="#F2B84B"/></g></g>
-        <text x="420" y="205" font-family="'Noto Kufi Arabic','Cairo','Segoe UI',Arial,Tahoma,sans-serif" font-size="36" font-weight="800" fill="#14213D">FAHIM · VERIFIED LEARNING OS</text>
-        <text x="420" y="258" font-family="'Noto Kufi Arabic','Cairo','Segoe UI',Arial,Tahoma,sans-serif" font-size="22" font-weight="700" letter-spacing="5" fill="#D95D39">VERIFIED COMPLETION CREDENTIAL · ${xml(credentialLevelLabel(level, 'en').toUpperCase())}</text>
+        <rect x="82" y="82" width="2236" height="1533" rx="22" fill="none" stroke="#0F8B83" stroke-width="2" stroke-dasharray="8 14"/>
+        <g transform="translate(150 125)"><rect width="180" height="180" rx="36" fill="#F6F4EE"/><image href="${brandMarkDataUrl}" x="15" y="15" width="150" height="150" preserveAspectRatio="xMidYMid meet"/></g>
+        <text x="420" y="205" font-family="'Cairo','Segoe UI',Arial,Tahoma,sans-serif" font-size="36" font-weight="800" fill="#14213D">FAHIM AI · VERIFIED LEARNING</text>
+        <text x="420" y="258" font-family="'Cairo','Segoe UI',Arial,Tahoma,sans-serif" font-size="22" font-weight="700" letter-spacing="5" fill="#0F8B83">COMPLETION CREDENTIAL · ${xml(credentialLevelLabel(level, 'en').toUpperCase())}</text>
         <line x1="420" y1="302" x2="2050" y2="302" stroke="#14213D" stroke-opacity=".22" stroke-width="3"/>
         <text x="420" y="455" font-family="'Noto Kufi Arabic','Cairo','Segoe UI',Arial,Tahoma,sans-serif" font-size="35" fill="#596577">This completion credential is awarded to</text>
         <text font-family="'Noto Kufi Arabic','Cairo','Segoe UI',Arial,Tahoma,sans-serif" font-size="78" font-weight="900" fill="#14213D">${svgLines(learnerLines, 420, 560, 82)}</text>
         <line x1="420" y1="730" x2="1980" y2="730" stroke="#F2B84B" stroke-width="9"/>
         <text x="420" y="802" font-family="'Noto Kufi Arabic','Cairo','Segoe UI',Arial,Tahoma,sans-serif" font-size="30" fill="#596577">for successfully completing the verified learning requirements of</text>
-        <text font-family="'Noto Kufi Arabic','Cairo','Segoe UI',Arial,Tahoma,sans-serif" font-size="56" font-weight="850" fill="#0F766E">${svgLines(courseLines, 420, 885, 66)}</text>
+        <text font-family="'Cairo','Segoe UI',Arial,Tahoma,sans-serif" font-size="56" font-weight="850" fill="#0F8B83">${svgLines(courseLines, 420, 885, 66)}</text>
         <text x="420" y="1035" font-family="'Noto Kufi Arabic','Cairo','Segoe UI',Arial,Tahoma,sans-serif" font-size="27" font-weight="700" fill="#14213D">${xml(evidenceLine)}</text>
         <g transform="translate(420 1115)">
           <text x="0" y="80" font-family="'Segoe Script','Brush Script MT',cursive" font-size="58" font-style="italic" fill="#14213D">Marwan Abdelghaffar</text>
@@ -119,9 +132,9 @@ export default function CertificateArtwork({ credential, language, compact = fal
           <text y="48" font-family="Arial,Tahoma,sans-serif" font-size="22" font-weight="800" fill="#596577">ID</text><text x="112" y="48" font-family="monospace" font-size="22" font-weight="800" fill="#14213D">${xml(credential.certificate_number)}</text>
         </g>
         <g transform="translate(1740 1130)">
-          <rect width="360" height="410" rx="28" fill="#FFFDF8" stroke="#14213D" stroke-width="3"/>
+          <rect width="360" height="410" rx="28" fill="#F6F4EE" stroke="#14213D" stroke-width="3"/>
           ${qrDataUrl ? `<image href="${qrDataUrl}" x="50" y="32" width="260" height="260"/>` : ''}
-          <text x="180" y="330" text-anchor="middle" font-family="Arial,Tahoma,sans-serif" font-size="20" font-weight="900" fill="#0F766E">VERIFY THIS CREDENTIAL</text>
+          <text x="180" y="330" text-anchor="middle" font-family="Arial,Tahoma,sans-serif" font-size="20" font-weight="900" fill="#0F8B83">VERIFY THIS CREDENTIAL</text>
           <text x="180" y="365" text-anchor="middle" font-family="monospace" font-size="15" fill="#596577">fahim-ai-egypt.vercel.app/verify/</text>
           <text x="180" y="390" text-anchor="middle" font-family="monospace" font-size="14" fill="#14213D">${xml(credential.certificate_number)}</text>
         </g>
@@ -153,7 +166,7 @@ export default function CertificateArtwork({ credential, language, compact = fal
     <article className="fahim-certificate" aria-label={rtl ? `شهادة إتمام ${title}` : `${title} completion certificate`}>
       <div className="fahim-certificate-rail" aria-hidden="true" />
       <div className="fahim-certificate-content">
-        <header className="fahim-certificate-header"><div className="flex items-center gap-3"><img src="/brand/fahim-certificate-mark.svg" width="64" height="64" alt="" /><div><p>FAHIM</p><span>VERIFIED LEARNING OS</span></div></div><div className="fahim-certificate-badges"><span className="fahim-certificate-kind">{rtl ? 'شهادة إتمام موثقة' : 'VERIFIED COMPLETION CREDENTIAL'}</span><span className="fahim-certificate-level" data-level={level}><BadgeCheck />{levelLabel}</span></div></header>
+        <header className="fahim-certificate-header"><div className="flex items-center gap-3"><span className="fahim-certificate-seal"><img src="/brand/fahim-symbol-v32.png" width="64" height="64" alt="" /></span><div><p>FAHIM AI</p><span>{rtl ? 'الفهم الذي يمكنك إثباته' : 'VERIFIED LEARNING'}</span></div></div><div className="fahim-certificate-badges"><span className="fahim-certificate-kind">{rtl ? 'شهادة إتمام قابلة للتحقق' : 'VERIFIABLE COMPLETION CREDENTIAL'}</span><span className="fahim-certificate-level" data-level={level}><BadgeCheck />{levelLabel}</span></div></header>
         <div className="fahim-certificate-award"><p>{rtl ? 'تُمنح شهادة الإتمام إلى' : 'This completion credential is awarded to'}</p><h2>{credential.learner_name}</h2><span>{rtl ? 'بعد استكمال متطلبات مسار' : 'after completing the verified requirements of'}</span><h3>{title}</h3></div>
         <div className="fahim-certificate-proof" aria-label={rtl ? 'سلسلة إثبات الشهادة' : 'Credential evidence chain'}>
           <div><span>{rtl ? 'المسار' : 'Path'}</span><strong>{rtl ? 'مكتمل' : 'Complete'}</strong><small><bdi>{credential.evidence?.completionPercent ?? 100}%</bdi></small></div>

@@ -111,7 +111,7 @@ const controls = [
     titleAr: 'الشهادة مرتبطة بأهلية فعلية دون ادعاء اعتماد',
     titleEn: 'Credentials require eligibility without claiming accreditation',
     evidence: 'credential SQL · Showcase trust boundary',
-    pass: sources['supabase/migrations/20260827010000_branded_auth_and_auto_credentials.sql'].includes('my_certificate_eligibility_v2') && sources['supabase/migrations/20260827010000_branded_auth_and_auto_credentials.sql'].includes('issue_my_completion_certificate_v2') && sources['src/pages/Showcase.tsx'].includes('Completion without fake accreditation') && sources['src/pages/Showcase.tsx'].includes('Academic accreditation appears only after a documented partnership'),
+    pass: sources['supabase/migrations/20260827010000_branded_auth_and_auto_credentials.sql'].includes('my_certificate_eligibility_v2') && sources['supabase/migrations/20260827010000_branded_auth_and_auto_credentials.sql'].includes('issue_my_completion_certificate_v2') && sources['src/pages/Showcase.tsx'].includes('Verifiable completion credential') && sources['src/pages/Showcase.tsx'].includes('Academic accreditation only after a documented partnership'),
   },
 ].map(({ pass, ...control }) => ({ ...control, status: pass ? 'passed' : 'failed' }));
 

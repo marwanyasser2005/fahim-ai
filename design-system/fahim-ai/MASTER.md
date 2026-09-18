@@ -1,12 +1,13 @@
-# Fahim Verified Learning OS — Design System 3.0
+# Fahim Verified Learning OS — Design System 3.2
 
-## Active specification — 10 September 2026
+## Active specification — 18 September 2026
 
-### Brand mark — 16 September 2026
+### Brand mark — V3.2
 
 The Fahim identity uses a refined Arabic **ف** learning loop with a generous counter and a short rounded terminal. The navy body communicates rigor, the teal page-shaped path communicates progress, and the pure saffron dot represents the moment of understanding. Do not add a miniature check inside the dot. The canonical assets and usage rules are documented in `BRAND_IDENTITY.md`.
 
-- Primary icon: `public/brand/fahim-icon.svg`
+- Primary approved symbol: `public/brand/fahim-symbol-v32.png`
+- Approved full lockup: `public/brand/fahim-lockup-v32.png`
 - Light and dark lockups: `public/brand/fahim-logo.svg`, `public/brand/fahim-logo-dark.svg`
 - App icon: `public/brand/fahim-app-icon.svg`
 - Certificate seal: `public/brand/fahim-certificate-mark.svg`
@@ -14,11 +15,11 @@ The Fahim identity uses a refined Arabic **ف** learning loop with a generous co
 
 The current user-requested UI overhaul supersedes the historical 2.0 palette below. Use `src/styles/tokens.css` as the source of truth and `src/styles/learning-os.css` for shared product surfaces. The older sections are retained as migration context, not instructions to restore the previous cream/navy interface.
 
-- App: `#F7F8FC` light / `#0C0D12` dark.
-- Surface: white light / `#12141B` dark.
-- Primary action: `#5B5CE2` light / `#818CF8` dark.
+- App: Warm Canvas `#F6F4EE` light / deep ink `#07101F` dark.
+- Surface: `#FAF8F4` light / `#0D1829` dark.
+- Primary action: Fahim Ink `#14213D`; learning and evidence: `#0F8B83`; proof: `#F2B84B`.
 - Controls 8px, inputs 10px, cards 14px, panels 18px radius.
-- Arabic currently uses Cairo with calm heading weights and increased line height; IBM Plex Arabic remains an unimplemented font migration option.
+- Arabic UI uses self-hosted Cairo for crisp Windows rendering; the Arabic brand wordmark uses self-hosted Noto Kufi Arabic. English display uses the Cairo Latin companion with Segoe fallbacks.
 - Assessment stays the primary mobile action; Ask Fahim remains directly accessible.
 - Recorded activity is not automatically verified learning. Unknown evidence must remain explicitly untested or not recorded.
 - Avoid decorative fog overlays, high-opacity gradients over content, and excessive offset shadows.

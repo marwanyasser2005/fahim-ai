@@ -170,7 +170,7 @@ export default function KnowledgeVault({ language }: { language: "ar" | "en" }) 
   return (
     <main className="min-h-[80vh] bg-[var(--surface)] pb-20">
       {/* ——— Hero ——— */}
-      <section className="fahim-band-hero relative overflow-hidden border-b border-[var(--band)] bg-[var(--band)] px-4 py-16 text-white sm:px-6 lg:py-24">
+      <section className="fahim-band-hero relative overflow-hidden border-b border-[var(--band)] bg-[var(--band)] px-4 py-10 text-white sm:px-6 lg:py-14">
         <div
           className="pointer-events-none absolute inset-0"
           style={{
@@ -185,15 +185,15 @@ export default function KnowledgeVault({ language }: { language: "ar" | "en" }) 
             {t.eyebrow}
           </p>
 
-          <div className="mt-8 grid gap-10 lg:grid-cols-[1.3fr_.7fr] lg:items-end">
+          <div className="mt-6 grid gap-8 lg:grid-cols-[1.3fr_.7fr] lg:items-center">
             <div>
-              <h1 className="atlas-display max-w-3xl text-4xl text-white sm:text-6xl">
+              <h1 className="atlas-display max-w-3xl text-4xl text-white sm:text-5xl">
                 {t.title}
               </h1>
-              <p className="mt-6 max-w-2xl text-base leading-8 text-[#B9C6D4] sm:text-lg">
+              <p className="mt-5 max-w-2xl text-base leading-7 text-[#B9C6D4] sm:text-lg">
                 {t.body}
               </p>
-              <div className="mt-7 flex items-start gap-3 rounded-2xl border border-white/12 bg-white/[.06] p-4 backdrop-blur-sm">
+              <div className="mt-5 flex items-start gap-3 rounded-2xl border border-white/12 bg-white/[.06] p-4 backdrop-blur-sm">
                 <LockKeyhole
                   className="mt-0.5 h-5 w-5 shrink-0 text-[var(--nile)]"
                   strokeWidth={1.75}

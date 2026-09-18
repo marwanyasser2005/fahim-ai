@@ -10,18 +10,18 @@ The mark combines three ideas in one compact Arabic symbol:
 - The teal rising path represents correction and learning progress.
 - The pure saffron dot identifies the Arabic letter and represents the moment of understanding. Verification is expressed through the learning journey, not a tiny check inside the dot.
 
-## Refined symbol, September 2026
+## Production identity V3.2, 18 September 2026
 
-The second version uses a wider, calmer bowl, a shorter right terminal and a larger open counter. The teal page sweeps upward through the letter. The standalone dot stays legible at small sizes. Flat SVG masters are authoritative; the AI-generated exploration is retained under `public/brand/explorations/fahim-refined-fa-v2.png` for provenance and is not the production master.
+V3.2 uses the supplied, approved Arabic **ف** master: a deep-ink learning loop, a rising teal path and a saffron proof dot. Its optical proportions, gradient depth and clear space are fixed. The application uses the approved transparent master without stretching, recolouring or cropping. Live bilingual wordmarks remain text so they stay accessible and theme-aware.
 
-Transparent high-resolution export: `/public/brand/fahim-symbol-v2-2048.png`. Use SVG for print and layouts that require resolution independence.
+Approved transparent symbol: `/public/brand/fahim-symbol-v32.png`. Approved full lockup: `/public/brand/fahim-lockup-v32.png`. The previous V2 files remain only for migration history.
 
 ## Primary lockup
 
-- Light surfaces: `/public/brand/fahim-logo.svg`
+- Light surfaces: responsive `FahimBrand` lockup with `/public/brand/fahim-symbol-v32.png`
 - Dark surfaces: `/public/brand/fahim-logo-dark.svg`
 - One color: `/public/brand/fahim-logo-mono.svg`
-- Icon only: `/public/brand/fahim-icon.svg`
+- Icon only: `/public/brand/fahim-symbol-v32.png`
 - Certificate seal: `/public/brand/fahim-certificate-mark.svg`
 - App maskable icon: `/public/brand/fahim-app-icon.svg`
 
