@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, ArrowRight, Award, BookOpenCheck, Bot, Check, CheckCircle2, ChevronDown, Clock3, ExternalLink, GraduationCap, LockKeyhole, Play, BrainCircuit, Target, Trophy } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import type { Language } from '@/App';
@@ -6,7 +6,7 @@ import { courseMinutes, getCourse } from '@/data/courseCatalog';
 import { getCourseProgress, saveCourseProgress } from '@/lib/courseProgress';
 import { recordStudyAction } from '@/lib/studyProgress';
 import { serverCourseIdFor } from '@/lib/verifiedCourse';
-import { recordLessonCompletion } from '@/lib/supabase/progressSync';
+import { loadCompletedLessons, recordLessonCompletion } from '@/lib/supabase/progressSync';
 import CourseAssessment from '@/components/learning/CourseAssessment';
 
 const copy = {
@@ -44,6 +44,21 @@ function CourseExperience({ courseId, language }: { courseId: string; language: 
   const completed = new Set(progress.completedLessonIds);
   const percent = lessons.length ? Math.round((completed.size / lessons.length) * 100) : 0;
   const nextLesson = lessons.find((item) => !completed.has(item.id)) || lessons[lessons.length - 1];
+  useEffect(() => {
+    if (!serverCourseId) return;
+    let active = true;
+    void loadCompletedLessons(serverCourseId).then((serverLessons) => {
+      if (!active || !serverLessons.length) return;
+      setProgress((current) => {
+        const merged = [...new Set([...current.completedLessonIds, ...serverLessons])];
+        if (merged.length === current.completedLessonIds.length) return current;
+        const updated = { ...current, completedLessonIds: merged, updatedAt: new Date().toISOString() };
+        saveCourseProgress(updated);
+        return updated;
+      });
+    });
+    return () => { active = false; };
+  }, [serverCourseId]);
   const toggleLesson = (lessonId: string, title: string) => {
     const next = completed.has(lessonId) ? progress.completedLessonIds.filter((item) => item !== lessonId) : [...progress.completedLessonIds, lessonId];
     const updated = { ...progress, completedLessonIds: next, updatedAt: new Date().toISOString() };

@@ -43,6 +43,8 @@ const LearningPassport = lazy(() => import('@/pages/LearningPassport'));
 const CertificateCenter = lazy(() => import('@/pages/CertificateCenter'));
 const TeacherCockpit = lazy(() => import('@/pages/TeacherCockpit'));
 const TrustCenter = lazy(() => import('@/pages/TrustCenter'));
+const PersonalPathBuilder = lazy(() => import('@/pages/PersonalPathBuilder'));
+const PersonalPathDetail = lazy(() => import('@/pages/PersonalPathDetail'));
 
 export default function App() {
   const [language, setLanguage] = useState<Language>(() => localStorage.getItem('fahim-language') === 'en' ? 'en' : 'ar');
@@ -83,7 +85,7 @@ export default function App() {
 function AppShell({ language, setLanguage, theme, setTheme, lowBandwidth, setLowBandwidth }: { language: Language; setLanguage: (language: Language) => void; theme: Theme; setTheme: (theme: Theme) => void; lowBandwidth: boolean; setLowBandwidth: (value: boolean) => void }) {
   const location = useLocation();
   const { user } = useAuth();
-  const product = Boolean(user && /^\/(dashboard|workspace|ask-fahim|review|passport|knowledge-vault|library|teacher|admin|profile|support|quiz-lab|learning|course\/|certificates|videos|studio|generation\/)/.test(location.pathname));
+  const product = Boolean(user && /^\/(dashboard|workspace|ask-fahim|review|passport|knowledge-vault|library|teacher|admin|profile|support|quiz-lab|learning|course\/|personal-paths|personal-path\/|certificates|videos|studio|generation\/)/.test(location.pathname));
   const showcaseMode = location.pathname === '/showcase';
   const immersive = location.pathname === '/ask-fahim' || showcaseMode;
   useEffect(() => { if (!immersive) window.scrollTo({ top: 0, behavior: 'auto' }); }, [immersive, location.pathname]);
@@ -127,6 +129,8 @@ function AppShell({ language, setLanguage, theme, setTheme, lowBandwidth, setLow
               <Route path="/support" element={<ProtectedRoute><Support language={language} /></ProtectedRoute>} />
               <Route path="/courses" element={<Courses language={language} />} />
               <Route path="/course/:id" element={<ProtectedRoute><CourseDetail language={language} /></ProtectedRoute>} />
+              <Route path="/personal-paths" element={<ProtectedRoute><PersonalPathBuilder language={language} /></ProtectedRoute>} />
+              <Route path="/personal-path/:id" element={<ProtectedRoute><PersonalPathDetail language={language} /></ProtectedRoute>} />
               <Route path="/onboarding" element={<ProtectedRoute requireOnboarding={false}><Onboarding language={language} /></ProtectedRoute>} />
               <Route path="/login" element={<Auth language={language} mode="login" />} />
               <Route path="/register" element={<Auth language={language} mode="register" />} />
@@ -155,6 +159,7 @@ const routeTitles: Record<string, { ar: string; en: string }> = {
   '/': { ar: 'فَهيم | نظام تشغيل للفهم الموثق', en: 'Fahim | Verified Learning OS' },
   '/how-it-works': { ar: 'كيف يعمل فَهيم | من المصدر إلى الدليل', en: 'How Fahim works | From source to evidence' },
   '/courses': { ar: 'مسارات فَهيم التعليمية', en: 'Fahim learning paths' },
+  '/personal-paths': { ar: 'أنشئ مسارك الشخصي بالذكاء الاصطناعي | فَهيم', en: 'Build your AI learning path | Fahim' },
   '/pricing': { ar: 'أسعار فَهيم | 30 يومًا دون بطاقة', en: 'Fahim pricing | 30 days, no card' },
   '/about': { ar: 'عن فَهيم والمؤسس مروان عبد الغفار', en: 'About Fahim and founder Marwan Abdelghaffar' },
   '/showcase': { ar: 'عرض فَهيم | افهمها، اثبتها، افتكرها', en: 'Fahim Showcase | Learn it. Prove it. Remember it.' },
@@ -191,6 +196,7 @@ const routeTitles: Record<string, { ar: string; en: string }> = {
 
 const prefixTitles: Array<[string, { ar: string; en: string }]> = [
   ['/course/', { ar: 'المسار التعليمي | فَهيم', en: 'Learning path | Fahim' }],
+  ['/personal-path/', { ar: 'مساري الشخصي | فَهيم', en: 'My personal learning path | Fahim' }],
   ['/verify/', { ar: 'تحقق من شهادة | فَهيم', en: 'Verify a credential | Fahim' }],
   ['/generation/', { ar: 'تفاصيل التوليد | فَهيم', en: 'Generation detail | Fahim' }],
 ];

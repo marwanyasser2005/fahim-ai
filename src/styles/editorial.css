@@ -174,6 +174,145 @@ html[lang="ar"] :is(h1, h2, h3) { letter-spacing: 0 !important; }
 .fahim-badge-emblem { filter: drop-shadow(0 12px 18px rgba(20,33,61,.16)); }
 .badge-trail-grid > li:not(.is-locked) { border-color: color-mix(in srgb,var(--nile) 28%,var(--border)); background: linear-gradient(145deg,color-mix(in srgb,var(--saffron) 5%,var(--panel)),var(--panel)); }
 
+/* ------------------------------------------------------------------
+   8. Catalog legibility — the grid motif belongs to the background only.
+   The previous mask was attached to the whole section, which also faded
+   headings, search fields and filters toward the bottom of the hero.
+   ------------------------------------------------------------------ */
+.fahim-os .atlas-grid {
+  position: relative;
+  isolation: isolate;
+  background-image: none;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+.fahim-os .atlas-grid::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background-image: radial-gradient(circle at center, rgba(20,33,61,.1) 1px, transparent 1.25px);
+  background-size: 28px 28px;
+  -webkit-mask-image: linear-gradient(to bottom, #000, transparent 96%);
+  mask-image: linear-gradient(to bottom, #000, transparent 96%);
+  pointer-events: none;
+  content: "";
+}
+.dark .fahim-os .atlas-grid::before {
+  background-image: radial-gradient(circle at center, rgba(247,240,228,.1) 1px, transparent 1.25px);
+}
+.fahim-os .catalog-hero {
+  background:
+    radial-gradient(circle at 82% 18%, color-mix(in srgb,var(--nile) 10%,transparent), transparent 28rem),
+    var(--paper);
+}
+.fahim-os .catalog-hero :is(.atlas-display, p, input, button, label) { opacity: 1; }
+.fahim-os .catalog-filter-panel {
+  border-radius: 1.15rem .35rem 1.15rem 1.15rem;
+  background: var(--panel);
+  box-shadow: 5px 5px 0 var(--saffron), var(--shadow-md);
+}
+.fahim-os .catalog-control {
+  background: var(--soft);
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
+}
+.fahim-os .catalog-control::placeholder,
+.fahim-os .catalog-search input::placeholder { color: var(--text-muted); opacity: 1; }
+.fahim-os .catalog-search {
+  border-color: var(--border-strong);
+  background: var(--panel);
+  box-shadow: 6px 6px 0 color-mix(in srgb,var(--saffron) 82%,transparent), var(--shadow-md);
+}
+.fahim-os .catalog-search label { background: var(--panel); }
+.fahim-os .catalog-search .atlas-search-button:disabled {
+  background: color-mix(in srgb,var(--text) 42%,var(--panel));
+  color: var(--on-solid);
+  opacity: 1;
+}
+.fahim-os .catalog-filters .atlas-filter {
+  border-color: var(--border-strong);
+  background: var(--panel);
+  color: var(--text-secondary);
+}
+.fahim-os .catalog-filters .atlas-filter-active {
+  border-color: var(--brand-solid);
+  background: var(--brand-solid);
+  color: var(--on-solid);
+}
+.dark .fahim-os .catalog-hero {
+  background:
+    radial-gradient(circle at 82% 18%, rgba(112,216,209,.11), transparent 28rem),
+    #0b1524;
+}
+.dark .fahim-os .catalog-filter-panel,
+.dark .fahim-os .catalog-search {
+  border-color: var(--border-strong);
+  background: #0d1829;
+}
+.dark .fahim-os .catalog-control,
+.dark .fahim-os .catalog-search label,
+.dark .fahim-os .catalog-filters .atlas-filter { background: #152238; }
+
+/* ------------------------------------------------------------------
+   9. Supplied achievement artwork — a live state layer around the exact
+   Fahim badge assets, with a separate transparent PNG download action.
+   ------------------------------------------------------------------ */
+.fahim-os .fahim-badge-emblem {
+  display: grid;
+  height: auto;
+  aspect-ratio: 1;
+  flex: 0 0 auto;
+  place-items: center;
+  filter: drop-shadow(0 14px 24px rgba(20,33,61,.2));
+}
+.fahim-os .fahim-badge-emblem.is-large { width: min(100%, 12.5rem); height: auto; }
+.fahim-os .fahim-badge-emblem.is-small { width: min(100%, 7.25rem); height: auto; }
+.fahim-os .fahim-badge-emblem img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.fahim-os .fahim-badge-emblem.is-progress-art {
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb,var(--nile) 28%,var(--border));
+  border-radius: 1.15rem .35rem 1.15rem 1.15rem;
+  background: #061b2e;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+.fahim-os .fahim-badge-emblem.is-completed-art img { transform: scale(1.02); }
+.fahim-os .is-locked .fahim-badge-emblem {
+  filter: drop-shadow(0 12px 20px rgba(20,33,61,.16));
+  opacity: 1;
+}
+.fahim-os .badge-trail-grid > li { min-height: 24rem; gap: .65rem; }
+.fahim-os .badge-trail.is-compact .badge-trail-grid > li { min-height: 15.5rem; }
+.fahim-os .badge-download {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  border: 1px solid color-mix(in srgb,var(--nile) 48%,var(--border));
+  border-radius: .75rem;
+  background: color-mix(in srgb,var(--nile) 8%,var(--panel));
+  padding: .55rem .8rem;
+  color: var(--nile);
+  font-size: .7rem;
+  font-weight: 800;
+  transition: transform .18s var(--ease-premium), border-color .18s var(--ease-premium), background-color .18s var(--ease-premium);
+}
+.fahim-os .badge-download svg { width: 1rem; height: 1rem; }
+@media (hover: hover) {
+  .fahim-os .badge-download:hover {
+    transform: translateY(-2px);
+    border-color: var(--nile);
+    background: color-mix(in srgb,var(--nile) 14%,var(--panel));
+  }
+}
+@media (max-width: 760px) {
+  .fahim-os .badge-trail-grid > li { min-height: 25rem; }
+  .fahim-os .fahim-badge-emblem.is-large { width: min(100%, 16rem); }
+}
+
 @media print {
   .fahim-certificate { background: #f6f4ee !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   .fahim-certificate-seal img { width: 100% !important; height: 100% !important; }

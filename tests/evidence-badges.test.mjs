@@ -29,15 +29,21 @@ describe('evidence-backed badge trail', () => {
     expect(migration).toContain('revoke all on function public.refresh_badges_for_user_v1(uuid) from public, anon, authenticated');
   });
 
-  it('publishes a profile and dashboard trail with accessible earned and locked states', () => {
+  it('publishes a profile and dashboard trail with accessible completed and pending states', () => {
     const trail = read('src/components/badges/BadgeTrail.tsx');
     const emblem = read('src/components/badges/BadgeEmblem.tsx');
+    const artwork = read('src/lib/badgeArtwork.ts');
     const profile = read('src/pages/Profile.tsx');
     const dashboard = read('src/pages/Dashboard.tsx');
     const center = read('src/pages/CertificateCenter.tsx');
     expect(trail).toContain('role="progressbar"');
     expect(trail).toContain('LockKeyhole');
+    expect(trail).toContain('badgeDownloadPath');
+    expect(trail).toContain('download={`Fahim-${badge.key}.png`}');
     expect(emblem).toContain('role="img"');
+    expect(emblem).toContain('badgeArtworkPath');
+    expect(artwork).toContain('/brand/badges/completed-');
+    expect(artwork).toContain('/brand/badges/progress-');
     expect(profile).toContain('badgeProgress.certificateCount');
     expect(dashboard).toContain('compact');
     expect(center).toContain('الشارات قبل الشهادة');

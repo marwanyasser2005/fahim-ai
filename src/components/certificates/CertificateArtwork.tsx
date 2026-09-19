@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { BadgeCheck, Download, ExternalLink, Printer, QrCode, ShieldCheck } from 'lucide-react';
+import { BadgeCheck, Check, Copy, Download, ExternalLink, FileJson, Printer, QrCode, ShieldCheck } from 'lucide-react';
 import QRCode from 'qrcode';
 import type { Language } from '@/App';
 import { credentialLevelFromScore, credentialLevelLabel } from '@/lib/credentials';
@@ -75,6 +75,8 @@ export default function CertificateArtwork({ credential, language, compact = fal
   const verificationUrl = useMemo(() => `${window.location.origin}/verify/${encodeURIComponent(credential.certificate_number)}`, [credential.certificate_number]);
   const [qrDataUrl, setQrDataUrl] = useState('');
   const [downloading, setDownloading] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [exportError, setExportError] = useState('');
   const issuedDate = new Intl.DateTimeFormat(rtl ? 'ar-EG' : 'en-US', { dateStyle: 'long' }).format(new Date(credential.issued_at));
   const level = credential.evidence?.achievementTier ?? credentialLevelFromScore(credential.evidence?.finalAssessmentScore);
   const levelLabel = credentialLevelLabel(level, language);
@@ -90,6 +92,7 @@ export default function CertificateArtwork({ credential, language, compact = fal
 
   const download = async () => {
     setDownloading(true);
+    setExportError('');
     try {
       const width = 2400;
       const height = 1697;
@@ -156,10 +159,47 @@ export default function CertificateArtwork({ credential, language, compact = fal
       anchor.href = downloadUrl;
       anchor.download = `Fahim-${credential.certificate_number}.png`;
       anchor.click();
-      URL.revokeObjectURL(downloadUrl);
+      window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+    } catch (reason) {
+      setExportError(reason instanceof Error ? reason.message : 'Certificate export failed.');
     } finally {
       setDownloading(false);
     }
+  };
+
+  const copyVerificationLink = async () => {
+    setExportError('');
+    try {
+      await navigator.clipboard.writeText(verificationUrl);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2200);
+    } catch {
+      setExportError(rtl ? 'تعذر نسخ الرابط. افتح سجل التحقق وانسخ الرابط من المتصفح.' : 'Could not copy the link. Open the verification record and copy it from the browser.');
+    }
+  };
+
+  const downloadRegistryRecord = () => {
+    const record = {
+      certificateNumber: credential.certificate_number,
+      credentialType: credential.credential_type,
+      issuer: { name: credential.issuer_name, title: credential.issuer_title || 'Founder of Fahim AI' },
+      learnerName: credential.learner_name,
+      courseTitle: credential.course_title,
+      issuedAt: credential.issued_at,
+      status: credential.status,
+      evidence: credential.evidence || {},
+      registryFingerprint: credential.registry_fingerprint,
+      fingerprintAlgorithm: credential.fingerprint_algorithm,
+      signatureValid: credential.signature_valid,
+      verificationUrl,
+      nonAccredited: credential.non_accredited ?? true,
+    };
+    const url = URL.createObjectURL(new Blob([JSON.stringify(record, null, 2)], { type: 'application/json;charset=utf-8' }));
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `Fahim-${credential.certificate_number}-registry.json`;
+    anchor.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
   return <div className={compact ? '' : 'certificate-print-shell'}>
@@ -183,6 +223,6 @@ export default function CertificateArtwork({ credential, language, compact = fal
         <p className="fahim-certificate-disclaimer">{rtl ? 'شهادة إتمام قائمة على سجل فَهيم العام؛ تثبت متطلبات المسار الموضحة أعلاه ولا تمثل اعتمادًا أكاديميًا أو حكوميًا.' : 'A Fahim public-registry completion credential proving the requirements shown above; not academic or government accreditation.'}</p>
       </div>
     </article>
-    {!compact && <div className="certificate-actions no-print"><button type="button" className="atlas-primary" onClick={() => void download()} disabled={downloading || !qrDataUrl}>{downloading ? <span className="spinner" /> : <Download className="h-4 w-4" />}{rtl ? 'تحميل PNG عالي الدقة' : 'Download high-resolution PNG'}</button><button type="button" className="atlas-secondary" onClick={() => window.print()}><Printer className="h-4 w-4" />{rtl ? 'طباعة أو حفظ PDF' : 'Print or save PDF'}</button><a href={verificationUrl} className="atlas-secondary"><ExternalLink className="h-4 w-4" />{rtl ? 'فتح سجل التحقق' : 'Open verification record'}</a></div>}
+    {!compact && <div className="no-print"><div className="certificate-actions"><button type="button" className="atlas-primary" onClick={() => void download()} disabled={downloading || !qrDataUrl}>{downloading ? <span className="spinner" /> : <Download className="h-4 w-4" />}{rtl ? 'تحميل PNG عالي الدقة' : 'Download high-resolution PNG'}</button><button type="button" className="atlas-secondary" onClick={() => window.print()}><Printer className="h-4 w-4" />{rtl ? 'طباعة أو حفظ PDF' : 'Print or save PDF'}</button><button type="button" className="atlas-secondary" onClick={() => void copyVerificationLink()}>{copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}{copied ? (rtl ? 'تم نسخ الرابط' : 'Link copied') : (rtl ? 'نسخ رابط التحقق' : 'Copy verification link')}</button><button type="button" className="atlas-secondary" onClick={downloadRegistryRecord}><FileJson className="h-4 w-4" />{rtl ? 'تنزيل سجل الدليل JSON' : 'Download evidence JSON'}</button><a href={verificationUrl} className="atlas-secondary"><ExternalLink className="h-4 w-4" />{rtl ? 'فتح سجل التحقق' : 'Open verification record'}</a></div>{exportError && <p role="alert" className="mt-3 rounded-xl border border-[var(--danger-border)] bg-[var(--danger-surface)] p-3 text-xs font-bold text-[var(--danger-text)]">{exportError}</p>}</div>}
   </div>;
 }

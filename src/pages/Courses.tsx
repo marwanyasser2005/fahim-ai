@@ -1,5 +1,5 @@
 import { useDeferredValue, useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, BookOpen, Check, Clock3, Filter, Search, BrainCircuit, Star, Users, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, Check, Clock3, Filter, Search, BrainCircuit, Sparkles, Star, Users, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { Language } from '@/App';
 import { courseCatalog, courseMinutes, type CourseLevel } from '@/data/courseCatalog';
@@ -10,14 +10,14 @@ const copy = {
     body: 'تسعة مسارات مجانية بمخرجات قابلة للقياس، ودروس قصيرة، وممارسة، ومشروع نهائي يرتبط مباشرة بفَهيم ومختبر الإتقان.',
     search: 'ابحث في المسارات والمهارات', filters: 'تصفية', all: 'الكل', beginner: 'تأسيسي', intermediate: 'متوسط', advanced: 'متقدم',
     tracks: 'مسارات متاحة', free: 'مجاني بالكامل', learners: 'متعلم', lessons: 'درس', hours: 'ساعة', start: 'افتح المسار', outcomes: 'ستتقن',
-    empty: 'لا توجد مسارات مطابقة. جرّب كلمة أخرى أو أزل التصفية.', clear: 'إزالة التصفية', quality: 'مصادر أصلية • تقدم محفوظ • تعلم نشط',
+    empty: 'لا توجد مسارات مطابقة. جرّب كلمة أخرى أو أزل التصفية.', clear: 'إزالة التصفية', quality: 'مصادر أصلية • تقدم محفوظ • تعلم نشط', aiTitle: 'هدف مختلف؟ ابنِ مسارك الخاص.', aiBody: 'وكيل فَهيم يحوّل احتياجك إلى وحدات ودروس وتطبيقات وتقييم نهائي بشهادة قائمة على الإنجاز.', aiAction: 'اصنع مساري بالـAI',
   },
   en: {
     eyebrow: 'Fahim paths', title: 'Follow a learning path, not a video list.',
     body: 'Nine free paths with measurable outcomes, focused lessons, practice, and a capstone connected directly to Fahim and the mastery lab.',
     search: 'Search paths and skills', filters: 'Filter', all: 'All', beginner: 'Foundation', intermediate: 'Intermediate', advanced: 'Advanced',
     tracks: 'Available paths', free: 'Completely free', learners: 'learners', lessons: 'lessons', hours: 'hours', start: 'Open path', outcomes: 'You will master',
-    empty: 'No matching paths. Try another term or clear the filter.', clear: 'Clear filters', quality: 'Primary resources • saved progress • active learning',
+    empty: 'No matching paths. Try another term or clear the filter.', clear: 'Clear filters', quality: 'Primary resources • saved progress • active learning', aiTitle: 'Different goal? Build your own path.', aiBody: 'Fahim Agent turns your need into modules, lessons, practice, a final assessment, and an evidence-based credential.', aiAction: 'Build my AI path',
   },
 } as const;
 
@@ -36,17 +36,19 @@ export default function Courses({ language }: { language: Language }) {
   }), [category, deferredQuery, language, level]);
   const clear = () => { setQuery(''); setLevel('all'); setCategory('all'); };
 
-  return <main className="min-h-[80vh] bg-[var(--surface)] pb-20">
-    <section className="atlas-grid border-b border-[var(--border)] bg-[var(--paper)] py-14 dark:bg-[#0b1116] sm:py-20">
+  return <main className="courses-page min-h-[80vh] bg-[var(--surface)] pb-20">
+    <section className="catalog-hero atlas-grid border-b border-[var(--border)] bg-[var(--paper)] py-14 sm:py-20">
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl"><span className="atlas-kicker"><BrainCircuit className="h-4 w-4" />{t.eyebrow}</span><h1 className="atlas-display mt-5 text-4xl sm:text-6xl">{t.title}</h1><p className="mt-5 max-w-2xl text-sm leading-8 text-[var(--muted)] sm:text-base">{t.body}</p><p className="mt-5 inline-flex items-center gap-2 text-xs font-black text-[var(--nile)]"><Check className="h-4 w-4" />{t.quality}</p></div>
     </div></section><div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
-      <section className="sticky top-[calc(var(--nav-height)+0.5rem)] z-40 mx-auto mt-8 min-w-0 max-w-6xl border border-[var(--band)] bg-[var(--panel)]/95 p-3 shadow-[5px_5px_0_var(--saffron)] backdrop-blur-xl" aria-label={t.filters}>
+      <section className="mt-8 grid items-center gap-5 overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[#14213D] p-5 text-white shadow-[var(--shadow-lg)] sm:p-7 lg:grid-cols-[minmax(0,1fr)_auto]" aria-labelledby="ai-path-title"><div><span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[.16em] text-[#F2B84B]"><Sparkles className="h-4 w-4" />FAHIM PATH AGENT</span><h2 id="ai-path-title" className="mt-3 text-2xl font-black sm:text-3xl">{t.aiTitle}</h2><p className="mt-2 max-w-3xl text-xs font-bold leading-7 text-slate-300 sm:text-sm">{t.aiBody}</p></div><Link to="/personal-paths" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#F2B84B] px-5 text-xs font-black text-[#14213D] transition hover:bg-amber-300"><Sparkles className="h-4 w-4" />{t.aiAction}</Link></section>
+
+      <section className="catalog-filter-panel sticky top-[calc(var(--nav-height)+0.5rem)] z-40 mx-auto mt-8 min-w-0 max-w-6xl border border-[var(--band)] bg-[var(--panel)] p-3 shadow-[5px_5px_0_var(--saffron)]" aria-label={t.filters}>
         <div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1fr)_auto_auto]">
-          <label className="relative min-w-0"><Search className="absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted)]" /><span className="sr-only">{t.search}</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t.search} className="h-12 min-w-0 w-full rounded-2xl border border-[var(--border)] bg-[var(--soft)] pe-10 ps-11 text-sm font-bold text-[var(--text)] outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-500/10" />{query && <button type="button" onClick={() => setQuery('')} className="absolute end-3 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-lg text-[var(--muted)] hover:bg-[var(--panel)]" aria-label={t.clear}><X className="h-4 w-4" /></button>}</label>
+          <label className="relative min-w-0"><Search className="absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted)]" /><span className="sr-only">{t.search}</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t.search} className="catalog-control h-12 min-w-0 w-full rounded-2xl border border-[var(--border-strong)] bg-[var(--soft)] pe-10 ps-11 text-sm font-bold text-[var(--text)] outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-500/10" />{query && <button type="button" onClick={() => setQuery('')} className="absolute end-3 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-[var(--muted)] hover:bg-[var(--panel)]" aria-label={t.clear}><X className="h-4 w-4" /></button>}</label>
           <div className="flex min-w-0 max-w-full items-center gap-2 overflow-x-auto"><Filter className="h-4 w-4 shrink-0 text-[var(--muted)]" />{(['all', 'beginner', 'intermediate', 'advanced'] as const).map((item) => <button type="button" key={item} onClick={() => setLevel(item)} className={`whitespace-nowrap rounded-lg px-3 py-2.5 text-[10px] font-black ${level === item ? 'bg-[var(--brand-solid)] text-[var(--on-solid)]' : 'bg-[var(--soft)] text-[var(--muted)] hover:text-[var(--text)]'}`}>{t[item]}</button>)}</div>
-          <select value={category} onChange={(event) => setCategory(event.target.value)} className="h-12 min-w-0 w-full max-w-full rounded-2xl border border-[var(--border)] bg-[var(--panel)] px-4 text-xs font-black text-[var(--text)] outline-none focus:border-teal-600 lg:w-auto"><option value="all">{t.all}</option>{categories.map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select>
+          <select value={category} onChange={(event) => setCategory(event.target.value)} className="catalog-control h-12 min-w-0 w-full max-w-full rounded-2xl border border-[var(--border-strong)] bg-[var(--panel)] px-4 text-xs font-black text-[var(--text)] outline-none focus:border-teal-600 lg:w-auto"><option value="all">{t.all}</option>{categories.map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select>
         </div>
       </section>
 
