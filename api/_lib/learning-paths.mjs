@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { readLearningAIResponse, requestLearningAI } from './_lib/ai-routing.mjs';
+import { readLearningAIResponse, requestLearningAI } from './ai-routing.mjs';
 import {
   applyApiHeaders,
   consumeRateLimit,
@@ -9,8 +9,8 @@ import {
   rejectRateLimit,
   requestSearchParams,
   RequestBodyError,
-} from './_lib/security.mjs';
-import { AuthenticationError, createAdminClient, requireAuthenticatedUser, ServerConfigurationError } from './_lib/supabase-auth.mjs';
+} from './security.mjs';
+import { AuthenticationError, createAdminClient, requireAuthenticatedUser, ServerConfigurationError } from './supabase-auth.mjs';
 
 const HEADERS = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' };
 

@@ -1,8 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { normalizeGeneratedPlan } from '../api/learning-paths.mjs';
+import { normalizeGeneratedPlan } from '../api/_lib/learning-paths.mjs';
 
-const api = readFileSync(new URL('../api/learning-paths.mjs', import.meta.url), 'utf8');
+const api = readFileSync(new URL('../api/_lib/learning-paths.mjs', import.meta.url), 'utf8');
+const gateway = readFileSync(new URL('../api/ai.mjs', import.meta.url), 'utf8');
+const vercel = readFileSync(new URL('../vercel.json', import.meta.url), 'utf8');
 const migration = readFileSync(new URL('../supabase/migrations/20260919010000_personalized_learning_paths.sql', import.meta.url), 'utf8');
 const detail = readFileSync(new URL('../src/pages/PersonalPathDetail.tsx', import.meta.url), 'utf8');
 const certificate = readFileSync(new URL('../src/components/certificates/CertificateArtwork.tsx', import.meta.url), 'utf8');
@@ -35,6 +37,8 @@ describe('personalized learning-path agent', () => {
     expect(api).toContain('consumeRateLimit(request');
     expect(api).toContain("await admin.from('courses').delete().eq('id', courseId)");
     expect(api).toContain("action: 'learning_path.generated'");
+    expect(gateway).toContain("route === 'learning-paths'");
+    expect(vercel).toContain('"source": "/api/learning-paths"');
   });
 
   it('keeps personalized paths private while allowing their owner to earn a credential', () => {
