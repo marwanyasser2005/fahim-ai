@@ -10,7 +10,7 @@ const source = readFileSync(new URL('../api/quiz.mjs', import.meta.url), 'utf8')
 // provider to exercise end to end.
 describe('quiz generation metering', () => {
   it('consumes the shared AI entitlement for generation', () => {
-    expect(source).toMatch(/consume_entitlement_v1', \{ target_key: 'ai_sessions_month', amount: 1 \}/);
+    expect(source).toMatch(/gate = await consumeAiSession\(auth\.client\)/);
   });
 
   it('records a generation row so spend is observable', () => {
@@ -20,11 +20,11 @@ describe('quiz generation metering', () => {
   });
 
   it('returns the entitlement when no usable quiz was produced', () => {
-    expect(source).toMatch(/if \(!succeeded\) \{[\s\S]*?refund_entitlement_v1/);
+    expect(source).toMatch(/if \(!succeeded\) \{[\s\S]*?refundAiSession/);
   });
 
   it('rolls back the entitlement when the generation row cannot be written', () => {
-    expect(source).toMatch(/if \(generationError\) \{[\s\S]*?refund_entitlement_v1/);
+    expect(source).toMatch(/if \(generationError\) \{[\s\S]*?refundAiSession/);
   });
 
   it('records token usage and an estimated cost for both model calls', () => {
@@ -40,7 +40,7 @@ describe('quiz generation metering', () => {
 
   it('rejects an invalid topic before spending an entitlement', () => {
     const guardIndex = source.indexOf('Topic must be at least 3 characters.');
-    const meterIndex = source.indexOf('consume_entitlement_v1');
+    const meterIndex = source.indexOf('gate = await consumeAiSession');
     expect(guardIndex).toBeGreaterThan(-1);
     expect(guardIndex).toBeLessThan(meterIndex);
   });

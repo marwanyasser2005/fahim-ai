@@ -57,8 +57,8 @@ describe('agent endpoint wiring (zero new Vercel functions)', () => {
   it('keeps the agent authenticated, same-origin, and metered like chat', () => {
     expect(handler).toContain('requireAuthenticatedUser');
     expect(handler).toContain('isSameOrigin');
-    expect(handler).toContain("consume_entitlement_v1");
-    expect(handler).toContain("refund_entitlement_v1");
+    expect(handler).toContain('consumeAiSession');
+    expect(handler).toContain('refundAiSession');
   });
 
   it('exposes the Agent Studio behind ProtectedRoute and the impact RPC in the client', () => {

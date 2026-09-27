@@ -71,6 +71,6 @@ describe('chat endpoint deadline wiring', () => {
   });
 
   it('does not bill the learner for an answer that produced no text', () => {
-    expect(CHAT_SOURCE).toMatch(/if \(!streamedText\) await admin\.rpc\('refund_entitlement_v1'/);
+    expect(CHAT_SOURCE).toMatch(/if \(!streamedText\) await refundAiSession\(admin, auth\.user\.id, gate\.metered\)/);
   });
 });

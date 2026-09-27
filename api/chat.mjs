@@ -9,6 +9,7 @@ import {
   requestLearningAI,
 } from './_lib/ai-routing.mjs';
 import { AuthenticationError, createAdminClient, requireAuthenticatedUser, ServerConfigurationError } from './_lib/supabase-auth.mjs';
+import { consumeAiSession, refundAiSession } from './_lib/entitlements.mjs';
 import {
   applyApiHeaders,
   consumeRateLimit,
@@ -297,9 +298,9 @@ export default async function handler(request, response) {
     return send(response, 200, { answer: cached.result_text, sources: cached.sources || [], generationId, cacheHit: true });
   }
 
-  const { data: entitlementConsumed, error: entitlementError } = await auth.client.rpc('consume_entitlement_v1', { target_key: 'ai_sessions_month', amount: 1 });
-  if (entitlementError) return send(response, 503, { error: 'AI entitlements are not configured.' });
-  if (!entitlementConsumed) return send(response, 429, { error: 'Your AI session allowance is exhausted. Review your plan or wait for the next reset.' });
+  const gate = await consumeAiSession(auth.client);
+  if (gate.configError) return send(response, 503, { error: 'AI entitlements are not configured.' });
+  if (!gate.allowed) return send(response, 429, { error: 'Your AI session allowance is exhausted. Review your plan or wait for the next reset.' });
 
   const generationId = randomUUID();
   const { error: generationError } = await admin.from('ai_generations').insert({
@@ -308,7 +309,7 @@ export default async function handler(request, response) {
     sources: publicSources, status: stream ? 'streaming' : 'pending',
   });
   if (generationError) {
-    await admin.rpc('refund_entitlement_v1', { target_user: auth.user.id, target_key: 'ai_sessions_month', amount: 1 });
+    await refundAiSession(admin, auth.user.id, gate.metered);
     return send(response, 500, { error: 'The generation could not be recorded.' });
   }
 
@@ -340,7 +341,7 @@ export default async function handler(request, response) {
     const { text: answer, usage } = await readLearningAIResponse(route);
     if (!answer) {
       await admin.from('ai_generations').update({ status: 'error', error_code: 'empty_response', completed_at: new Date().toISOString() }).eq('id', generationId);
-      await admin.rpc('refund_entitlement_v1', { target_user: auth.user.id, target_key: 'ai_sessions_month', amount: 1 });
+      await refundAiSession(admin, auth.user.id, gate.metered);
       return send(response, 502, { error: 'The learning assistant returned no text.' });
     }
     await admin.from('ai_generations').update({
@@ -363,7 +364,7 @@ export default async function handler(request, response) {
       completed_at: new Date().toISOString(),
     }).eq('id', generationId);
     // Refund only when the learner received nothing; a truncated answer still delivered value.
-    if (!streamedText) await admin.rpc('refund_entitlement_v1', { target_user: auth.user.id, target_key: 'ai_sessions_month', amount: 1 });
+    if (!streamedText) await refundAiSession(admin, auth.user.id, gate.metered);
     if (!response.headersSent) return send(response, 502, { error: 'The learning assistant is temporarily unavailable.' });
     ndjson(response, { type: 'error', error: 'The stream was interrupted.' });
     return response.end();

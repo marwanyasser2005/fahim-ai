@@ -2,6 +2,7 @@ import { createCipheriv, createDecipheriv, createHash, randomBytes, randomUUID }
 import { estimateAICostMicrousd, getAIStatus, readLearningAIResponse, requestLearningAI } from './_lib/ai-routing.mjs';
 import { rankVerifiedSources } from './_lib/source-ranking.mjs';
 import { AuthenticationError, createAdminClient, requireAuthenticatedUser, ServerConfigurationError } from './_lib/supabase-auth.mjs';
+import { consumeAiSession, refundAiSession } from './_lib/entitlements.mjs';
 import {
   applyApiHeaders,
   consumeRateLimit,
@@ -294,6 +295,7 @@ export default async function handler(request, response) {
   // records a generation row. Grading is local and stays unmetered.
   let admin = null;
   let generationId = null;
+  let gate = { metered: false };
   const meter = { provider: null, model: null, inputTokens: 0, outputTokens: 0 };
   if (!isGrade) {
     try {
@@ -301,9 +303,9 @@ export default async function handler(request, response) {
     } catch {
       return send(response, 503, { error: 'Quiz metering is not configured.' });
     }
-    const { data: consumed, error: entitlementError } = await auth.client.rpc('consume_entitlement_v1', { target_key: 'ai_sessions_month', amount: 1 });
-    if (entitlementError) return send(response, 503, { error: 'AI entitlements are not configured.' });
-    if (!consumed) return send(response, 429, { error: 'Your AI session allowance is exhausted. Review your plan or wait for the next reset.' });
+    gate = await consumeAiSession(auth.client);
+    if (gate.configError) return send(response, 503, { error: 'AI entitlements are not configured.' });
+    if (!gate.allowed) return send(response, 429, { error: 'Your AI session allowance is exhausted. Review your plan or wait for the next reset.' });
 
     generationId = randomUUID();
     const promptHash = createHash('sha256').update(JSON.stringify({
@@ -326,7 +328,7 @@ export default async function handler(request, response) {
       status: 'pending',
     });
     if (generationError) {
-      await auth.client.rpc('refund_entitlement_v1', { target_user: auth.user.id, target_key: 'ai_sessions_month', amount: 1 });
+      await refundAiSession(auth.client, auth.user.id, gate.metered);
       return send(response, 500, { error: 'The quiz generation could not be recorded.' });
     }
   }
@@ -352,7 +354,7 @@ export default async function handler(request, response) {
     }).eq('id', generationId);
     // No usable quiz means the learner received nothing, so the entitlement is returned.
     if (!succeeded) {
-      await auth.client.rpc('refund_entitlement_v1', { target_user: auth.user.id, target_key: 'ai_sessions_month', amount: 1 });
+      await refundAiSession(auth.client, auth.user.id, gate.metered);
     }
   }
 

@@ -20,6 +20,7 @@ import {
   RequestBodyError,
 } from '../security.mjs';
 import { runAgentTurn } from './orchestrator.mjs';
+import { consumeAiSession, refundAiSession } from '../entitlements.mjs';
 
 function send(response, status, body) {
   response.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -105,9 +106,9 @@ export default async function agentHandler(request, response) {
   const stream = body.stream === true;
   const deadlineAt = Date.now() + 45_000;
 
-  const { data: entitlementConsumed, error: entitlementError } = await auth.client.rpc('consume_entitlement_v1', { target_key: 'ai_sessions_month', amount: 1 });
-  if (entitlementError) return send(response, 503, { error: 'AI entitlements are not configured.' });
-  if (!entitlementConsumed) return send(response, 429, { error: 'Your AI session allowance is exhausted. Review your plan or wait for the next reset.' });
+  const gate = await consumeAiSession(auth.client);
+  if (gate.configError) return send(response, 503, { error: 'AI entitlements are not configured.' });
+  if (!gate.allowed) return send(response, 429, { error: 'Your AI session allowance is exhausted. Review your plan or wait for the next reset.' });
 
   const generationId = randomUUID();
   await admin.from('ai_generations').insert({
@@ -182,7 +183,7 @@ export default async function agentHandler(request, response) {
   } catch (error) {
     logEvent('agent_turn_failed', { requestId, code: error?.name || 'error' });
     await admin.from('ai_generations').update({ status: 'error', error_code: error?.name || 'agent_error', completed_at: new Date().toISOString() }).eq('id', generationId).then(() => {}, () => {});
-    await auth.client.rpc('refund_entitlement_v1', { target_user: auth.user.id, target_key: 'ai_sessions_month', amount: 1 }).then(() => {}, () => {});
+    await refundAiSession(auth.client, auth.user.id, gate.metered);
     if (!response.headersSent) return send(response, 502, { error: 'The learning agent is temporarily unavailable.' });
     ndjson(response, { type: 'error', error: 'The agent run was interrupted.' });
     return response.end();
