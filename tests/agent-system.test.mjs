@@ -9,6 +9,9 @@ const vercel = read('../vercel.json');
 const app = read('../src/App.tsx');
 const handler = read('../api/_lib/agent/handler.mjs');
 const cockpitClient = read('../src/lib/teacherCockpit.ts');
+const adminMigration = read('../supabase/migrations/20260927020000_admin_agent_oversight.sql');
+const adminLib = read('../src/lib/adminAgent.ts');
+const adminPage = read('../src/pages/Admin.tsx');
 
 describe('durable agent memory migration', () => {
   it('creates a server-owned concept_mastery table with owner RLS and a reader RPC', () => {
@@ -61,5 +64,23 @@ describe('agent endpoint wiring (zero new Vercel functions)', () => {
   it('exposes the Agent Studio behind ProtectedRoute and the impact RPC in the client', () => {
     expect(app).toMatch(/path="\/agent".+ProtectedRoute/);
     expect(cockpitClient).toContain("client().rpc('sme_impact_summary_v1'");
+  });
+});
+
+describe('admin agent oversight', () => {
+  it('gates the overview RPC by the admin role and returns aggregates only', () => {
+    expect(adminMigration).toContain('create or replace function public.admin_agent_overview_v1()');
+    expect(adminMigration).toContain("public.has_role('admin')");
+    expect(adminMigration).toContain('security definer');
+    // Privacy: it must never select learner prompt/answer/result column content.
+    expect(adminMigration).not.toMatch(/prompt_text|result_text/);
+    expect(adminMigration).toContain("grant execute on function public.admin_agent_overview_v1() to authenticated");
+  });
+
+  it('wires the admin oversight tab and client loader', () => {
+    expect(adminLib).toContain("supabase.rpc('admin_agent_overview_v1')");
+    expect(adminPage).toContain('loadAdminAgentOverview');
+    expect(adminPage).toContain('AgentOversight');
+    expect(adminPage).toMatch(/key:\s*"agent"/);
   });
 });

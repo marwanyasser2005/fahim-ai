@@ -3,6 +3,8 @@ import {
   Activity,
   BadgeCheck,
   BookOpen,
+  Bot,
+  Brain,
   Check,
   CircleDollarSign,
   ExternalLink,
@@ -17,6 +19,7 @@ import {
   Send,
   ShieldAlert,
   ShieldCheck,
+  TimerReset,
   UploadCloud,
   Users,
   X,
@@ -24,6 +27,8 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { authenticatedFetch, supabase } from "@/lib/supabase/client";
 import { displayLabel } from "@/lib/displayLabels";
+import { loadAdminAgentOverview, type AdminAgentOverview } from "@/lib/adminAgent";
+import { masteryLabel as bktMasteryLabel } from "@/lib/learning/bkt";
 import type { Language } from "@/App";
 import type {
   PaymentMethod,
@@ -31,7 +36,7 @@ import type {
   PaymentStatus,
 } from "@/lib/manualCommerce";
 
-type Tab = "overview" | "payments" | "content" | "credentials" | "support" | "users";
+type Tab = "overview" | "agent" | "payments" | "content" | "credentials" | "support" | "users";
 type ManagedUser = {
   id: string;
   email: string;
@@ -242,6 +247,7 @@ export default function Admin({ language }: { language: Language }) {
     count?: number;
   }[] = [
     { key: "overview", icon: LayoutDashboard, ar: "نظرة عامة", en: "Overview" },
+    { key: "agent", icon: Bot, ar: "الوكيل المعلّم", en: "Tutor agent" },
     {
       key: "payments",
       icon: CircleDollarSign,
@@ -350,6 +356,7 @@ export default function Admin({ language }: { language: Language }) {
                 setTab={setTab}
               />
             )}
+            {tab === "agent" && <AgentOversight language={language} setError={setError} />}
             {tab === "payments" && (
               <Payments
                 language={language}
@@ -511,6 +518,89 @@ function Overview({
         </article>
       </section>
     </>
+  );
+}
+
+function AgentOversight({ language, setError }: { language: Language; setError: (v: string) => void }) {
+  const rtl = language === "ar";
+  const [data, setData] = useState<AdminAgentOverview | null>(null);
+  const [loading, setLoading] = useState(true);
+  const bandAr: Record<string, string> = { "Needs Foundation": "يحتاج الأساسيات", Developing: "قيد التطور", Progressing: "في تقدم", Strong: "قوي", Mastered: "مُتقَن" };
+  const load = async () => {
+    setLoading(true);
+    try { setData(await loadAdminAgentOverview()); }
+    catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); }
+    finally { setLoading(false); }
+  };
+  useEffect(() => { void load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  if (loading) return <div className="grid h-64 place-items-center border border-[var(--border)] bg-[var(--panel)]"><Loader2 className="h-6 w-6 animate-spin" /></div>;
+  if (!data) return <Empty icon={Bot} text={rtl ? "تعذّر تحميل نظرة الوكيل." : "Could not load agent overview."} />;
+  const t = data.totals;
+  const maxBand = Math.max(1, ...data.masteryBands.map((b) => b.count));
+  const cards = [
+    { icon: Bot, value: t.agentSessions, sub: `+${t.agentSessions7d} ${rtl ? "خلال 7 أيام" : "in 7d"}`, label: rtl ? "جلسات الوكيل" : "Agent sessions" },
+    { icon: Users, value: t.agentLearners, sub: `${t.learnersWithMastery} ${rtl ? "بإتقان محفوظ" : "with mastery"}`, label: rtl ? "متعلمون استخدموا الوكيل" : "Learners using the agent" },
+    { icon: Brain, value: `${Math.round(t.avgMastery * 100)}%`, sub: `${t.masteredConcepts} ${rtl ? "متقَنة" : "mastered"}`, label: rtl ? "متوسط الإتقان" : "Average mastery" },
+    { icon: TimerReset, value: t.reviewsScheduled, sub: `${t.reviewsDue} ${rtl ? "مستحقة" : "due"}`, label: rtl ? "مراجعات مجدولة" : "Reviews scheduled" },
+  ];
+  return (
+    <div className="space-y-5">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {cards.map((card) => (
+          <div key={card.label} className="atlas-metric">
+            <card.icon className="h-5 w-5 text-[var(--nile)]" />
+            <strong className="mt-8 block text-4xl font-black tabular-nums">{card.value}</strong>
+            <span className="mt-2 block text-xs font-bold text-[var(--muted)]">{card.label}</span>
+            <span className="mt-1 block text-[11px] font-semibold text-[var(--nile)]">{card.sub}</span>
+          </div>
+        ))}
+      </div>
+      {/* AGENT_OVERSIGHT_REST */}
+      <section className="grid gap-5 lg:grid-cols-2">
+        <article className="atlas-panel p-6">
+          <div className="flex items-center justify-between">
+            <p className="atlas-section-number">MASTERY DISTRIBUTION</p>
+            <span className="text-xs font-bold text-[var(--muted)]">{t.conceptsTracked} {rtl ? "مفهوم" : "concepts"} · {t.smeOrganizations} SME</span>
+          </div>
+          <div className="mt-5 space-y-3">
+            {data.masteryBands.map((band) => (
+              <div key={band.band}>
+                <div className="flex items-center justify-between text-xs font-bold">
+                  <span>{rtl ? bandAr[band.band] || band.band : band.band}</span>
+                  <span className="tabular-nums text-[var(--muted)]">{band.count}</span>
+                </div>
+                <span className="mt-1.5 block h-2 overflow-hidden rounded-full bg-[var(--soft)]"><span className="block h-full rounded-full bg-[var(--nile)]" style={{ width: `${Math.round((band.count / maxBand) * 100)}%` }} /></span>
+              </div>
+            ))}
+            {data.masteryBands.every((b) => b.count === 0) && <p className="text-sm font-semibold text-[var(--muted)]">{rtl ? "لا توجد بيانات إتقان بعد." : "No mastery data yet."}</p>}
+          </div>
+        </article>
+        <article className="atlas-panel p-6">
+          <p className="atlas-section-number">TOP CONCEPTS</p>
+          <div className="mt-5 divide-y divide-[var(--border)]">
+            {data.topConcepts.length === 0 ? <p className="text-sm font-semibold text-[var(--muted)]">{rtl ? "لم يبدأ أي متعلم بعد." : "No learners yet."}</p> : data.topConcepts.map((concept) => (
+              <div key={concept.conceptKey} className="flex items-center justify-between gap-3 py-2.5">
+                <span className="min-w-0 flex-1 truncate text-sm font-bold text-[var(--text)]">{concept.conceptKey}</span>
+                <span className="text-xs font-bold text-[var(--nile)]">{bktMasteryLabel(concept.avgMastery, rtl)}</span>
+                <span className="shrink-0 rounded-full bg-[var(--soft)] px-2 text-xs font-black tabular-nums text-[var(--muted)]">{concept.learners}</span>
+              </div>
+            ))}
+          </div>
+        </article>
+      </section>
+      <section className="atlas-panel overflow-hidden">
+        <header className="flex items-center justify-between gap-4 border-b border-[var(--border)] p-5">
+          <div><p className="atlas-section-number">RECENT AGENT RUNS</p><h2 className="mt-2 text-lg font-black">{rtl ? "أحدث تشغيلات الوكيل" : "Latest agent runs"}</h2></div>
+          <button type="button" onClick={() => void load()} className="icon-button" aria-label={rtl ? "تحديث" : "Refresh"}><Activity className="h-4 w-4" /></button>
+        </header>
+        {data.recentRuns.length === 0 ? <Empty icon={Bot} text={rtl ? "لا توجد تشغيلات بعد." : "No agent runs yet."} /> : (
+          <div className="overflow-x-auto"><table className="w-full min-w-[640px] text-sm"><thead className="bg-[var(--paper)] text-xs text-[var(--muted)]"><tr><th className="p-4 text-start">{rtl ? "الحالة" : "Status"}</th><th className="p-4 text-start">{rtl ? "المحرك" : "Engine"}</th><th className="p-4 text-start">{rtl ? "الرموز" : "Tokens"}</th><th className="p-4 text-start">{rtl ? "الوقت" : "Time"}</th></tr></thead><tbody>
+            {data.recentRuns.map((run) => (<tr key={run.id} className="border-t border-[var(--border)]"><td className="p-4">{displayLabel(run.status, language)}</td><td className="p-4 text-[var(--muted)]">{run.model}</td><td className="p-4 tabular-nums">{run.tokens}</td><td className="p-4 text-[var(--muted)]">{new Intl.DateTimeFormat(rtl ? "ar-EG" : "en-GB", { dateStyle: "short", timeStyle: "short" }).format(new Date(run.createdAt))}</td></tr>))}
+          </tbody></table></div>
+        )}
+      </section>
+      <p className="rounded-xl border border-[var(--border)] bg-[var(--soft)] px-4 py-3 text-xs font-semibold leading-6 text-[var(--muted)]">{rtl ? "هذه اللوحة تجميعية وآمنة للخصوصية: لا تعرض محتوى محادثات المتعلّمين، فقط أعداد ومؤشرات إتقان وبيانات تشغيل." : "This panel is aggregate and privacy-safe: it never shows learner conversation content — only counts, mastery signals, and run metadata."}</p>
+    </div>
   );
 }
 
