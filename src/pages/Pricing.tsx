@@ -77,6 +77,13 @@ export default function Pricing({ language }: { language: Language }) {
       <div className="relative mx-auto max-w-6xl text-center"><p className="atlas-kicker mx-auto w-fit"><WalletCards className="h-4 w-4" />{rtl ? 'تسعير مصري بلا مفاجآت' : 'Egypt-first, surprise-free pricing'}</p><h1 className="atlas-display mx-auto mt-6 max-w-4xl text-5xl sm:text-7xl">{rtl ? 'اتعلم شهرًا كاملًا قبل أن تدفع جنيهًا واحدًا.' : 'Learn for a full month before paying a pound.'}</h1><p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-[var(--muted)]">{rtl ? '30 يومًا مجانية دون بطاقة أو خصم تلقائي. بعدها حوّل بالطريقة المعلنة وارفع الإثبات؛ فريق فَهيم يراجعه بسجل واضح ويُفعّل حسابك.' : '30 free days, no card and no automatic charge. Then transfer using a published method, upload proof, and Fahim reviews it through an auditable process.'}</p><div className="mt-7 flex flex-wrap justify-center gap-3 text-xs font-black text-[var(--text)]"><span className="atlas-chip bg-[var(--saffron)] text-[#14213D]"><Clock3 className="h-4 w-4" />{rtl ? '30 يومًا مجانًا' : '30 days free'}</span><span className="atlas-chip bg-[color-mix(in_srgb,var(--nile)_14%,var(--panel))] text-[var(--nile)]"><ShieldCheck className="h-4 w-4" />{rtl ? 'لا خصم تلقائي' : 'No auto-charge'}</span><span className="atlas-chip bg-[color-mix(in_srgb,var(--vermilion)_12%,var(--panel))] text-[var(--vermilion)]"><BadgeCheck className="h-4 w-4" />{rtl ? 'مراجعة بشرية موثقة' : 'Audited human review'}</span></div></div>
     </section>
 
+    <div className="mx-auto mt-8 max-w-3xl px-4 sm:px-6">
+      <div className="flex items-start gap-3 rounded-2xl border border-[var(--nile)]/25 bg-[color-mix(in_srgb,var(--nile)_8%,var(--panel))] p-4 text-sm font-bold leading-7 text-[var(--text)]">
+        <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-[var(--nile)]" />
+        <span>{rtl ? 'عرض الإطلاق: كل مزايا فَهيم بلس (بما فيها المعلّم الذكي والمراجعة المتباعدة والأدلة) مفعّلة مجانًا لكل الحسابات مؤقتًا لحين تفعيل الدفع.' : 'Launch offer: every Fahim Plus feature — including the tutor agent, spaced review, and evidence — is unlocked free for all accounts while payment is being finalized.'}</span>
+      </div>
+    </div>
+
     <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
       <div className="grid gap-5 lg:grid-cols-3">{publicPlans.map((plan) => {
         const featured = plan.code === 'plus_annual';

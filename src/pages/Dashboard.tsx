@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   ArrowRight,
   BookOpen,
+  Bot,
   BrainCircuit,
   CalendarClock,
   CheckCircle2,
@@ -34,7 +35,7 @@ const copy = {
   ar: {
     kicker: 'مساحة التعلّم الشخصية', welcome: 'أهلًا', title: 'ماذا يحتاج فهمك الآن؟',
     subtitle: 'قرار واحد في الأعلى: راجع ما استحق، أو أكمل حلقة فهم، أو ابدأ خط أساس جديد.',
-    startAssessment: 'ابدأ تقييمًا تشخيصيًا', continueAssessment: 'أكمل حلقة الفهم', askFahim: 'اسأل فَهيم عن مفهوم',
+    startAssessment: 'ابدأ تقييمًا تشخيصيًا', continueAssessment: 'أكمل حلقة الفهم', askFahim: 'اسأل فَهيم عن مفهوم', agentCta: 'ابدأ مع الوكيل المعلّم',
     reviewToday: 'مراجعتك اليوم', reviewCount: 'بطاقة مستحقة الآن', reviewBody: 'حان موعد استرجاع هذه المفاهيم من الذاكرة قبل موعد النسيان.', startReview: 'ابدأ المراجعة',
     nextTitle: 'الخطوة التالية المقترحة', nextNewTitle: 'ابدأ بخط أساس قصير',
     nextNewBody: 'خمسة أسئلة تطبيقية تكشف أين يبدأ التدخل المناسب، من دون كشف الإجابة قبل التفكير.',
@@ -54,7 +55,7 @@ const copy = {
   en: {
     kicker: 'Personal learning space', welcome: 'Welcome', title: 'What does your understanding need now?',
     subtitle: 'One decision up top: review what is due, complete the understanding loop, or start a fresh baseline.',
-    startAssessment: 'Start diagnostic assessment', continueAssessment: 'Complete the loop', askFahim: 'Ask Fahim about a concept',
+    startAssessment: 'Start diagnostic assessment', continueAssessment: 'Complete the loop', askFahim: 'Ask Fahim about a concept', agentCta: 'Start with the Tutor Agent',
     reviewToday: 'Your review today', reviewCount: 'cards due now', reviewBody: 'These concepts are ready to be retrieved from memory before the forgetting deadline.', startReview: 'Start review',
     nextTitle: 'Recommended next step', nextNewTitle: 'Start with a short baseline',
     nextNewBody: 'Five application questions reveal where intervention should start without exposing the answer before reflection.',
@@ -170,6 +171,7 @@ export default function Dashboard({ language }: Props) {
             <p className="dashboard-subtitle">{t.subtitle}</p>
           </div>
           <div className="dashboard-actions">
+            <Link to="/agent" className="premium-button-secondary"><Bot aria-hidden="true" />{t.agentCta}</Link>
             <Link to="/ask-fahim" className="premium-button-secondary"><FileQuestion aria-hidden="true" />{t.askFahim}</Link>
           </div>
         </header>
