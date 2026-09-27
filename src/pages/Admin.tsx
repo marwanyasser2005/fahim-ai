@@ -86,6 +86,7 @@ type Health = {
   aiProviderCount?: number;
   aiRedundancyConfigured?: boolean;
   youtubeConfigured?: boolean;
+  agentReady?: boolean;
   billingProvider?: string;
 };
 
@@ -484,6 +485,10 @@ function Overview({
               [
                 rtl ? "توجيه احتياطي" : "Provider redundancy",
                 health.aiRedundancyConfigured,
+              ],
+              [
+                rtl ? "الوكيل المعلّم جاهز" : "Tutor agent ready",
+                health.agentReady,
               ],
               [rtl ? "بحث الفيديو" : "Video search", health.youtubeConfigured],
             ].map(([label, ok]) => (

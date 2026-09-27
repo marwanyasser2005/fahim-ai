@@ -62,6 +62,8 @@ export default async function handler(request, response) {
       aiRedundancyConfigured: ai.redundancyConfigured,
       youtubeConfigured: Boolean(process.env.YOUTUBE_API_KEY),
       serverAuthorizationConfigured: Boolean(serviceKey),
+      // The tutor agent needs both a live provider and the sealed-diagnostic signing secret.
+      agentReady: checks.ai === 'configured' && checks.quizSigning === 'configured',
       billingProvider: 'manual-review',
     }
     : {};
