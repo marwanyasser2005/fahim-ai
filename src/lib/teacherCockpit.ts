@@ -197,3 +197,37 @@ export async function loadPilotSummary(pilotId: string): Promise<PilotSummary> {
   const { data, error } = await client().rpc('pilot_impact_summary_v1', { p_pilot_id: pilotId });
   return dataOrThrow(data as PilotSummary | null, error);
 }
+
+export type SmeImpactAssumptions = {
+  teacherHourlyCost: number;
+  minutesPerDiagnosis: number;
+  minutesPerGrading: number;
+  minutesPerFollowup: number;
+  revenuePerStudent: number;
+  hoursPerExtraStudent: number;
+};
+
+export type SmeImpact = {
+  currency: string;
+  activity: { agentSessions: number; assessmentsGraded: number; reviewsScheduled: number; activeLearners: number };
+  assumptions: SmeImpactAssumptions;
+  projection: { hoursSaved: number; costSaved: number; extraStudentCapacity: number; revenueEnabled: number };
+  disclaimer: string;
+};
+
+export async function loadSmeImpact(orgId: string): Promise<SmeImpact> {
+  const { data, error } = await client().rpc('sme_impact_summary_v1', { p_org_id: orgId });
+  return dataOrThrow(data as SmeImpact | null, error);
+}
+
+export async function saveSmeAssumptions(orgId: string, patch: Partial<SmeImpactAssumptions>) {
+  const row: Record<string, number | string> = { org_id: orgId };
+  if (patch.teacherHourlyCost !== undefined) row.teacher_hourly_cost = patch.teacherHourlyCost;
+  if (patch.minutesPerDiagnosis !== undefined) row.minutes_per_diagnosis = patch.minutesPerDiagnosis;
+  if (patch.minutesPerGrading !== undefined) row.minutes_per_grading = patch.minutesPerGrading;
+  if (patch.minutesPerFollowup !== undefined) row.minutes_per_followup = patch.minutesPerFollowup;
+  if (patch.revenuePerStudent !== undefined) row.revenue_per_student = patch.revenuePerStudent;
+  if (patch.hoursPerExtraStudent !== undefined) row.hours_per_extra_student = patch.hoursPerExtraStudent;
+  const { error } = await client().from('sme_impact_assumptions').upsert(row, { onConflict: 'org_id' });
+  if (error) throw new Error(error.message);
+}

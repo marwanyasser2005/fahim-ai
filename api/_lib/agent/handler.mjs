@@ -1,0 +1,190 @@
+/**
+ * Fahim Agent — HTTP handler (sub-route of /api/ai).
+ *
+ * Exposed as /api/agent via a vercel.json rewrite to /api/ai?route=agent, so it adds ZERO new
+ * serverless functions (the deploy is at the Hobby 12-function ceiling). It reuses the same
+ * security, auth, entitlement-metering, and NDJSON-streaming contract as /api/chat, and streams
+ * the agent's plan→act→observe trace to the client as it happens.
+ */
+
+import { randomUUID } from 'node:crypto';
+import { getAIStatus, estimateAICostMicrousd } from '../ai-routing.mjs';
+import { AuthenticationError, createAdminClient, requireAuthenticatedUser, ServerConfigurationError } from '../supabase-auth.mjs';
+import {
+  applyApiHeaders,
+  consumeRateLimit,
+  isSameOrigin,
+  logEvent,
+  parseJsonBody,
+  rejectRateLimit,
+  RequestBodyError,
+} from '../security.mjs';
+import { runAgentTurn } from './orchestrator.mjs';
+
+function send(response, status, body) {
+  response.setHeader('Content-Type', 'application/json; charset=utf-8');
+  response.setHeader('Cache-Control', 'no-store');
+  response.setHeader('X-Content-Type-Options', 'nosniff');
+  response.writeHead(status);
+  response.end(JSON.stringify(body));
+}
+
+function ndjson(response, value) {
+  response.write(`${JSON.stringify(value)}\n`);
+}
+
+function sanitizeLearnerInput(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  const out = {};
+  if (typeof raw.itemToken === 'string' && raw.itemToken.length <= 4000) out.itemToken = raw.itemToken;
+  if (Number.isInteger(raw.answerIndex) && raw.answerIndex >= 0 && raw.answerIndex <= 3) out.answerIndex = raw.answerIndex;
+  if (typeof raw.text === 'string' && raw.text.length <= 4000) out.text = raw.text;
+  return Object.keys(out).length ? out : null;
+}
+
+function sanitizePriorState(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  const out = {};
+  if (raw.pendingItem && typeof raw.pendingItem.token === 'string' && raw.pendingItem.token.length <= 4000) {
+    out.pendingItem = { token: raw.pendingItem.token, skill: String(raw.pendingItem.skill || '').slice(0, 120), difficulty: ['easy', 'medium', 'hard'].includes(raw.pendingItem.difficulty) ? raw.pendingItem.difficulty : 'medium' };
+  }
+  if (Array.isArray(raw.sources)) {
+    out.sources = raw.sources.slice(0, 4).map((source) => ({
+      citationId: String(source?.citationId || '').slice(0, 8),
+      title: String(source?.title || '').slice(0, 200),
+      authority: String(source?.authority || '').slice(0, 40),
+      url: String(source?.url || '').slice(0, 400),
+    }));
+  }
+  if (raw.misconception && typeof raw.misconception === 'object') {
+    out.misconception = { category: String(raw.misconception.category || '').slice(0, 60), label: String(raw.misconception.label || '').slice(0, 120) };
+  }
+  return Object.keys(out).length ? out : null;
+}
+
+export default async function agentHandler(request, response) {
+  const requestId = applyApiHeaders(request, response);
+  if (request.method !== 'POST') {
+    response.setHeader('Allow', 'POST');
+    return send(response, 405, { error: 'Method not allowed' });
+  }
+  if (!isSameOrigin(request)) return send(response, 403, { error: 'Origin not allowed' });
+
+  const rate = await consumeRateLimit(request, { namespace: 'agent', limit: 40, windowMs: 10 * 60 * 1000 });
+  if (!rate.allowed) return rejectRateLimit(response, rate, send, 'Too many agent requests. Try again later.');
+  response.setHeader('X-RateLimit-Remaining', String(rate.remaining));
+
+  let auth;
+  let admin;
+  try {
+    auth = await requireAuthenticatedUser(request);
+    admin = createAdminClient();
+  } catch (error) {
+    if (error instanceof AuthenticationError || error instanceof ServerConfigurationError) return send(response, error.status, { error: error.message });
+    return send(response, 500, { error: 'Authentication could not be verified.' });
+  }
+  if (!getAIStatus().configured) return send(response, 503, { error: 'AI is not configured yet.' });
+  const secret = process.env.QUIZ_TOKEN_SECRET || process.env.QUIZ_SIGNING_SECRET;
+  if (!secret || secret.length < 32) return send(response, 503, { error: 'Secure diagnostics are not configured.' });
+
+  let body;
+  try { body = parseJsonBody(request, { maxBytes: 32_000 }); }
+  catch (error) {
+    if (error instanceof RequestBodyError) return send(response, error.status, { error: error.message });
+    return send(response, 400, { error: 'Invalid JSON body.' });
+  }
+
+  const goal = String(body.goal || body.concept || '').trim().slice(0, 400);
+  const concept = String(body.concept || body.goal || '').trim().slice(0, 240);
+  if (goal.length < 3) return send(response, 400, { error: 'A learning goal or concept is required.' });
+  const language = body.language === 'en' ? 'en' : 'ar';
+  const subject = String(body.subject || '').slice(0, 80);
+  const grade = String(body.grade || '').slice(0, 80);
+  const learnerInput = sanitizeLearnerInput(body.learnerInput);
+  const priorState = sanitizePriorState(body.priorState);
+  const stream = body.stream === true;
+  const deadlineAt = Date.now() + 45_000;
+
+  const { data: entitlementConsumed, error: entitlementError } = await auth.client.rpc('consume_entitlement_v1', { target_key: 'ai_sessions_month', amount: 1 });
+  if (entitlementError) return send(response, 503, { error: 'AI entitlements are not configured.' });
+  if (!entitlementConsumed) return send(response, 429, { error: 'Your AI session allowance is exhausted. Review your plan or wait for the next reset.' });
+
+  const generationId = randomUUID();
+  await admin.from('ai_generations').insert({
+    id: generationId,
+    user_id: auth.user.id,
+    task_type: 'agent',
+    provider: 'fahim_router',
+    model: 'agent-loop',
+    prompt_text: goal.slice(0, 12000),
+    status: stream ? 'streaming' : 'pending',
+  }).then(() => {}, () => {});
+
+  if (stream) {
+    response.writeHead(200, {
+      'Content-Type': 'application/x-ndjson; charset=utf-8',
+      'Cache-Control': 'no-cache, no-store',
+      'X-Content-Type-Options': 'nosniff',
+      'X-Accel-Buffering': 'no',
+    });
+    ndjson(response, { type: 'meta', generationId, conceptKey: concept });
+  }
+
+  try {
+    const result = await runAgentTurn({
+      admin,
+      userId: auth.user.id,
+      language,
+      subject,
+      grade,
+      secret,
+      goal,
+      concept,
+      learnerInput,
+      priorState,
+      deadlineAt,
+      emit: stream ? (event) => ndjson(response, event) : undefined,
+    });
+
+    const usage = result.usage || { inputTokens: 0, outputTokens: 0 };
+    await admin.from('ai_generations').update({
+      status: 'complete',
+      model: 'agent-loop',
+      result_text: (result.summary || result.prompt || '').slice(0, 12000),
+      input_tokens: usage.inputTokens,
+      output_tokens: usage.outputTokens,
+      estimated_cost_microusd: estimateAICostMicrousd(usage, 'agent-router'),
+      completed_at: new Date().toISOString(),
+    }).eq('id', generationId).then(() => {}, () => {});
+
+    logEvent('agent_turn', { requestId, steps: result.steps?.length || 0, awaiting: result.awaiting, terminal: result.terminalTool, mastery: Math.round(result.mastery * 100) });
+
+    if (stream) {
+      ndjson(response, { type: 'done' });
+      return response.end();
+    }
+    return send(response, 200, {
+      ok: true,
+      generationId,
+      conceptKey: result.conceptKey,
+      awaiting: result.awaiting,
+      prompt: result.prompt,
+      expects: result.expects,
+      item: result.item,
+      summary: result.summary,
+      mastery: result.mastery,
+      masteryLabel: result.masteryLabel,
+      ability: result.ability,
+      attempts: result.attempts,
+      steps: result.steps,
+      state: result.state,
+    });
+  } catch (error) {
+    logEvent('agent_turn_failed', { requestId, code: error?.name || 'error' });
+    await admin.from('ai_generations').update({ status: 'error', error_code: error?.name || 'agent_error', completed_at: new Date().toISOString() }).eq('id', generationId).then(() => {}, () => {});
+    await auth.client.rpc('refund_entitlement_v1', { target_user: auth.user.id, target_key: 'ai_sessions_month', amount: 1 }).then(() => {}, () => {});
+    if (!response.headersSent) return send(response, 502, { error: 'The learning agent is temporarily unavailable.' });
+    ndjson(response, { type: 'error', error: 'The agent run was interrupted.' });
+    return response.end();
+  }
+}

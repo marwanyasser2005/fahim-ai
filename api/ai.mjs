@@ -23,6 +23,7 @@ import {
 } from './_lib/security.mjs';
 import { AuthenticationError, requireAuthenticatedUser, ServerConfigurationError } from './_lib/supabase-auth.mjs';
 import learningPathsHandler from './_lib/learning-paths.mjs';
+import agentHandler from './_lib/agent/handler.mjs';
 
 const JSON_HEADERS = {
   'Content-Type': 'application/json; charset=utf-8',
@@ -86,6 +87,7 @@ function normalizeTask(raw) {
 export default async function handler(request, response) {
   const route = new URL(request.url || '', 'http://localhost').searchParams.get('route');
   if (route === 'learning-paths') return learningPathsHandler(request, response);
+  if (route === 'agent') return agentHandler(request, response);
   const requestId = applyApiHeaders(request, response);
   if (request.method !== 'POST') {
     response.setHeader('Allow', 'POST');

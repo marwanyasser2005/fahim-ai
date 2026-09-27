@@ -1,4 +1,5 @@
 import {
+  Bot,
   CalendarCheck,
   GraduationCap,
   Layers3,
@@ -55,6 +56,15 @@ export const productNav: NavEntry[] = [
     hintAr: 'اشرح درسًا أو حل سؤالًا معك خطوة بخطوة',
     hintEn: 'Explain a lesson or solve a question step by step',
     icon: Sparkles,
+    role: 'all',
+  },
+  {
+    to: '/agent',
+    ar: 'الوكيل المعلّم',
+    en: 'Tutor Agent',
+    hintAr: 'وكيل مستقل يشخّص ويشرح ويجدول مراجعتك خطوة بخطوة',
+    hintEn: 'An autonomous agent that diagnoses, teaches, and schedules your review',
+    icon: Bot,
     role: 'all',
   },
   {

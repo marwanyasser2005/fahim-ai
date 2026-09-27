@@ -45,6 +45,7 @@ const TeacherCockpit = lazy(() => import('@/pages/TeacherCockpit'));
 const TrustCenter = lazy(() => import('@/pages/TrustCenter'));
 const PersonalPathBuilder = lazy(() => import('@/pages/PersonalPathBuilder'));
 const PersonalPathDetail = lazy(() => import('@/pages/PersonalPathDetail'));
+const AgentStudio = lazy(() => import('@/pages/AgentStudio'));
 
 export default function App() {
   const [language, setLanguage] = useState<Language>(() => localStorage.getItem('fahim-language') === 'en' ? 'en' : 'ar');
@@ -85,7 +86,7 @@ export default function App() {
 function AppShell({ language, setLanguage, theme, setTheme, lowBandwidth, setLowBandwidth }: { language: Language; setLanguage: (language: Language) => void; theme: Theme; setTheme: (theme: Theme) => void; lowBandwidth: boolean; setLowBandwidth: (value: boolean) => void }) {
   const location = useLocation();
   const { user } = useAuth();
-  const product = Boolean(user && /^\/(dashboard|workspace|ask-fahim|review|passport|knowledge-vault|library|teacher|admin|profile|support|quiz-lab|learning|course\/|personal-paths|personal-path\/|certificates|videos|studio|generation\/)/.test(location.pathname));
+  const product = Boolean(user && /^\/(dashboard|workspace|ask-fahim|agent|review|passport|knowledge-vault|library|teacher|admin|profile|support|quiz-lab|learning|course\/|personal-paths|personal-path\/|certificates|videos|studio|generation\/)/.test(location.pathname));
   const showcaseMode = location.pathname === '/showcase';
   const immersive = location.pathname === '/ask-fahim' || showcaseMode;
   useEffect(() => { if (!immersive) window.scrollTo({ top: 0, behavior: 'auto' }); }, [immersive, location.pathname]);
@@ -115,6 +116,7 @@ function AppShell({ language, setLanguage, theme, setTheme, lowBandwidth, setLow
               <Route path="/library" element={<ProtectedRoute><Library language={language} /></ProtectedRoute>} />
               <Route path="/resources" element={<Resources language={language} />} />
               <Route path="/ask-fahim" element={<ProtectedRoute><AiTutor language={language} /></ProtectedRoute>} />
+              <Route path="/agent" element={<ProtectedRoute><AgentStudio language={language} /></ProtectedRoute>} />
               <Route path="/generation/:generationId" element={<ProtectedRoute><GenerationDetail language={language} /></ProtectedRoute>} />
               <Route path="/quiz-lab" element={<ProtectedRoute><QuizLab language={language} /></ProtectedRoute>} />
               <Route path="/knowledge-vault" element={<ProtectedRoute><KnowledgeVault language={language} /></ProtectedRoute>} />
@@ -184,6 +186,7 @@ const routeTitles: Record<string, { ar: string; en: string }> = {
   '/support': { ar: 'الدعم | فَهيم', en: 'Support | Fahim' },
   '/workspace': { ar: 'مساحة تعلّمي | فَهيم', en: 'My learning workspace | Fahim' },
   '/ask-fahim': { ar: 'اسأل فَهيم', en: 'Ask Fahim' },
+  '/agent': { ar: 'وكيل فَهيم المعلّم | Agent Studio', en: 'Fahim Agent Studio' },
   '/review': { ar: 'المراجعة المتباعدة | فَهيم', en: 'Spaced review | Fahim' },
   '/knowledge-vault': { ar: 'خزانة المعرفة | فَهيم', en: 'Knowledge vault | Fahim' },
   '/quiz-lab': { ar: 'مختبر التقييم | فَهيم', en: 'Assessment lab | Fahim' },

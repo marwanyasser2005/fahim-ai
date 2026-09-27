@@ -113,7 +113,8 @@ function normalizeMessages(messages) {
     .filter((message) => message.content);
 }
 
-function geminiPayload({ system, messages, maxOutputTokens, structured }) {
+function geminiPayload({ system, messages, maxOutputTokens, structured, tools }) {
+  const hasTools = Array.isArray(tools) && tools.length > 0;
   const payload = {
     system_instruction: { parts: [{ text: String(system || '') }] },
     contents: normalizeMessages(messages).map((message) => ({
@@ -122,8 +123,14 @@ function geminiPayload({ system, messages, maxOutputTokens, structured }) {
     })),
     generationConfig: {
       maxOutputTokens,
-      ...(structured ? { responseMimeType: 'application/json' } : {}),
+      // Gemini rejects a JSON mime type when function declarations are present; the tool
+      // schema carries the structure in that case.
+      ...(structured && !hasTools ? { responseMimeType: 'application/json' } : {}),
     },
+    ...(hasTools ? {
+      tools: [{ function_declarations: tools.map((tool) => tool.function || tool) }],
+      tool_config: { function_calling_config: { mode: 'AUTO' } },
+    } : {}),
     safetySettings: [
       'HARM_CATEGORY_HARASSMENT',
       'HARM_CATEGORY_HATE_SPEECH',
@@ -134,18 +141,19 @@ function geminiPayload({ system, messages, maxOutputTokens, structured }) {
   return payload;
 }
 
-async function callGemini({ model, system, messages, maxOutputTokens, structured, stream, timeoutMs }) {
+async function callGemini({ model, system, messages, maxOutputTokens, structured, stream, timeoutMs, tools }) {
   const method = stream ? 'streamGenerateContent?alt=sse' : 'generateContent';
   return fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:${method}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY },
-    body: JSON.stringify(geminiPayload({ system, messages, maxOutputTokens, structured })),
+    body: JSON.stringify(geminiPayload({ system, messages, maxOutputTokens, structured, tools })),
     signal: AbortSignal.timeout(timeoutMs),
   });
 }
 
-async function callAgentRouter({ model, system, messages, maxOutputTokens, structured, stream, timeoutMs }) {
+async function callAgentRouter({ model, system, messages, maxOutputTokens, structured, stream, timeoutMs, tools, toolChoice }) {
   const baseUrl = cleanBaseUrl(process.env.AGENT_ROUTER_BASE_URL);
+  const hasTools = Array.isArray(tools) && tools.length > 0;
   return fetch(`${baseUrl}/chat/completions`, {
     method: 'POST',
     headers: {
@@ -161,7 +169,10 @@ async function callAgentRouter({ model, system, messages, maxOutputTokens, struc
       max_tokens: maxOutputTokens,
       stream,
       ...(stream ? { stream_options: { include_usage: true } } : {}),
-      ...(structured ? { response_format: { type: 'json_object' } } : {}),
+      // JSON mode and tool mode are mutually exclusive on the OpenAI contract; when the
+      // caller asks for tools, the tool schema is the structure, so response_format is dropped.
+      ...(structured && !hasTools ? { response_format: { type: 'json_object' } } : {}),
+      ...(hasTools ? { tools, tool_choice: toolChoice || 'auto' } : {}),
     }),
     signal: AbortSignal.timeout(timeoutMs),
   });
@@ -205,8 +216,9 @@ function hfContentParts(messages) {
   return normalizeMessages(messages).map((message) => ({ role: message.role, content: message.content }));
 }
 
-async function callHF({ model, system, messages, maxOutputTokens, structured, stream, timeoutMs }) {
+async function callHF({ model, system, messages, maxOutputTokens, structured, stream, timeoutMs, tools, toolChoice }) {
   const baseUrl = cleanHFBaseUrl(process.env.HF_BASE_URL);
+  const hasTools = Array.isArray(tools) && tools.length > 0;
   return fetch(`${baseUrl}/chat/completions`, {
     method: 'POST',
     headers: {
@@ -222,7 +234,8 @@ async function callHF({ model, system, messages, maxOutputTokens, structured, st
       max_tokens: maxOutputTokens,
       stream,
       ...(stream ? { stream_options: { include_usage: true } } : {}),
-      ...(structured ? { response_format: { type: 'json_object' } } : {}),
+      ...(structured && !hasTools ? { response_format: { type: 'json_object' } } : {}),
+      ...(hasTools ? { tools, tool_choice: toolChoice || 'auto' } : {}),
     }),
     signal: AbortSignal.timeout(timeoutMs),
   });
@@ -259,7 +272,7 @@ export async function requestHFEmbeddings(inputs, { deadlineAt = Number.POSITIVE
   return { vectors, provider: 'hf', model };
 }
 
-export async function requestLearningAI({ system, messages, maxOutputTokens = 2400, structured = false, stream = false, deadlineAt = Number.POSITIVE_INFINITY }) {
+export async function requestLearningAI({ system, messages, maxOutputTokens = 2400, structured = false, stream = false, deadlineAt = Number.POSITIVE_INFINITY, tools = null, toolChoice = null }) {
   const routes = routeCandidates();
   if (!routes.length) throw new AIProviderExhaustedError([{ provider: 'none', status: 503 }]);
   const attempts = [];
@@ -272,10 +285,10 @@ export async function requestLearningAI({ system, messages, maxOutputTokens = 24
       const model = models[index];
       try {
         const response = provider === 'agent-router'
-          ? await callAgentRouter({ model, system, messages, maxOutputTokens, structured, stream, timeoutMs })
+          ? await callAgentRouter({ model, system, messages, maxOutputTokens, structured, stream, timeoutMs, tools, toolChoice })
           : provider === 'hf'
-            ? await callHF({ model, system, messages, maxOutputTokens, structured, stream, timeoutMs })
-            : await callGemini({ model, system, messages, maxOutputTokens, structured, stream, timeoutMs });
+            ? await callHF({ model, system, messages, maxOutputTokens, structured, stream, timeoutMs, tools, toolChoice })
+            : await callGemini({ model, system, messages, maxOutputTokens, structured, stream, timeoutMs, tools });
         if (response.ok) return { response, provider, model, protocol: provider === 'gemini' ? 'gemini' : 'openai' };
         // 402 means the HF account's monthly included credits are depleted;
         // the cascade moves on rather than burning the whole deadline.
@@ -319,6 +332,47 @@ export async function readLearningAIResponse(route) {
     ? data.candidates?.[0]?.content?.parts?.map((part) => part.text || '').join('').trim()
     : openAIText(data.choices?.[0]?.message?.content).trim();
   return { text, usage: normalizedUsage(data, route.protocol) };
+}
+
+function safeToolArguments(value) {
+  if (value && typeof value === 'object') return value;
+  const text = String(value || '').trim();
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    const start = text.indexOf('{');
+    const end = text.lastIndexOf('}');
+    if (start >= 0 && end > start) {
+      try { return JSON.parse(text.slice(start, end + 1)); }
+      catch { return {}; }
+    }
+    return {};
+  }
+}
+
+/**
+ * Read one agent decision from a completion. Normalizes native tool-calling across the
+ * OpenAI contract (`message.tool_calls`) and Gemini (`functionCall` parts) into a single
+ * `toolCalls: [{ id, name, arguments }]` shape, and always returns any free `text` so the
+ * orchestrator can fall back to a JSON-action parse when a provider ignores the tool schema.
+ */
+export async function readAgentResponse(route) {
+  const data = await route.response.json();
+  if (route.protocol === 'gemini') {
+    const parts = data.candidates?.[0]?.content?.parts || [];
+    const text = parts.map((part) => part.text || '').join('').trim();
+    const toolCalls = parts
+      .filter((part) => part.functionCall?.name)
+      .map((part, index) => ({ id: `gemini-${index}`, name: part.functionCall.name, arguments: safeToolArguments(part.functionCall.args) }));
+    return { text, toolCalls, usage: normalizedUsage(data, 'gemini') };
+  }
+  const message = data.choices?.[0]?.message || {};
+  const text = openAIText(message.content).trim();
+  const toolCalls = (Array.isArray(message.tool_calls) ? message.tool_calls : [])
+    .filter((call) => call?.function?.name)
+    .map((call, index) => ({ id: call.id || `tool-${index}`, name: call.function.name, arguments: safeToolArguments(call.function.arguments) }));
+  return { text, toolCalls, usage: normalizedUsage(data, route.protocol) };
 }
 
 function parseSseBlock(block) {

@@ -67,6 +67,20 @@ Open [`/evidence`](https://fahim-ai-egypt.vercel.app/evidence) to inspect the we
 | Access | Arabic/English, RTL/LTR, light/dark/system, reduced motion, low-bandwidth mode, responsive PWA |
 | Credential path | Exactly one catalog course (`physics-force-motion`) is server-backed, so it is the only one that can currently produce a credential. The other nine paths are device-local |
 
+## The Fahim Tutor Agent
+
+Fahim now ships a genuine **autonomous tutoring agent** (`/agent`, server route `/api/agent`), not a single-shot chatbot. Given one learner goal, the agent runs a bounded **plan → act → observe** loop where the model chooses the next tool each step and the orchestrator executes it, feeding the observation back into the next decision.
+
+- **Real tools (model-invoked):** `get_learner_state`, `search_verified_sources`, `generate_diagnostic` (sealed AES-GCM answer key), `assess_answer` (grade + BKT update), `diagnose_misconception`, `select_next_item` (IRT), `explain_concept` (grounded intervention), `schedule_review` (FSRS), `record_evidence`, plus the human-in-the-loop terminals `ask_learner` and `finish`.
+- **Two decision protocols, one executor:** native function-calling when the provider returns `tool_calls`, and a portable JSON-action fallback otherwise — so the loop is model-driven yet degrades gracefully.
+- **Durable memory:** per-concept mastery (BKT posterior) and adaptive ability (IRT θ) persist in the server-owned `concept_mastery` table; the spaced-review schedule persists as a full FSRS card on `review_items`. The agent reads this back each turn, so learning survives a device change.
+- **Transparent by design:** the Agent Studio streams every step (decision, tool, observation) over NDJSON, with the mastery gauge and review schedule updating live — so a judge can watch the agent actually work.
+- Zero new serverless functions: the agent is a sub-route of `/api/ai` to stay within the Vercel function ceiling.
+
+### Business impact for an educational SME (Agents at Work)
+
+Framed as an **AI teaching assistant** for a tutoring centre, the Teacher Cockpit's **Business Impact** tab turns real agent activity (sessions, assessments graded, reviews scheduled) into a transparent projection of **hours saved, cost saved, extra student capacity, and revenue enabled** via `sme_impact_summary_v1`. Every figure equals *real activity × editable centre assumptions* and is labelled a projection, never a measured financial outcome.
+
 ## Architecture
 
 ```mermaid
@@ -153,12 +167,15 @@ docs/                    Architecture, pilot, demo and hackathon evidence
 
 ## Hackathon positioning
 
-**Primary theme:** Assessment Revolution.  
-**Secondary strength:** Best Arabic-Language Solution.
+Fahim targets two events with one integrated product:
 
-The recommended narrative is not “chat + videos + quizzes.” It is:
+**GenAI for Education 2026 — primary theme:** Assessment Revolution; secondary: Best Arabic-Language Solution.
 
 > Fahim is the Arabic-first operating system that converts learning into evidence a learner, teacher, and parent can inspect—without exposing private conversations or pretending that completion equals mastery.
+
+**Agents at Work (Egyptian SMEs) — track:** an autonomous agent that does a real job for a business.
+
+> The Fahim Tutor Agent is an AI teaching assistant for an educational SME (a tutoring centre): it diagnoses each learner, grades and updates mastery, teaches from verified sources, and schedules review autonomously — saving staff hours and expanding how many students one teacher can serve. Impact is quantified in the Teacher Cockpit's Business Impact tab as *real activity × editable assumptions*, never as a fabricated result.
 
 The previously published internal readiness figure of **85/100** predates the 2026-09-15 hardening pass and must be treated as stale. Several gaps it was scored against have since closed (signed and verified credentials, admin revocation, a closed learning loop, a server-graded course assessment, metered quiz spend, a single migration tree, security headers on the only deploy config), while others remain open and must still be scored honestly: there is no component or E2E test layer, one course is server-backed rather than the whole catalogue, manual payment methods must be configured with real account details before the paid flow can run, and no pilot or learning-gain measurement exists. **Re-derive the score from the current repository before citing any number.** See the [Hackathon Readiness Report](docs/HACKATHON_READINESS_REPORT_2026.md).
 
