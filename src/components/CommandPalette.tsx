@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Moon, PlaySquare, School, Search, Sun, ClipboardCheck } from 'lucide-react';
+import { Moon, PlaySquare, School, Search, Sun, ClipboardCheck, Route } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
 import { useProfileRole } from '@/hooks/useProfileRole';
 import { productNav, publicNav } from '@/lib/appNavigation';
 import type { Language, Theme } from '@/App';
@@ -15,7 +14,6 @@ export default function CommandPalette({ language, theme, setTheme }: Props) {
   const [query, setQuery] = useState('');
   const inputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
-  const { user } = useAuth();
   const { isStaff } = useProfileRole();
   const ar = language === 'ar';
   const labels = ar
@@ -37,10 +35,10 @@ export default function CommandPalette({ language, theme, setTheme }: Props) {
       { path: '/quiz-lab', ar: 'مختبر التقييم', en: 'Assessment lab', icon: ClipboardCheck },
       { path: '/videos', ar: 'الفيديوهات التعليمية', en: 'Learning videos', icon: PlaySquare },
       { path: '/studio', ar: 'استوديو الفصول والمشروعات', en: 'Class and project studio', icon: School },
-      { path: user ? '/profile' : '/login', ar: user ? 'حسابي والإعدادات' : 'تسجيل الدخول', en: user ? 'My account and settings' : 'Sign in', icon: user ? School : Search },
+      { path: '/personal-paths', ar: 'أنشئ مسارك بالذكاء الاصطناعي', en: 'Build an AI learning path', icon: Route },
     ];
     return [...shared, ...extras];
-  }, [isStaff, user]);
+  }, [isStaff]);
 
   const filtered = routes.filter((entry) => {
     const needle = query.toLowerCase();

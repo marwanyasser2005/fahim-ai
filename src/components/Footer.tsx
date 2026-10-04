@@ -18,8 +18,8 @@ export default function Footer({ language }: { language: "ar" | "en" }) {
       title: rtl ? "الشركة" : "Company",
       links: [
         [rtl ? "عن فَهيم والمؤسس" : "About Fahim and founder", "/about"],
-        [rtl ? "إنشاء حساب" : "Create account", "/register"],
-        [rtl ? "تسجيل الدخول" : "Sign in", "/login"],
+        [rtl ? "استكشف الوكيل المعلّم" : "Explore the tutor agent", "/agent"],
+        [rtl ? "أنشئ مسارك بالذكاء الاصطناعي" : "Build an AI learning path", "/personal-paths"],
       ],
     },
     {
@@ -53,7 +53,7 @@ export default function Footer({ language }: { language: "ar" | "en" }) {
           </p>
           <p className="mt-2 flex items-center gap-2 text-xs text-blue-300">
             <MapPin className="h-4 w-4" />
-            Cairo, Egypt
+            {rtl ? "دخول مفتوح · جلسة خاصة لكل جهاز · القاهرة، مصر" : "Open access · private session per device · Cairo, Egypt"}
           </p>
         </div>
         {groups.map((group) => (

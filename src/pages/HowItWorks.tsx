@@ -325,16 +325,15 @@ export default function HowItWorks({ language }: { language: "ar" | "en" }) {
         </h2>
         <p className="mx-auto mt-5 max-w-xl text-base leading-8 text-[var(--muted)]">
           {rtl
-            ? "أنشئ حسابًا أولًا لحماية ملفاتك وربط المحاولات والمراجعات والأدلة بشخصك. التجربة الكاملة 30 يومًا دون بطاقة."
-            : "Create an account first so files, attempts, reviews, and evidence belong to you. The full trial is 30 days with no card."}
+            ? "ابدأ فورًا بجلسة مجهولة معزولة تحفظ ملفاتك ومحاولاتك ومراجعاتك وأدلتك على هذا الجهاز."
+            : "Start instantly with an isolated anonymous session that keeps your files, attempts, reviews, and evidence on this device."}
         </p>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
           <Link
-            to="/register"
-            state={{ from: "/dashboard" }}
+            to="/agent"
             className="atlas-primary justify-center"
           >
-            {rtl ? "ابدأ مجانًا لمدة 30 يومًا" : "Start 30 days free"}
+            {rtl ? "جرّب الوكيل المعلّم" : "Try the tutor agent"}
             <Arrow className="h-4 w-4" />
           </Link>
           <Link to="/showcase" className="atlas-secondary justify-center">

@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import type { Session, User } from '@supabase/supabase-js';
 import { authenticatedFetch, getFreshSession, isSupabaseConfigured, supabase } from '@/lib/supabase/client';
 import { setUserScope } from '@/lib/userScope';
+import { OPEN_JUDGE_MODE } from '@/config/productMode';
 
 type AuthResult = { error?: string; needsVerification?: boolean };
 
@@ -10,6 +11,8 @@ type AuthContextValue = {
   session: Session | null;
   loading: boolean;
   configured: boolean;
+  bootstrapError: string | null;
+  retryOpenSession: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signUp: (name: string, email: string, password: string) => Promise<AuthResult>;
   resendVerification: (email: string) => Promise<AuthResult>;
@@ -21,13 +24,36 @@ type AuthContextValue = {
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+let anonymousBootstrap: Promise<Session> | null = null;
+
 function getSupabase() {
   return Promise.resolve(isSupabaseConfigured ? supabase : null);
+}
+
+async function createOpenSession(): Promise<Session> {
+  const client = await getSupabase();
+  if (!client) throw new Error('Supabase is not configured.');
+  if (!anonymousBootstrap) {
+    anonymousBootstrap = client.auth.signInAnonymously({
+      options: {
+        data: {
+          full_name: 'Fahim Explorer',
+          role: 'student',
+          open_judge_mode: true,
+        },
+      },
+    }).then(({ data, error }) => {
+      if (error || !data.session) throw error || new Error('Anonymous session was not created.');
+      return data.session;
+    }).finally(() => { anonymousBootstrap = null; });
+  }
+  return anonymousBootstrap;
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [bootstrapError, setBootstrapError] = useState<string | null>(null);
 
   useEffect(() => {
     setUserScope(session?.user?.id ?? null);
@@ -45,21 +71,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (active) setLoading(false);
         return;
       }
-      const { session: freshSession } = await getFreshSession();
-      if (!active) return;
-      setSession(freshSession);
-      setLoading(false);
-      const listener = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      const listener = supabase.auth.onAuthStateChange((event, nextSession) => {
         if (!active) return;
         setSession(nextSession);
+        if (nextSession) {
+          setBootstrapError(null);
+        } else if (OPEN_JUDGE_MODE && event === 'SIGNED_OUT') {
+          setLoading(true);
+          void createOpenSession()
+            .then((replacement) => {
+              if (!active) return;
+              setSession(replacement);
+              setBootstrapError(null);
+            })
+            .catch((error) => {
+              if (!active) return;
+              setBootstrapError(error instanceof Error ? error.message : 'Open session could not be recreated.');
+            })
+            .finally(() => { if (active) setLoading(false); });
+          return;
+        }
         setLoading(false);
       });
       unsubscribe = () => listener.data.subscription.unsubscribe();
+      try {
+        const { session: freshSession } = await getFreshSession();
+        const resolved = freshSession || (OPEN_JUDGE_MODE ? await createOpenSession() : null);
+        if (!active) return;
+        setSession(resolved);
+        setBootstrapError(null);
+      } catch (error) {
+        if (!active) return;
+        setSession(null);
+        setBootstrapError(error instanceof Error ? error.message : 'Open session could not be created.');
+      } finally {
+        if (active) setLoading(false);
+      }
     });
     return () => {
       active = false;
       unsubscribe?.();
     };
+  }, []);
+
+  const retryOpenSession = useCallback(async () => {
+    if (!OPEN_JUDGE_MODE) return;
+    setLoading(true);
+    setBootstrapError(null);
+    try {
+      const nextSession = await createOpenSession();
+      setSession(nextSession);
+    } catch (error) {
+      setBootstrapError(error instanceof Error ? error.message : 'Open session could not be created.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const signIn = useCallback(async (email: string, password: string): Promise<AuthResult> => {
@@ -146,6 +212,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     const supabase = await getSupabase();
     await supabase?.auth.signOut();
+    if (OPEN_JUDGE_MODE) {
+      try {
+        setSession(await createOpenSession());
+      } catch (error) {
+        setBootstrapError(error instanceof Error ? error.message : 'Open session could not be recreated.');
+      }
+    }
   }, []);
 
   const value = useMemo<AuthContextValue>(() => ({
@@ -153,6 +226,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     session,
     loading,
     configured: isSupabaseConfigured,
+    bootstrapError,
+    retryOpenSession,
     signIn,
     signUp,
     resendVerification,
@@ -161,7 +236,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     updatePassword,
     signInWithOAuth,
     signOut,
-  }), [loading, resendVerification, resetPassword, sendMagicLink, session, signIn, signInWithOAuth, signOut, signUp, updatePassword]);
+  }), [bootstrapError, loading, resendVerification, resetPassword, retryOpenSession, sendMagicLink, session, signIn, signInWithOAuth, signOut, signUp, updatePassword]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

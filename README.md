@@ -13,7 +13,7 @@
   </p>
 </div>
 
-![CI](https://img.shields.io/badge/quality%20gate-150%20tests-0f766e)
+![CI](https://img.shields.io/badge/quality%20gate-200%20tests-0f766e)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-173f5f)
 ![Supabase](https://img.shields.io/badge/Supabase-RLS-3ecf8e)
 ![Arabic first](https://img.shields.io/badge/UX-Arabic--first-f2b84b)
@@ -37,7 +37,7 @@ The product combines an Arabic-first AI tutor, adaptive assessment, misconceptio
 
 ## Competition demo
 
-Open [`/showcase`](https://fahim-ai-egypt.vercel.app/showcase). It is deterministic, needs no account, and is designed for a four-minute judging slot.
+Open [`/showcase`](https://fahim-ai-egypt.vercel.app/showcase). It is deterministic, needs no visible account flow, and is designed for a four-minute judging slot.
 
 1. Meet one learner in one high-stakes moment.
 2. Inspect the trusted source and first attempt.
@@ -49,6 +49,15 @@ Open [`/showcase`](https://fahim-ai-egypt.vercel.app/showcase). It is determinis
 All showcase outcomes are visibly labelled **illustrative demo data** and never enter a learner account. Fahim does not claim pilot outcomes, institutional accreditation, or partnerships that do not yet exist.
 
 Open [`/evidence`](https://fahim-ai-egypt.vercel.app/evidence) to inspect the weighted readiness estimate, the reproducible 12-control guard suite, the evidence ladder, and every boundary that still requires real learners or partners.
+
+### Open Judge Mode
+
+The competition build opens the complete learner product without showing sign-in or registration. On first visit, Supabase creates a unique anonymous Auth user for that browser. It is an authenticated, device-bound identity—not public database access—so the existing owner-scoped RLS policies continue to isolate paths, attempts, files, agent memory, badges, and credentials per visitor.
+
+- `/login`, `/register`, and recovery routes remain in the codebase but redirect to the product while open mode is active.
+- Learner capabilities are unlocked; teacher, staff, and admin data still require explicit roles.
+- The session persists in browser storage. Clearing site data or moving to another device starts a new isolated learner record.
+- Set `VITE_OPEN_JUDGE_MODE=false` to restore the account-entry UI after the competition window.
 
 ## Product capabilities
 
@@ -62,19 +71,21 @@ Open [`/evidence`](https://fahim-ai-egypt.vercel.app/evidence) to inspect the we
 | Learning Passport | Evidence sessions, mistake portfolio, badges, HMAC-SHA256 signed completion credentials with recomputed verification and admin revocation |
 | Teacher Cockpit | Organizations, classes, join codes, assignments, pilot measurements, cohort signals |
 | Discovery | Verified Egypt source registry, Wikimedia, OpenAlex, Crossref, YouTube Data API and embedded learning player |
-| Retention | Adaptive spaced repetition inspired by SM-2 (not SM-2 itself), memory queue, due reviews, synced to Supabase so the schedule survives a device change |
+| Retention | Adaptive spaced repetition inspired by SM-2 (not SM-2 itself), memory queue, and due reviews saved automatically to the visitor's private browser session; permanent-account mode can restore cross-device sync when re-enabled |
 | Trust | Supabase RLS, server authorization, CSP, rate controls, audit trail, claim labels and honest fallback states |
 | Access | Arabic/English, RTL/LTR, light/dark/system, reduced motion, low-bandwidth mode, responsive PWA |
 | Credential path | Exactly one catalog course (`physics-force-motion`) is server-backed, so it is the only one that can currently produce a credential. The other nine paths are device-local |
 
 ## The Fahim Tutor Agent
 
-Fahim now ships a genuine **autonomous tutoring agent** (`/agent`, server route `/api/agent`), not a single-shot chatbot. Given one learner goal, the agent runs a bounded **plan → act → observe** loop where the model chooses the next tool each step and the orchestrator executes it, feeding the observation back into the next decision.
+Fahim ships a production-oriented **tutoring agent** (`/agent`, server route `/api/agent`), not a single-shot chatbot. Given one learner goal, it runs a bounded **plan → act → observe** loop under a deterministic pedagogical policy; GenAI is used only where semantic generation adds value (diagnosis, reasoning assessment, and targeted teaching). This keeps state transitions, budgets, mastery updates, and completion criteria auditable instead of delegating control to an unconstrained model planner.
 
-- **Real tools (model-invoked):** `get_learner_state`, `search_verified_sources`, `generate_diagnostic` (sealed AES-GCM answer key), `assess_answer` (grade + BKT update), `diagnose_misconception`, `select_next_item` (IRT), `explain_concept` (grounded intervention), `schedule_review` (FSRS), `record_evidence`, plus the human-in-the-loop terminals `ask_learner` and `finish`.
-- **Two decision protocols, one executor:** native function-calling when the provider returns `tool_calls`, and a portable JSON-action fallback otherwise — so the loop is model-driven yet degrades gracefully.
-- **Durable memory:** per-concept mastery (BKT posterior) and adaptive ability (IRT θ) persist in the server-owned `concept_mastery` table; the spaced-review schedule persists as a full FSRS card on `review_items`. The agent reads this back each turn, so learning survives a device change.
-- **Transparent by design:** the Agent Studio streams every step (decision, tool, observation) over NDJSON, with the mastery gauge and review schedule updating live — so a judge can watch the agent actually work.
+- **Real tools:** `get_learner_state`, `search_verified_sources`, `generate_diagnostic`, `assess_answer`, `diagnose_misconception`, `select_next_item`, `explain_concept`, `schedule_review`, and `record_evidence`, plus human-in-the-loop prompts.
+- **Proof before mastery:** a correct choice alone cannot complete a concept. The policy requires explanation or transfer evidence, preventing lucky-click mastery.
+- **Server-authoritative checkpoints:** pending answers, mastery state, attempts, and review decisions live in `agent_sessions`; the browser resumes by opaque session ID and never receives the answer key.
+- **Durable memory:** per-concept BKT mastery and IRT ability persist in `concept_mastery`; review scheduling persists as an FSRS card on `review_items`.
+- **Grounded and bounded:** citations come from an allowlisted source registry, model calls have deadlines and failover, and each turn has a seven-step ceiling with safe retry/resume/cancel behavior.
+- **Transparent by design:** Agent Studio streams reason codes, tool actions, and sanitized observations over NDJSON—never hidden chain-of-thought—while mastery and evidence update live.
 - Zero new serverless functions: the agent is a sub-route of `/api/ai` to stay within the Vercel function ceiling.
 
 ### Business impact for an educational SME (Agents at Work)
@@ -144,9 +155,9 @@ npm run smoke:production   # public route/API smoke test
 npm run load:test          # controlled API load probe
 ```
 
-The repository currently contains 150 automated tests across 32 files, 25 Supabase migrations, 36 page components, and 12 top-level server API modules. Counts are implementation inventory—not claims of user impact.
+The repository currently contains 200 automated tests across 40 files, 33 Supabase migrations, 39 page components, and 12 top-level server API modules. Counts are implementation inventory—not claims of user impact.
 
-Of those tests, 19 files assert runtime behaviour (routing, deadline budgets, sealed-token grading, rate-limit buckets, spaced repetition, credential levels, master classes) and 13 assert source contracts by reading files. **There is no component or end-to-end test layer** — no `@testing-library/react`, no browser driver — so no test currently renders a React component or exercises a full user journey. The `evaluation:check` "12 controls" are source-contract substring checks, not behavioural verification.
+The suite mixes runtime behavior tests (routing, deadline budgets, session integrity, server grading, rate limits, spaced repetition, credentials, and agent policy) with source-contract checks. **There is no committed component or browser E2E suite**—manual browser verification complements, but does not replace, this automated gap. The `evaluation:check` controls are deterministic engineering guards, not evidence of learner impact.
 
 ## Repository map
 

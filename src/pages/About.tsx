@@ -307,15 +307,14 @@ export default function About({ language }: { language: "ar" | "en" }) {
         </h2>
         <p className="mx-auto mt-5 max-w-2xl text-sm leading-8 text-[var(--muted)]">
           {rtl
-            ? "التجربة الكاملة 30 يومًا دون بطاقة. يبدأ الاستخدام الحقيقي بعد إنشاء حساب حتى تبقى ملفاتك ومحاولاتك وأدلتك مرتبطة بك."
-            : "The full trial is 30 days with no card. Real use starts after account creation so your files, attempts, and evidence remain yours."}
+            ? "الاستكشاف الكامل مفتوح الآن. ينشئ فَهيم جلسة معزولة لهذا الجهاز حتى تبقى ملفاتك ومحاولاتك وأدلتك خاصة بك."
+            : "Full exploration is open now. Fahim creates an isolated session for this device so your files, attempts, and evidence stay private."}
         </p>
         <Link
-          to="/register"
-          state={{ from: "/dashboard" }}
+          to="/dashboard"
           className="atlas-primary mt-8 justify-center"
         >
-          {rtl ? "ابدأ التجربة" : "Start the trial"}
+          {rtl ? "ادخل مساحة التعلّم" : "Enter the learning space"}
           <Arrow className="h-4 w-4" />
         </Link>
       </section>

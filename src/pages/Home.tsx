@@ -179,13 +179,12 @@ export default function Home({ language }: { language: Language }) {
               </p>
               <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                 <Link
-                  to="/register"
-                  state={{ from: "/dashboard" }}
+                  to="/quiz-lab"
                   className="atlas-primary justify-center"
                 >
                   {rtl
-                    ? "ابدأ أول تقييم، 30 يومًا مجانًا"
-                    : "Start your first assessment, 30 days free"}
+                    ? "ابدأ أول تقييم الآن — بلا تسجيل"
+                    : "Start your first assessment — no sign-up"}
                   <Arrow className="h-4 w-4" />
                 </Link>
                 <Link to="/showcase" className="atlas-secondary justify-center">
@@ -569,15 +568,14 @@ export default function Home({ language }: { language: Language }) {
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-sm font-bold leading-8">
             {rtl
-              ? "أنشئ حسابك، أكمل خمس خطوات، وابدأ مهمة اليوم. لا بطاقة، ولا تجربة مجهولة قبل التسجيل."
-              : "Create your account, complete five steps, and start Today’s mission. No card and no anonymous product trial."}
+              ? "ابدأ فورًا بجلسة خاصة على جهازك. سيحفظ فَهيم تقدمك ومساراتك وأدلتك دون بريد أو كلمة مرور."
+              : "Start instantly with a private session on this device. Fahim saves your progress, paths, and evidence without an email or password."}
           </p>
           <Link
-            to="/register"
-            state={{ from: "/dashboard" }}
+            to="/personal-paths"
             className="mt-8 inline-flex min-h-12 items-center gap-2 border border-[#14213D] bg-[#14213D] px-6 text-sm font-black text-white shadow-[5px_5px_0_#D95D39]"
           >
-            {rtl ? "ابدأ 30 يومًا كاملة" : "Start the full 30 days"}
+            {rtl ? "أنشئ مسارك الذكي الآن" : "Build your AI path now"}
             <Arrow className="h-4 w-4" />
           </Link>
         </div>

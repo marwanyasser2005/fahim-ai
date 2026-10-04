@@ -28,6 +28,7 @@ import CommandPalette from "@/components/CommandPalette";
 import FahimBrand from "@/components/brand/FahimBrand";
 import { hint, label, productNav, publicNav } from "@/lib/appNavigation";
 import type { NavEntry } from "@/lib/appNavigation";
+import { OPEN_JUDGE_MODE } from "@/config/productMode";
 
 const extraAppNav: NavEntry[] = [
   {
@@ -138,7 +139,7 @@ export default function Navbar({
   const access = useProductAccess();
   const { isStaff } = useProfileRole();
   const t = copy[language];
-  const appReady = Boolean(user && access.onboardingComplete);
+  const appReady = Boolean(user && (OPEN_JUDGE_MODE || access.onboardingComplete));
   const manifestItems = (appReady ? [...productNav, ...extraAppNav] : [...publicNav, ...extraPublicNav])
     .filter((entry) => entry.role === 'all' || isStaff);
   const items = manifestItems.map((entry) => ({
@@ -220,6 +221,16 @@ export default function Navbar({
               <Globe2 className="h-4 w-4" />
               {language === "ar" ? "EN" : "ع"}
             </button>
+            {OPEN_JUDGE_MODE && (
+              <Link
+                to="/agent"
+                className="hidden h-11 items-center gap-2 rounded-xl border border-teal-400/40 bg-teal-400/10 px-3 text-xs font-black text-[var(--nile)] sm:flex"
+                title={language === "ar" ? "استكشاف كامل بجلسة خاصة على هذا الجهاز" : "Full exploration with a private device session"}
+              >
+                <BadgeCheck className="h-4 w-4" />
+                {language === "ar" ? "دخول مفتوح" : "Open access"}
+              </Link>
+            )}
             {appReady ? (
               <Link
                 to="/quiz-lab"
@@ -228,14 +239,14 @@ export default function Navbar({
                 <ClipboardCheck className="h-4 w-4" />
                 {t.assessment}
               </Link>
-            ) : user ? (
+            ) : user && !OPEN_JUDGE_MODE ? (
               <Link
                 to="/onboarding"
                 className="hidden h-11 items-center gap-2 rounded-xl border border-[#14213D] bg-[#F2B84B] px-4 text-sm font-black text-[#14213D] sm:flex"
               >
                 {t.setup}
               </Link>
-            ) : (
+            ) : !OPEN_JUDGE_MODE ? (
               <>
                 <Link
                   to="/login"
@@ -251,8 +262,8 @@ export default function Navbar({
                   {t.start}
                 </Link>
               </>
-            )}
-            {user && (
+            ) : null}
+            {user && !OPEN_JUDGE_MODE && (
               <div className="group relative hidden md:block">
                 <button
                   type="button"
@@ -351,7 +362,7 @@ export default function Navbar({
                   {t.vault}
                 </NavLink>
               )}
-              {!user && (
+              {!user && !OPEN_JUDGE_MODE && (
                 <Link
                   to="/register"
                   onClick={() => setOpen(false)}

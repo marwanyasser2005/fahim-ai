@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { useAuth } from '@/contexts/AuthContext';
 import { AUTH_SESSION_EXPIRED, getFreshSession, isExpiredJwtError, supabase } from '@/lib/supabase/client';
 import type { PlanCode } from '@/config/plans';
+import { OPEN_JUDGE_MODE } from '@/config/productMode';
 
 export type AccessStatus = 'guest' | 'loading' | 'trialing' | 'active' | 'free' | 'setup_required';
 
@@ -57,6 +58,18 @@ const guestAccess: ProductAccess = {
   error: null,
 };
 
+const openJudgeAccess: ProductAccess = {
+  onboardingComplete: true,
+  status: 'active',
+  planCode: 'plus_annual',
+  trialStartedAt: null,
+  trialEndsAt: null,
+  trialDaysRemaining: 0,
+  aiSessionsRemaining: 999999,
+  canUseCore: true,
+  error: null,
+};
+
 const ProductAccessContext = createContext<ProductAccessContextValue | null>(null);
 
 function normalizeAccess(payload: unknown): ProductAccess {
@@ -105,9 +118,11 @@ export function ProductAccessProvider({ children }: { children: ReactNode }) {
     }
     const { data, error } = await supabase.rpc('current_access_v1');
     if (error) {
-      setAccess({ ...guestAccess, status: 'setup_required', error: isExpiredJwtError(error) ? AUTH_SESSION_EXPIRED : 'Product access is temporarily unavailable.' });
+      setAccess(OPEN_JUDGE_MODE
+        ? { ...openJudgeAccess, error: isExpiredJwtError(error) ? AUTH_SESSION_EXPIRED : 'Access verification is temporarily unavailable; open learner mode remains active.' }
+        : { ...guestAccess, status: 'setup_required', error: isExpiredJwtError(error) ? AUTH_SESSION_EXPIRED : 'Product access is temporarily unavailable.' });
     } else {
-      setAccess(normalizeAccess(data));
+      setAccess(OPEN_JUDGE_MODE ? { ...normalizeAccess(data), onboardingComplete: true, canUseCore: true } : normalizeAccess(data));
     }
     loadedUserId.current = userId;
     setLoading(false);

@@ -8,6 +8,7 @@ import MobileDock from '@/components/MobileDock';
 import Home from '@/pages/Home';
 import ProductSidebar from '@/components/ProductSidebar';
 import { useAuth } from '@/contexts/AuthContext';
+import { OPEN_JUDGE_MODE } from '@/config/productMode';
 
 export type Language = 'ar' | 'en';
 export type Theme = 'light' | 'dark' | 'system';
@@ -134,10 +135,10 @@ function AppShell({ language, setLanguage, theme, setTheme, lowBandwidth, setLow
               <Route path="/personal-paths" element={<ProtectedRoute><PersonalPathBuilder language={language} /></ProtectedRoute>} />
               <Route path="/personal-path/:id" element={<ProtectedRoute><PersonalPathDetail language={language} /></ProtectedRoute>} />
               <Route path="/onboarding" element={<ProtectedRoute requireOnboarding={false}><Onboarding language={language} /></ProtectedRoute>} />
-              <Route path="/login" element={<Auth language={language} mode="login" />} />
-              <Route path="/register" element={<Auth language={language} mode="register" />} />
-              <Route path="/forgot-password" element={<Auth language={language} mode="forgot" />} />
-              <Route path="/reset-password" element={<Auth language={language} mode="reset" />} />
+              <Route path="/login" element={OPEN_JUDGE_MODE ? <Navigate to="/dashboard" replace /> : <Auth language={language} mode="login" />} />
+              <Route path="/register" element={OPEN_JUDGE_MODE ? <Navigate to="/dashboard" replace /> : <Auth language={language} mode="register" />} />
+              <Route path="/forgot-password" element={OPEN_JUDGE_MODE ? <Navigate to="/dashboard" replace /> : <Auth language={language} mode="forgot" />} />
+              <Route path="/reset-password" element={OPEN_JUDGE_MODE ? <Navigate to="/dashboard" replace /> : <Auth language={language} mode="reset" />} />
               <Route path="/contact" element={<Navigate to="/resources" replace />} />
               <Route path="/gamification" element={<Navigate to="/dashboard" replace />} />
               <Route path="/community-forum" element={<Navigate to="/workspace" replace />} />

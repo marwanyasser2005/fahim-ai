@@ -1,0 +1,7 @@
+project_id = "erwlkwcsjrxexwtkxtar"
+
+[auth]
+# Competition open-access mode: the browser creates an isolated authenticated
+# identity without collecting email, phone, or password. Owner-scoped RLS still
+# applies because anonymous Auth users use the authenticated database role.
+enable_anonymous_sign_ins = true

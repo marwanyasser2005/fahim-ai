@@ -395,7 +395,7 @@ function ProductProofScene({ language }: { language: Language }) {
         <Fact icon={Globe2} value="AR / EN" label={rtl ? 'تجربة ثنائية اللغة' : 'bilingual experience'} />
         <Fact icon={ServerCog} value="LIVE" label={rtl ? 'نموذج منشور' : 'deployed prototype'} />
       </div>
-      <div className="product-proof__cta"><div><img src="/brand/fahim-symbol-v32.png" alt="" /><span><b>{rtl ? 'الفهم الذي يمكنك إثباته' : 'Verified learning'}</b><small>{rtl ? 'ابدأ رحلة تعلم حقيقية داخل المنتج.' : 'Start a real learning journey in the product.'}</small></span></div><div><Link to="/register" className="atlas-primary">{rtl ? 'ابدأ مجانًا' : 'Start free'}<ArrowRight /></Link><Link to="/evidence" className="atlas-secondary">{rtl ? 'افحص الدليل' : 'Inspect evidence'}<ExternalLink /></Link></div></div>
+      <div className="product-proof__cta"><div><img src="/brand/fahim-symbol-v32.png" alt="" /><span><b>{rtl ? 'الفهم الذي يمكنك إثباته' : 'Verified learning'}</b><small>{rtl ? 'ابدأ رحلة تعلم حقيقية داخل المنتج، بلا تسجيل.' : 'Start a real learning journey in the product—no sign-up.'}</small></span></div><div><Link to="/agent" className="atlas-primary">{rtl ? 'جرّب الوكيل الآن' : 'Try the agent'}<ArrowRight /></Link><Link to="/evidence" className="atlas-secondary">{rtl ? 'افحص الدليل' : 'Inspect evidence'}<ExternalLink /></Link></div></div>
     </div>
   </div>;
 }

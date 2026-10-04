@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { ClipboardCheck, UserRound } from 'lucide-react';
+import { BadgeCheck, ClipboardCheck } from 'lucide-react';
 import type { Language } from '@/App';
 import { useAuth } from '@/contexts/AuthContext';
 import { label, productNav } from '@/lib/appNavigation';
@@ -16,7 +16,7 @@ export default function MobileDock({ language, immersive }: { language: Language
     { to: askFahim.to, text: label(askFahim, language), icon: askFahim.icon },
     { to: '/quiz-lab', text: language === 'ar' ? 'قيّم فهمك' : 'Assess', icon: ClipboardCheck, primary: true },
     { to: review.to, text: label(review, language), icon: review.icon },
-    { to: '/profile', text: language === 'ar' ? 'حسابي' : 'Account', icon: UserRound },
+    { to: '/certificates', text: language === 'ar' ? 'شهاداتي' : 'Credentials', icon: BadgeCheck },
   ];
   return <nav className="mobile-dock" aria-label={language === 'ar' ? 'التنقل الرئيسي للموبايل' : 'Primary mobile navigation'}>{items.map((item) => {
     const active = location.pathname === item.to;
