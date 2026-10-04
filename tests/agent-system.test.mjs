@@ -12,6 +12,11 @@ const cockpitClient = read('../src/lib/teacherCockpit.ts');
 const adminMigration = read('../supabase/migrations/20260927020000_admin_agent_oversight.sql');
 const adminLib = read('../src/lib/adminAgent.ts');
 const adminPage = read('../src/pages/Admin.tsx');
+const sessionIntegrity = read('../supabase/migrations/20261002185911_agent_session_integrity.sql');
+const orchestrator = read('../api/_lib/agent/orchestrator.mjs');
+const tools = read('../api/_lib/agent/tools.mjs');
+const agentClient = read('../src/lib/agentClient.ts');
+const agentPage = read('../src/pages/AgentStudio.tsx');
 
 describe('durable agent memory migration', () => {
   it('creates a server-owned concept_mastery table with owner RLS and a reader RPC', () => {
@@ -54,6 +59,14 @@ describe('agent endpoint wiring (zero new Vercel functions)', () => {
     expect(vercel).toContain('/api/ai?route=agent');
   });
 
+  it('keeps checkpoints server-authoritative and never trusts browser prior state', () => {
+    expect(handler).toContain('loadAgentSession');
+    expect(handler).toContain('saveAgentSession');
+    expect(handler).not.toContain('body.priorState');
+    expect(agentClient).toContain('sessionId?: string | null');
+    expect(agentClient).not.toContain('priorState');
+  });
+
   it('keeps the agent authenticated, same-origin, and metered like chat', () => {
     expect(handler).toContain('requireAuthenticatedUser');
     expect(handler).toContain('isSameOrigin');
@@ -64,6 +77,32 @@ describe('agent endpoint wiring (zero new Vercel functions)', () => {
   it('exposes the Agent Studio behind ProtectedRoute and the impact RPC in the client', () => {
     expect(app).toMatch(/path="\/agent".+ProtectedRoute/);
     expect(cockpitClient).toContain("client().rpc('sme_impact_summary_v1'");
+  });
+});
+
+describe('agent session integrity and accountable reasoning', () => {
+  it('stores opaque checkpoints behind service-role access only', () => {
+    expect(sessionIntegrity).toContain('create table if not exists public.agent_sessions');
+    expect(sessionIntegrity).toContain('alter table public.agent_sessions enable row level security');
+    expect(sessionIntegrity).toContain('revoke all on public.agent_sessions from anon, authenticated');
+    expect(sessionIntegrity).toContain("security invoker");
+    expect(sessionIntegrity).toContain("set search_path = ''");
+  });
+
+  it('uses a bounded policy, explanation assessment, and public reason codes without chain-of-thought', () => {
+    expect(orchestrator).toContain('selectPolicyAction');
+    expect(orchestrator).toContain("tool: 'assess_explanation'");
+    expect(orchestrator).toContain('reasonCode');
+    expect(orchestrator).not.toContain('decision.thought');
+    expect(agentClient).not.toContain('thought?:');
+    expect(agentPage).not.toContain('entry.thought');
+    expect(tools).toContain("name: 'assess_explanation'");
+  });
+
+  it('keeps encrypted answer material out of public stream results', () => {
+    expect(orchestrator).toContain("!['token', 'correctAnswer'].includes(key)");
+    expect(orchestrator).toContain('Public state never contains the encrypted answer token');
+    expect(agentClient).not.toContain('itemToken?:');
   });
 });
 

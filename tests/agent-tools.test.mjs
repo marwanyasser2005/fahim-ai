@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { readAgentResponse, requestLearningAI } from '../api/_lib/ai-routing.mjs';
-import { AGENT_TOOLS, AGENT_TOOL_MAP, classifyMisconception, toolSchemas } from '../api/_lib/agent/tools.mjs';
+import { AGENT_TOOLS, AGENT_TOOL_MAP, citedSourceIds, classifyMisconception, toolSchemas } from '../api/_lib/agent/tools.mjs';
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -20,6 +20,7 @@ describe('agent tool registry', () => {
     expect(AGENT_TOOL_MAP.ask_learner.terminal).toBe(true);
     expect(AGENT_TOOL_MAP.finish.terminal).toBe(true);
     expect(AGENT_TOOL_MAP.get_learner_state.terminal).toBeFalsy();
+    expect(AGENT_TOOL_MAP.assess_explanation.terminal).toBeFalsy();
   });
 
   it('classifies misconceptions into stable bilingual categories', () => {
@@ -27,6 +28,11 @@ describe('agent tool registry', () => {
     expect(classifyMisconception('just memorized the قانون').category).toBe('formula_misuse');
     expect(classifyMisconception('نسي إشارة السالب').category).toBe('sign_or_direction');
     expect(classifyMisconception('something entirely new').category).toBe('conceptual_gap');
+  });
+
+  it('accepts only citations present in the server source ledger', () => {
+    const sources = [{ citationId: 'E1' }, { citationId: 'R1' }];
+    expect(citedSourceIds('Supported [E1] and [R1], invented [E9] and [R7].', sources)).toEqual(['E1', 'R1']);
   });
 });
 

@@ -20,6 +20,7 @@ import {
   RequestBodyError,
 } from '../security.mjs';
 import { runAgentTurn } from './orchestrator.mjs';
+import { createAgentSession, loadAgentSession, saveAgentSession } from './memory.mjs';
 import { consumeAiSession, refundAiSession } from '../entitlements.mjs';
 
 function send(response, status, body) {
@@ -43,25 +44,7 @@ function sanitizeLearnerInput(raw) {
   return Object.keys(out).length ? out : null;
 }
 
-function sanitizePriorState(raw) {
-  if (!raw || typeof raw !== 'object') return null;
-  const out = {};
-  if (raw.pendingItem && typeof raw.pendingItem.token === 'string' && raw.pendingItem.token.length <= 4000) {
-    out.pendingItem = { token: raw.pendingItem.token, skill: String(raw.pendingItem.skill || '').slice(0, 120), difficulty: ['easy', 'medium', 'hard'].includes(raw.pendingItem.difficulty) ? raw.pendingItem.difficulty : 'medium' };
-  }
-  if (Array.isArray(raw.sources)) {
-    out.sources = raw.sources.slice(0, 4).map((source) => ({
-      citationId: String(source?.citationId || '').slice(0, 8),
-      title: String(source?.title || '').slice(0, 200),
-      authority: String(source?.authority || '').slice(0, 40),
-      url: String(source?.url || '').slice(0, 400),
-    }));
-  }
-  if (raw.misconception && typeof raw.misconception === 'object') {
-    out.misconception = { category: String(raw.misconception.category || '').slice(0, 60), label: String(raw.misconception.label || '').slice(0, 120) };
-  }
-  return Object.keys(out).length ? out : null;
-}
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export default async function agentHandler(request, response) {
   const requestId = applyApiHeaders(request, response);
@@ -95,20 +78,32 @@ export default async function agentHandler(request, response) {
     return send(response, 400, { error: 'Invalid JSON body.' });
   }
 
-  const goal = String(body.goal || body.concept || '').trim().slice(0, 400);
-  const concept = String(body.concept || body.goal || '').trim().slice(0, 240);
-  if (goal.length < 3) return send(response, 400, { error: 'A learning goal or concept is required.' });
-  const language = body.language === 'en' ? 'en' : 'ar';
-  const subject = String(body.subject || '').slice(0, 80);
-  const grade = String(body.grade || '').slice(0, 80);
-  const learnerInput = sanitizeLearnerInput(body.learnerInput);
-  const priorState = sanitizePriorState(body.priorState);
-  const stream = body.stream === true;
-  const deadlineAt = Date.now() + 45_000;
+  const requestedSessionId = UUID_RE.test(String(body.sessionId || '')) ? String(body.sessionId) : '';
+  let session = requestedSessionId ? await loadAgentSession(admin, auth.user.id, requestedSessionId) : null;
+  if (requestedSessionId && !session) return send(response, 404, { error: 'This learning session was not found or is no longer available.' });
 
+  let goal = String(session?.goal || body.goal || body.concept || '').trim().slice(0, 400);
+  let concept = String(session?.concept_key || body.concept || body.goal || '').trim().slice(0, 240);
+  if (goal.length < 3) return send(response, 400, { error: 'A learning goal or concept is required.' });
+  const language = (session?.language || body.language) === 'en' ? 'en' : 'ar';
+  const subject = String(session?.subject || body.subject || '').slice(0, 80);
+  const grade = String(session?.grade || body.grade || '').slice(0, 80);
+  const learnerInput = sanitizeLearnerInput(body.learnerInput);
   const gate = await consumeAiSession(auth.client);
   if (gate.configError) return send(response, 503, { error: 'AI entitlements are not configured.' });
   if (!gate.allowed) return send(response, 429, { error: 'Your AI session allowance is exhausted. Review your plan or wait for the next reset.' });
+  if (!session) {
+    session = await createAgentSession(admin, auth.user.id, { conceptKey: concept, goal, subject, grade, language });
+    if (!session) {
+      await refundAiSession(auth.client, auth.user.id, gate.metered);
+      return send(response, 503, { error: 'The secure agent session store is not ready. Please try again shortly.' });
+    }
+    goal = session.goal;
+    concept = session.concept_key;
+  }
+  const priorState = session.state && typeof session.state === 'object' && Object.keys(session.state).length ? session.state : null;
+  const stream = body.stream === true;
+  const deadlineAt = Date.now() + 45_000;
 
   const generationId = randomUUID();
   await admin.from('ai_generations').insert({
@@ -128,7 +123,7 @@ export default async function agentHandler(request, response) {
       'X-Content-Type-Options': 'nosniff',
       'X-Accel-Buffering': 'no',
     });
-    ndjson(response, { type: 'meta', generationId, conceptKey: concept });
+    ndjson(response, { type: 'meta', generationId, sessionId: session.id, conceptKey: concept });
   }
 
   try {
@@ -144,19 +139,31 @@ export default async function agentHandler(request, response) {
       learnerInput,
       priorState,
       deadlineAt,
-      emit: stream ? (event) => ndjson(response, event) : undefined,
+      emit: stream ? (event) => ndjson(response, event.type === 'result'
+        ? { ...event, result: { ...event.result, sessionId: session.id } }
+        : event) : undefined,
     });
 
     const usage = result.usage || { inputTokens: 0, outputTokens: 0 };
-    await admin.from('ai_generations').update({
-      status: 'complete',
-      model: 'agent-loop',
-      result_text: (result.summary || result.prompt || '').slice(0, 12000),
-      input_tokens: usage.inputTokens,
-      output_tokens: usage.outputTokens,
-      estimated_cost_microusd: estimateAICostMicrousd(usage, 'agent-router'),
-      completed_at: new Date().toISOString(),
-    }).eq('id', generationId).then(() => {}, () => {});
+    await Promise.all([
+      admin.from('ai_generations').update({
+        status: 'complete',
+        model: 'agent-loop',
+        result_text: (result.summary || result.prompt || '').slice(0, 12000),
+        input_tokens: usage.inputTokens,
+        output_tokens: usage.outputTokens,
+        estimated_cost_microusd: estimateAICostMicrousd(usage, 'agent-router'),
+        completed_at: new Date().toISOString(),
+      }).eq('id', generationId).then(() => {}, () => {}),
+      saveAgentSession(admin, auth.user.id, session.id, {
+        state: result.checkpoint,
+        stage: result.stage,
+        status: result.awaiting ? 'awaiting' : 'completed',
+        mastery: result.mastery,
+        generationId,
+        completed: !result.awaiting,
+      }),
+    ]);
 
     logEvent('agent_turn', { requestId, steps: result.steps?.length || 0, awaiting: result.awaiting, terminal: result.terminalTool, mastery: Math.round(result.mastery * 100) });
 
@@ -167,6 +174,7 @@ export default async function agentHandler(request, response) {
     return send(response, 200, {
       ok: true,
       generationId,
+      sessionId: session.id,
       conceptKey: result.conceptKey,
       awaiting: result.awaiting,
       prompt: result.prompt,
@@ -179,6 +187,8 @@ export default async function agentHandler(request, response) {
       attempts: result.attempts,
       steps: result.steps,
       state: result.state,
+      stage: result.stage,
+      confidence: result.confidence,
     });
   } catch (error) {
     logEvent('agent_turn_failed', { requestId, code: error?.name || 'error' });

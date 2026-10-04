@@ -9,11 +9,17 @@ const sources = Object.fromEntries(await Promise.all([
   'api/quiz.mjs',
   'api/_lib/ai-routing.mjs',
   'api/_lib/security.mjs',
+  'api/_lib/agent/handler.mjs',
+  'api/_lib/agent/orchestrator.mjs',
+  'api/_lib/agent/tools.mjs',
+  'src/lib/agentClient.ts',
+  'src/pages/AgentStudio.tsx',
   'src/pages/QuizLab.tsx',
   'src/pages/Showcase.tsx',
   'supabase/migrations/20260825000000_learning_event_spine.sql',
   'supabase/migrations/20260827010000_branded_auth_and_auto_credentials.sql',
   'supabase/migrations/20260830010000_competition_evidence_teacher_cockpit.sql',
+  'supabase/migrations/20261002185911_agent_session_integrity.sql',
 ].map(async (file) => [file, await read(file)])));
 
 const controls = [
@@ -113,11 +119,72 @@ const controls = [
     evidence: 'credential SQL · Showcase trust boundary',
     pass: sources['supabase/migrations/20260827010000_branded_auth_and_auto_credentials.sql'].includes('my_certificate_eligibility_v2') && sources['supabase/migrations/20260827010000_branded_auth_and_auto_credentials.sql'].includes('issue_my_completion_certificate_v2') && sources['src/pages/Showcase.tsx'].includes('Verifiable completion credential') && sources['src/pages/Showcase.tsx'].includes('Academic accreditation only after a documented partnership'),
   },
+  {
+    id: 'agent-server-checkpoint',
+    area: 'agent-integrity',
+    titleAr: 'حالة الوكيل مرجعية في الخادم وليست في المتصفح',
+    titleEn: 'Agent checkpoints are server-authoritative',
+    evidence: 'agent handler · agent session integrity SQL',
+    pass: sources['api/_lib/agent/handler.mjs'].includes('loadAgentSession')
+      && sources['api/_lib/agent/handler.mjs'].includes('saveAgentSession')
+      && !sources['api/_lib/agent/handler.mjs'].includes('body.priorState')
+      && sources['supabase/migrations/20261002185911_agent_session_integrity.sql'].includes('revoke all on public.agent_sessions from anon, authenticated'),
+  },
+  {
+    id: 'agent-proof-before-mastery',
+    area: 'pedagogy',
+    titleAr: 'الاختيار الصحيح يتبعه إثبات للفهم',
+    titleEn: 'A correct choice must be followed by an explanation proof',
+    evidence: 'agent policy · explanation assessor',
+    pass: sources['api/_lib/agent/orchestrator.mjs'].includes("reasonCode: POLICY_REASON.request_reasoning")
+      && sources['api/_lib/agent/orchestrator.mjs'].includes("tool: 'assess_explanation'")
+      && sources['api/_lib/agent/tools.mjs'].includes("name: 'assess_explanation'"),
+  },
+  {
+    id: 'agent-bounded-policy',
+    area: 'reliability',
+    titleAr: 'مسار تعليمي محدود بحالات وقواعد آمنة',
+    titleEn: 'The learning loop is bounded by a deterministic safety policy',
+    evidence: 'agent orchestrator',
+    pass: sources['api/_lib/agent/orchestrator.mjs'].includes('selectPolicyAction')
+      && sources['api/_lib/agent/orchestrator.mjs'].includes('MAX_STEPS_DEFAULT = 7')
+      && sources['api/_lib/agent/orchestrator.mjs'].includes('deadlineAt - Date.now() < 3_000'),
+  },
+  {
+    id: 'agent-no-chain-of-thought',
+    area: 'safety',
+    titleAr: 'لا يُعرض التفكير الداخلي أو البنية الخفية',
+    titleEn: 'Internal chain-of-thought and infrastructure stay private',
+    evidence: 'agent orchestrator · client · studio',
+    pass: sources['api/_lib/agent/orchestrator.mjs'].includes('Never reveal internal chain-of-thought')
+      && !sources['src/lib/agentClient.ts'].includes('thought?:')
+      && !sources['src/pages/AgentStudio.tsx'].includes('entry.thought'),
+  },
+  {
+    id: 'agent-citation-allowlist',
+    area: 'trust',
+    titleAr: 'الإحالات محصورة في سجل المصادر الفعلي',
+    titleEn: 'Agent citations are allowlisted against the source ledger',
+    evidence: 'agent tools',
+    pass: sources['api/_lib/agent/tools.mjs'].includes('export function citedSourceIds')
+      && sources['api/_lib/agent/tools.mjs'].includes('allowed.has(id)')
+      && sources['api/_lib/agent/tools.mjs'].includes('topical-reference'),
+  },
+  {
+    id: 'agent-resumable-session',
+    area: 'continuity',
+    titleAr: 'الجلسة قابلة للاستكمال دون تخزين الدليل الحساس في الجهاز',
+    titleEn: 'Sessions resume without storing sensitive evidence in the browser',
+    evidence: 'Agent Studio · agent client',
+    pass: sources['src/pages/AgentStudio.tsx'].includes('localStorage.setItem(STORAGE_KEY')
+      && sources['src/pages/AgentStudio.tsx'].includes('sessionId')
+      && !sources['src/lib/agentClient.ts'].includes('pendingItem'),
+  },
 ].map(({ pass, ...control }) => ({ ...control, status: pass ? 'passed' : 'failed' }));
 
 const passed = controls.filter((control) => control.status === 'passed').length;
 const report = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   suiteId: 'fahim-learning-guard-suite',
   evaluationKind: 'deterministic-contract-coverage',
   passed,

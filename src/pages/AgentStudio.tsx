@@ -1,236 +1,99 @@
-import { FormEvent, useCallback, useRef, useState } from 'react';
-import { Activity, Brain, CheckCircle2, Compass, FileSearch, GraduationCap, ListChecks, Loader2, Play, Send, Sparkles, Target, TimerReset } from 'lucide-react';
-import { streamAgent, type AgentResult, type AgentState, type AgentStepEvent } from '@/lib/agentClient';
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Activity, Brain, Check, CheckCircle2, Compass, FileSearch, GraduationCap, ListChecks, Loader2, PauseCircle, Play, RotateCcw, Send, ShieldCheck, Sparkles, Square, Target, TimerReset, X } from 'lucide-react';
+import RichMessage from '@/components/RichMessage';
+import { streamAgent, type AgentResult, type AgentStage, type AgentStepEvent } from '@/lib/agentClient';
 import { masteryLabel as bktMasteryLabel } from '@/lib/learning/bkt';
 
 type Phase = 'idle' | 'running' | 'awaiting' | 'done';
-
-interface TraceEntry {
-  turn: number;
-  index: number;
-  tool: string;
-  thought?: string;
-  observation?: Record<string, unknown>;
-}
-
-interface PendingDiagnostic { question: string; options: string[]; token: string; }
+interface TraceEntry { turn: number; index: number; tool: string; phase?: AgentStage; reasonCode?: string; observation?: Record<string, unknown>; }
+interface PendingDiagnostic { question: string; options: string[]; }
+interface ResumeSession { sessionId: string; goal: string; subject: string; grade: string; language: 'ar' | 'en'; }
+type RunOverride = Partial<Omit<ResumeSession, 'sessionId'>> & { sessionId?: string | null };
+const STORAGE_KEY = 'fahim-agent-session-v2';
 
 const copy = {
   ar: {
-    eyebrow: 'وكيل فَهيم', title: 'الوكيل المُعلِّم المستقل',
-    body: 'وكيل حقيقي يقرر خطوته التالية بنفسه: يقرأ ذاكرتك، يشخّص بسؤال، يصحّح ويحدّث إتقانك (BKT)، يشرح من مصدر موثّق، ثم يجدول مراجعتك (FSRS). كل خطوة ظاهرة أمامك.',
-    goalLabel: 'المفهوم أو الهدف التعليمي', goalPlaceholder: 'مثال: قانون نيوتن الثاني', subject: 'المادة', grade: 'المستوى',
-    run: 'شغّل الوكيل', running: 'الوكيل يعمل…', trace: 'خطوات الوكيل الحيّة', waiting: 'الوكيل ينتظر إجابتك',
-    yourAnswer: 'إجابتك', submit: 'أرسل للوكيل', explainPrompt: 'اكتب فهمك بكلماتك', mastery: 'إتقان المفهوم',
-    ability: 'القدرة التكيفية (θ)', attempts: 'المحاولات', schedule: 'المراجعة القادمة', sources: 'المصادر الموثوقة',
-    summary: 'خلاصة الجلسة', done: 'اكتملت الجولة', memory: 'ذاكرة دائمة: يُحفظ إتقانك وجدول مراجعتك في حسابك.',
-    honest: 'الإتقان تقدير احتمالي (BKT) قابل للمراجعة، وليس حكمًا نهائيًا.', empty: 'اكتب هدفًا وابدأ لترى الوكيل يخطّط ويتصرّف.',
-    days: 'يوم', newRun: 'جولة جديدة',
+    eyebrow: 'مختبر فَهيم الوكيلي', title: 'تعلّم يقيس الفهم، لا عدد الرسائل', body: 'مسار آمن من خمس مراحل: يقرأ الذاكرة، يشخّص، يتدخل، يطلب منك إثبات الفهم، ثم يحفظ الدليل وجدول الاسترجاع.',
+    goalLabel: 'ما الذي تريد فهمه؟', goalPlaceholder: 'مثال: لماذا تتناسب القوة مع التسارع؟', subject: 'المادة', grade: 'المستوى', run: 'ابدأ جلسة موثّقة', running: 'فَهيم ينفّذ الخطوة…', trace: 'سجل الجلسة', waiting: 'دورك الآن',
+    yourAnswer: 'إجابتك', choose: 'اختر إجابة ثم أكّد', submitChoice: 'تأكيد المحاولة', submit: 'إرسال التفسير', explainPrompt: 'اشرح السبب وطبّق الفكرة بمثال قصير…', mastery: 'تقدير الإتقان', confidence: 'قوة الدليل', ability: 'القدرة التكيفية (θ)', attempts: 'أدلة مقاسة', schedule: 'الاسترجاع التالي', sources: 'سجل المصادر', done: 'اكتملت الجولة',
+    memory: 'الحالة محفوظة على الخادم؛ يمكنك استكمال الجلسة دون الوثوق بحالة المتصفح.', honest: 'الإتقان والثقة تقديرات احتمالية قابلة للمراجعة، وليسا حكمًا نهائيًا أو شهادة اعتماد.', empty: 'حدّد هدفًا واحدًا. سيبني فَهيم أقصر تجربة تكشف فهمك بدل محاضرة طويلة.', days: 'يوم', newRun: 'هدف جديد', cancel: 'إيقاف', retry: 'إعادة المحاولة', resume: 'استكمال الجلسة', dismiss: 'تجاهل', restored: 'توجد جلسة محفوظة يمكن استكمالها بأمان.', partialSource: 'وجهة تحقق', openReference: 'مرجع موضوعي',
   },
   en: {
-    eyebrow: 'Fahim Agent', title: 'The autonomous tutoring agent',
-    body: 'A real agent that decides its own next step: it reads your memory, diagnoses with a question, grades and updates your mastery (BKT), teaches from a verified source, then schedules your review (FSRS). Every step is visible.',
-    goalLabel: 'Concept or learning goal', goalPlaceholder: 'e.g. Newton\'s second law', subject: 'Subject', grade: 'Level',
-    run: 'Run the agent', running: 'Agent working…', trace: 'Live agent trace', waiting: 'The agent is waiting for you',
-    yourAnswer: 'Your answer', submit: 'Send to agent', explainPrompt: 'Explain in your own words', mastery: 'Concept mastery',
-    ability: 'Adaptive ability (θ)', attempts: 'Attempts', schedule: 'Next review', sources: 'Verified sources',
-    summary: 'Session summary', done: 'Session complete', memory: 'Durable memory: your mastery and review schedule are saved to your account.',
-    honest: 'Mastery is a revisable probability estimate (BKT), not a final verdict.', empty: 'Enter a goal and start to watch the agent plan and act.',
-    days: 'days', newRun: 'New run',
+    eyebrow: 'Fahim Agent Lab', title: 'Learning measured by understanding, not message count', body: 'A safe five-stage loop: read memory, diagnose, intervene, ask you to prove understanding, then save the evidence and recall schedule.',
+    goalLabel: 'What do you want to understand?', goalPlaceholder: 'e.g. Why does force scale with acceleration?', subject: 'Subject', grade: 'Level', run: 'Start verified session', running: 'Fahim is executing…', trace: 'Session ledger', waiting: 'Your turn',
+    yourAnswer: 'Your answer', choose: 'Choose an answer, then confirm', submitChoice: 'Confirm attempt', submit: 'Submit explanation', explainPrompt: 'Explain why, then apply the idea in one short example…', mastery: 'Mastery estimate', confidence: 'Evidence strength', ability: 'Adaptive ability (θ)', attempts: 'Measured evidence', schedule: 'Next recall', sources: 'Source ledger', done: 'Round complete',
+    memory: 'State is saved server-side, so the session can resume without trusting browser state.', honest: 'Mastery and confidence are revisable probability estimates—not a final verdict or accreditation.', empty: 'Set one goal. Fahim will build the shortest experience that reveals your understanding instead of starting with a long lecture.', days: 'days', newRun: 'New goal', cancel: 'Stop', retry: 'Try again', resume: 'Resume session', dismiss: 'Dismiss', restored: 'A secure saved session is available to resume.', partialSource: 'Verification destination', openReference: 'Topical reference',
   },
 } as const;
 
+const STAGES: Array<{ id: AgentStage; ar: string; en: string }> = [
+  { id: 'discover', ar: 'ذاكرة', en: 'Memory' }, { id: 'diagnose', ar: 'تشخيص', en: 'Diagnose' }, { id: 'teach', ar: 'تدخل', en: 'Intervene' }, { id: 'prove', ar: 'إثبات', en: 'Prove' }, { id: 'remember', ar: 'استرجاع', en: 'Recall' },
+];
 const TOOL_META: Record<string, { ar: string; en: string; icon: typeof Brain }> = {
-  get_learner_state: { ar: 'قراءة ذاكرة المتعلّم', en: 'Read learner memory', icon: Brain },
-  search_verified_sources: { ar: 'بحث في مصادر موثوقة', en: 'Search verified sources', icon: FileSearch },
-  generate_diagnostic: { ar: 'توليد سؤال تشخيصي', en: 'Generate diagnostic', icon: ListChecks },
-  ask_learner: { ar: 'طرح سؤال على المتعلّم', en: 'Ask the learner', icon: Send },
-  assess_answer: { ar: 'تصحيح وتحديث الإتقان', en: 'Assess and update mastery', icon: CheckCircle2 },
-  diagnose_misconception: { ar: 'تشخيص المفهوم الخاطئ', en: 'Diagnose misconception', icon: Target },
-  explain_concept: { ar: 'شرح تدخّلي مبني على مصدر', en: 'Grounded intervention', icon: GraduationCap },
-  select_next_item: { ar: 'اختيار الصعوبة التالية', en: 'Select next difficulty', icon: Compass },
-  schedule_review: { ar: 'جدولة المراجعة (FSRS)', en: 'Schedule review (FSRS)', icon: TimerReset },
-  record_evidence: { ar: 'تسجيل الدليل', en: 'Record evidence', icon: Activity },
-  finish: { ar: 'إنهاء الجلسة', en: 'Finish session', icon: Sparkles },
+  get_learner_state: { ar: 'استعاد ذاكرة المفهوم', en: 'Loaded concept memory', icon: Brain }, search_verified_sources: { ar: 'بنى سجل المصادر', en: 'Built source ledger', icon: FileSearch }, generate_diagnostic: { ar: 'أنشأ تشخيصًا متكيفًا', en: 'Created adaptive diagnostic', icon: ListChecks }, ask_learner: { ar: 'سلّم الدور للمتعلّم', en: 'Passed the turn to learner', icon: Send }, assess_answer: { ar: 'قاس المحاولة الأولى', en: 'Measured first attempt', icon: CheckCircle2 }, assess_explanation: { ar: 'تحقق من تفسير المتعلّم', en: 'Verified learner reasoning', icon: ShieldCheck }, diagnose_misconception: { ar: 'كوّن فرضية عن الخطأ', en: 'Formed misconception hypothesis', icon: Target }, explain_concept: { ar: 'قدّم تدخلًا موجّهًا', en: 'Delivered targeted intervention', icon: GraduationCap }, select_next_item: { ar: 'عاير الصعوبة التالية', en: 'Calibrated next difficulty', icon: Compass }, schedule_review: { ar: 'حجز لحظة الاسترجاع', en: 'Scheduled recall', icon: TimerReset }, record_evidence: { ar: 'حفظ دليل التعلّم', en: 'Saved learning evidence', icon: Activity }, finish: { ar: 'أغلق الجولة', en: 'Closed the round', icon: Sparkles },
+};
+const REASON_META: Record<string, { ar: string; en: string }> = {
+  memory_first: { ar: 'لأن القرار يبدأ مما تعرفه بالفعل', en: 'Because the decision starts from what you already know' }, evidence_first: { ar: 'لربط الشرح بمرجع يمكن فتحه', en: 'To connect teaching to references you can open' }, diagnostic_needed: { ar: 'للحصول على محاولة قبل أي شرح', en: 'To collect an attempt before teaching' }, present_diagnostic: { ar: 'الخطوة التالية تحتاج إجابتك', en: 'The next step needs your response' }, grade_attempt: { ar: 'لقياس التغير لا تخمينه', en: 'To measure change instead of guessing it' }, target_misconception: { ar: 'لتحديد نموذج الخطأ لا مظهره فقط', en: 'To target the error model, not only its symptom' }, teach_gap: { ar: 'لسد الفجوة بأقصر تدخل', en: 'To repair the gap with a focused intervention' }, request_reasoning: { ar: 'لاستبعاد التخمين وإثبات الفهم', en: 'To rule out guessing and prove understanding' }, verify_reasoning: { ar: 'لأن التفسير أقوى من اختيار منفرد', en: 'Because an explanation is stronger than one choice' }, retry_reasoning: { ar: 'لجمع دليل جديد بعد التدخل', en: 'To collect new evidence after intervention' }, schedule_recall: { ar: 'لحماية الفهم من النسيان', en: 'To protect understanding from forgetting' }, record_learning: { ar: 'لتحويل الجولة إلى سجل قابل للمراجعة', en: 'To make the round auditable' }, goal_complete: { ar: 'لأن الجولة وصلت إلى نهاية قابلة للقياس', en: 'Because the round reached a measurable end' },
 };
 
-// AGENT_STUDIO_BODY_PLACEHOLDER
 export default function AgentStudio({ language }: { language: 'ar' | 'en' }) {
-  const t = copy[language];
-  const rtl = language === 'ar';
-  const [goal, setGoal] = useState('');
-  const [subject, setSubject] = useState('');
-  const [grade, setGrade] = useState('');
-  const [phase, setPhase] = useState<Phase>('idle');
-  const [trace, setTrace] = useState<TraceEntry[]>([]);
-  const [pending, setPending] = useState<PendingDiagnostic | null>(null);
-  const [result, setResult] = useState<AgentResult | null>(null);
-  const [explanation, setExplanation] = useState<string>('');
-  const [nextReview, setNextReview] = useState<{ intervalDays: number; nextReviewAt: string } | null>(null);
-  const [error, setError] = useState('');
-  const [freeText, setFreeText] = useState('');
-  const turnRef = useRef(0);
-  const stateRef = useRef<AgentState | null>(null);
+  const t = copy[language]; const rtl = language === 'ar';
+  const [goal, setGoal] = useState(''); const [subject, setSubject] = useState(''); const [grade, setGrade] = useState('');
+  const [phase, setPhase] = useState<Phase>('idle'); const [trace, setTrace] = useState<TraceEntry[]>([]); const [pending, setPending] = useState<PendingDiagnostic | null>(null); const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
+  const [result, setResult] = useState<AgentResult | null>(null); const [explanation, setExplanation] = useState(''); const [nextReview, setNextReview] = useState<{ intervalDays: number; nextReviewAt: string } | null>(null); const [error, setError] = useState(''); const [freeText, setFreeText] = useState(''); const [sessionId, setSessionId] = useState<string | null>(null); const [resume, setResume] = useState<ResumeSession | null>(null);
+  const turnRef = useRef(0); const controllerRef = useRef<AbortController | null>(null);
 
-  const runTurn = useCallback(async (learnerInput: { itemToken?: string; answerIndex?: number; text?: string } | null) => {
-    turnRef.current += 1;
-    const turn = turnRef.current;
-    setPhase('running');
-    setError('');
-    setPending(null);
+  useEffect(() => { try { const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') as ResumeSession | null; if (saved?.sessionId && saved.language === language) setResume(saved); } catch { localStorage.removeItem(STORAGE_KEY); } }, [language]);
+
+  const runTurn = useCallback(async (learnerInput: { answerIndex?: number; text?: string } | null, override?: RunOverride) => {
+    controllerRef.current?.abort(); const controller = new AbortController(); controllerRef.current = controller; turnRef.current += 1; const turn = turnRef.current;
+    const activeGoal = override?.goal ?? goal; const activeSubject = override?.subject ?? subject; const activeGrade = override?.grade ?? grade; const activeSessionId = override && 'sessionId' in override ? override.sessionId : sessionId;
+    setPhase('running'); setError(''); setSelectedChoice(null);
     try {
-      await streamAgent(
-        { goal, concept: goal, subject, grade, language, learnerInput, priorState: stateRef.current },
-        {
-          onStep: (step: AgentStepEvent) => setTrace((current) => [...current, { turn, index: step.index, tool: step.tool, thought: step.thought }]),
-          onObservation: ({ index, tool, observation }) => {
-            setTrace((current) => current.map((entry) => (entry.turn === turn && entry.index === index && entry.tool === tool ? { ...entry, observation } : entry)));
-            if (tool === 'generate_diagnostic' && Array.isArray(observation.options)) {
-              setPending({ question: String(observation.question || ''), options: (observation.options as string[]).map(String), token: String(observation.token || '') });
-            }
-            if (tool === 'explain_concept' && typeof observation.explanation === 'string') setExplanation(observation.explanation);
-            if (tool === 'schedule_review' && observation.nextReviewAt) setNextReview({ intervalDays: Number(observation.intervalDays) || 0, nextReviewAt: String(observation.nextReviewAt) });
-          },
-          onResult: (res: AgentResult) => {
-            setResult(res);
-            stateRef.current = res.state;
-            setPhase(res.awaiting ? 'awaiting' : 'done');
-          },
-        },
-      );
-    } catch (streamError) {
-      setError(streamError instanceof Error ? streamError.message : 'error');
-      setPhase(result ? 'awaiting' : 'idle');
-    }
-  }, [goal, subject, grade, language, result]);
+      await streamAgent({ goal: activeGoal, concept: activeGoal, subject: activeSubject, grade: activeGrade, language, learnerInput, sessionId: activeSessionId }, {
+        onMeta: (_generationId, createdSessionId) => { setSessionId(createdSessionId); const saved = { sessionId: createdSessionId, goal: activeGoal, subject: activeSubject, grade: activeGrade, language }; localStorage.setItem(STORAGE_KEY, JSON.stringify(saved)); setResume(saved); },
+        onStep: (step: AgentStepEvent) => setTrace((current) => [...current, { turn, index: step.index, tool: step.tool, phase: step.phase, reasonCode: step.reasonCode }]),
+        onObservation: ({ index, tool, phase: stepPhase, observation }) => { setTrace((current) => current.map((entry) => entry.turn === turn && entry.index === index && entry.tool === tool ? { ...entry, phase: stepPhase || entry.phase, observation } : entry)); if (tool === 'generate_diagnostic' && Array.isArray(observation.options)) setPending({ question: String(observation.question || ''), options: (observation.options as string[]).map(String) }); if (tool === 'explain_concept' && typeof observation.explanation === 'string') setExplanation(observation.explanation); if (tool === 'schedule_review' && observation.nextReviewAt) setNextReview({ intervalDays: Number(observation.intervalDays) || 0, nextReviewAt: String(observation.nextReviewAt) }); },
+        onResult: (res) => { setResult(res); setSessionId(res.sessionId); setPhase(res.awaiting ? 'awaiting' : 'done'); if (!res.awaiting) { localStorage.removeItem(STORAGE_KEY); setResume(null); } },
+      }, controller.signal);
+    } catch (streamError) { if (controller.signal.aborted) { setPhase(result?.awaiting ? 'awaiting' : 'idle'); return; } setError(streamError instanceof Error ? streamError.message : 'error'); setPhase(result?.awaiting ? 'awaiting' : 'idle'); }
+    finally { if (controllerRef.current === controller) controllerRef.current = null; }
+  }, [goal, subject, grade, language, sessionId, result?.awaiting]);
 
-  const start = (event: FormEvent) => { event.preventDefault(); if (goal.trim().length < 3) return; turnRef.current = 0; stateRef.current = null; setTrace([]); setResult(null); setExplanation(''); setNextReview(null); void runTurn(null); };
-  const answerChoice = (index: number) => { if (pending) void runTurn({ itemToken: pending.token, answerIndex: index }); };
-  const answerText = (event: FormEvent) => { event.preventDefault(); if (freeText.trim().length < 2) return; const text = freeText; setFreeText(''); void runTurn({ text }); };
-  const masteryPct = result ? Math.round(result.mastery * 100) : 0;
-  const dateFmt = new Intl.DateTimeFormat(rtl ? 'ar-EG' : 'en-GB', { day: 'numeric', month: 'short' });
+  const clearSession = () => { controllerRef.current?.abort(); localStorage.removeItem(STORAGE_KEY); setResume(null); setSessionId(null); setPhase('idle'); setTrace([]); setPending(null); setResult(null); setExplanation(''); setNextReview(null); setError(''); setFreeText(''); setSelectedChoice(null); turnRef.current = 0; };
+  const start = (event: FormEvent) => { event.preventDefault(); if (goal.trim().length < 3) return; clearSession(); void runTurn(null, { sessionId: null, goal, subject, grade }); };
+  const answerText = (event: FormEvent) => { event.preventDefault(); if (freeText.trim().length < 8) return; const text = freeText; setFreeText(''); void runTurn({ text }); };
+  const resumeSaved = () => { if (!resume) return; setGoal(resume.goal); setSubject(resume.subject); setGrade(resume.grade); setSessionId(resume.sessionId); void runTurn(null, resume); };
+  const masteryPct = result ? Math.round(result.mastery * 100) : 0; const confidencePct = result ? Math.round(result.confidence * 100) : 0; const currentStage = result?.stage || trace[trace.length - 1]?.phase || 'discover'; const stageIndex = Math.max(0, STAGES.findIndex((stage) => stage.id === currentStage));
+  const dateFmt = useMemo(() => new Intl.DateTimeFormat(rtl ? 'ar-EG' : 'en-GB', { day: 'numeric', month: 'short' }), [rtl]);
 
-  return (
-    <main className="min-h-[80vh] bg-[var(--surface)] pb-20">
-      <section className="fahim-band-hero relative overflow-hidden border-b border-[var(--band)] bg-[var(--band)] px-4 py-16 text-white sm:px-6 lg:py-20">
-        <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ backgroundImage: 'radial-gradient(circle at 85% 12%, color-mix(in srgb, var(--nile) 22%, transparent), transparent 24rem), radial-gradient(circle at 10% 90%, color-mix(in srgb, var(--saffron) 13%, transparent), transparent 20rem)' }} />
-        <div className="relative mx-auto max-w-7xl">
-          <p className="flex w-fit items-center gap-2.5 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-bold text-[var(--saffron)]"><Sparkles className="h-4 w-4" />{t.eyebrow}</p>
-          <h1 className="atlas-display mt-8 max-w-3xl text-4xl text-white sm:text-6xl">{t.title}</h1>
-          <p className="mt-6 max-w-2xl text-base leading-8 text-[#B9C6D4] sm:text-lg">{t.body}</p>
-          <form onSubmit={start} className="mt-8 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
-            <div className="grid gap-3 sm:grid-cols-3">
-              <label className="block"><span className="mb-1 block text-xs font-bold text-[#B9C6D4]">{t.goalLabel}</span><input value={goal} onChange={(e) => setGoal(e.target.value)} placeholder={t.goalPlaceholder} className="h-12 w-full rounded-xl border border-white/15 bg-white/[.06] px-3 text-sm font-semibold text-white placeholder:text-white/40" /></label>
-              <label className="block"><span className="mb-1 block text-xs font-bold text-[#B9C6D4]">{t.subject}</span><input value={subject} onChange={(e) => setSubject(e.target.value)} className="h-12 w-full rounded-xl border border-white/15 bg-white/[.06] px-3 text-sm font-semibold text-white" /></label>
-              <label className="block"><span className="mb-1 block text-xs font-bold text-[#B9C6D4]">{t.grade}</span><input value={grade} onChange={(e) => setGrade(e.target.value)} className="h-12 w-full rounded-xl border border-white/15 bg-white/[.06] px-3 text-sm font-semibold text-white" /></label>
-            </div>
-            <button disabled={goal.trim().length < 3 || phase === 'running'} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-black text-[#14213d] shadow-[3px_3px_0_var(--saffron)] transition hover:-translate-y-0.5 disabled:opacity-40">
-              {phase === 'running' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}{phase === 'running' ? t.running : t.run}
-            </button>
-          </form>
-        </div>
+  return <main className="min-h-dvh bg-[var(--surface)] pb-20">
+    <section className="relative overflow-hidden border-b border-[var(--border)] bg-[var(--band)] px-4 py-9 text-white sm:px-6 lg:py-11"><div className="pointer-events-none absolute inset-0 opacity-80" aria-hidden="true" style={{ backgroundImage: 'radial-gradient(circle at 85% 15%, color-mix(in srgb, var(--nile) 24%, transparent), transparent 24rem), radial-gradient(circle at 8% 100%, color-mix(in srgb, var(--saffron) 14%, transparent), transparent 18rem)' }} /><div className="relative mx-auto max-w-7xl"><div className="grid items-end gap-7 lg:grid-cols-[minmax(0,.8fr)_minmax(34rem,1.2fr)]"><div><p className="flex w-fit items-center gap-2 rounded-full border border-white/15 bg-white/[.06] px-3 py-1.5 text-xs font-bold text-[var(--saffron)]"><Sparkles className="h-4 w-4" />{t.eyebrow}</p><h1 className="atlas-display mt-5 max-w-2xl !text-white text-3xl sm:text-5xl">{t.title}</h1><p className="mt-4 max-w-2xl text-sm leading-7 text-[#D7E0E9] sm:text-base">{t.body}</p></div>
+      <form onSubmit={start} className="rounded-2xl border border-white/15 bg-white/[.065] p-4 shadow-2xl backdrop-blur-sm"><label className="block"><span className="mb-1.5 block text-xs font-bold text-[#D7E0E9]">{t.goalLabel}</span><input value={goal} onChange={(event) => setGoal(event.target.value)} placeholder={t.goalPlaceholder} className="h-12 w-full rounded-xl border border-white/15 bg-[#071524]/75 px-3 text-base font-semibold text-white outline-none placeholder:text-white/40 focus:border-[var(--saffron)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--saffron)_30%,transparent)]" /></label><div className="mt-3 grid gap-3 sm:grid-cols-[1fr_1fr_auto]"><input aria-label={t.subject} value={subject} onChange={(event) => setSubject(event.target.value)} placeholder={t.subject} className="h-11 w-full rounded-xl border border-white/15 bg-[#071524]/75 px-3 text-sm font-semibold text-white outline-none placeholder:text-white/45 focus:border-[var(--saffron)]" /><input aria-label={t.grade} value={grade} onChange={(event) => setGrade(event.target.value)} placeholder={t.grade} className="h-11 w-full rounded-xl border border-white/15 bg-[#071524]/75 px-3 text-sm font-semibold text-white outline-none placeholder:text-white/45 focus:border-[var(--saffron)]" /><button disabled={goal.trim().length < 3 || phase === 'running'} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white px-5 text-sm font-black text-[#14213d] shadow-[3px_3px_0_var(--saffron)] transition hover:-translate-y-0.5 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-45">{phase === 'running' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}{phase === 'running' ? t.running : t.run}</button></div></form>
+    </div></div></section>
+
+    <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+      {resume && phase === 'idle' && <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--nile)_35%,var(--border))] bg-[color-mix(in_srgb,var(--nile)_7%,var(--panel))] p-4 sm:flex-row sm:items-center" role="status"><PauseCircle className="h-5 w-5 shrink-0 text-[var(--nile)]" /><p className="text-sm font-bold text-[var(--text)]">{t.restored} <span className="text-[var(--muted)]">{resume.goal}</span></p><div className="flex gap-2 sm:ms-auto"><button onClick={resumeSaved} className="atlas-primary min-h-11"><Play className="h-4 w-4" />{t.resume}</button><button onClick={() => { localStorage.removeItem(STORAGE_KEY); setResume(null); }} className="atlas-secondary min-h-11">{t.dismiss}</button></div></div>}
+      <nav aria-label={rtl ? 'مراحل جلسة فَهيم' : 'Fahim session stages'} className="mb-6 overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--panel)] p-2 shadow-[var(--shadow-sm)]"><ol className="grid min-w-[34rem] grid-cols-5 gap-1">{STAGES.map((stage, index) => { const complete = index < stageIndex || currentStage === 'complete'; const active = index === stageIndex && currentStage !== 'complete'; return <li key={stage.id} aria-current={active ? 'step' : undefined} className={`flex min-h-12 items-center gap-2 rounded-xl px-3 text-xs font-black ${active ? 'bg-[var(--nile)] text-white' : complete ? 'bg-[color-mix(in_srgb,var(--nile)_10%,var(--panel))] text-[var(--nile)]' : 'text-[var(--muted)]'}`}><span className="grid h-6 w-6 place-items-center rounded-full border border-current tabular-nums">{complete ? <Check className="h-3.5 w-3.5" /> : index + 1}</span>{stage[language]}</li>; })}</ol></nav>
+
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_21rem]"><section aria-label={t.trace} className="min-w-0">
+        {trace.length === 0 && phase === 'idle' ? <div className="grid min-h-[19rem] place-items-center rounded-3xl border-2 border-dashed border-[var(--border)] bg-[var(--panel)] px-6 py-12 text-center"><div><span className="mx-auto grid h-16 w-16 place-items-center rounded-3xl bg-[color-mix(in_srgb,var(--nile)_10%,var(--panel))] text-[var(--nile)]"><Compass className="h-8 w-8" /></span><p className="mx-auto mt-5 max-w-md text-base leading-8 text-[var(--muted)]">{t.empty}</p></div></div>
+          : <div className="rounded-3xl border border-[var(--border)] bg-[var(--panel)] shadow-[var(--shadow-sm)]"><div className="flex items-center border-b border-[var(--border)] px-5 py-4"><div><p className="text-xs font-black text-[var(--nile)]">{t.trace}</p><p className="mt-1 text-xs text-[var(--muted)]">{sessionId ? sessionId.slice(0, 8) : '—'}</p></div>{phase === 'running' && <button onClick={() => controllerRef.current?.abort()} className="atlas-secondary ms-auto min-h-11"><Square className="h-4 w-4" />{t.cancel}</button>}</div><ol className="divide-y divide-[var(--border)]" aria-live="polite">{trace.map((entry) => { const meta = TOOL_META[entry.tool] || { ar: entry.tool, en: entry.tool, icon: Activity }; const reason = entry.reasonCode ? REASON_META[entry.reasonCode] : null; const Icon = meta.icon; const obs = entry.observation || {}; const isRunning = !entry.observation; return <li key={`${entry.turn}-${entry.index}-${entry.tool}`} className="p-4 sm:p-5"><div className="flex items-start gap-3"><span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${isRunning ? 'bg-[color-mix(in_srgb,var(--saffron)_18%,var(--panel))] text-[var(--saffron-strong)]' : 'bg-[var(--soft)] text-[var(--nile)]'}`}>{isRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon className="h-4 w-4" />}</span><div className="min-w-0"><p className="text-sm font-black text-[var(--text)]">{meta[language]}</p>{reason && <p className="mt-1 text-xs font-semibold leading-6 text-[var(--muted)]">{reason[language]}</p>}</div><span className="ms-auto rounded-full bg-[var(--soft)] px-2 py-1 text-[11px] font-black tabular-nums text-[var(--muted)]">{entry.turn}.{entry.index}</span></div>{'masteryAfter' in obs && <div className="mt-3 flex items-center gap-2 ps-12 text-sm font-black text-[var(--text)]">{obs.correct === false || obs.passed === false ? <X className="h-4 w-4 text-[var(--danger)]" /> : <Check className="h-4 w-4 text-[var(--success)]" />}<span className="tabular-nums">{Math.round(Number(obs.masteryBefore) * 100)}% → {Math.round(Number(obs.masteryAfter) * 100)}%</span>{'score' in obs && <span className="rounded-full bg-[var(--soft)] px-2 py-1 text-xs text-[var(--muted)]">{Math.round(Number(obs.score) * 100)}%</span>}</div>}{'label' in obs && !('masteryAfter' in obs) && <p className="mt-2 ps-12 text-sm font-bold text-[var(--text)]">{String(obs.label)}</p>}{'intervalDays' in obs && <p className="mt-2 ps-12 text-sm font-bold text-[var(--text)]">{Number(obs.intervalDays)} {t.days}</p>}</li>; })}</ol></div>}
+
+        {phase === 'awaiting' && result?.prompt && <section className="mt-6 rounded-3xl border-2 border-[var(--nile)] bg-[color-mix(in_srgb,var(--nile)_7%,var(--panel))] p-5 shadow-[var(--shadow-md)]" aria-labelledby="agent-question" aria-live="polite"><p className="text-xs font-black text-[var(--nile)]">{t.waiting}</p><h2 id="agent-question" className="mt-2 whitespace-pre-wrap text-lg font-black leading-8 text-[var(--text)]">{result.prompt}</h2>{pending && result.expects === 'choice' ? <div className="mt-5"><p className="mb-3 text-xs font-bold text-[var(--muted)]">{t.choose}</p><div className="grid gap-2.5">{pending.options.map((option, index) => <button key={index} aria-pressed={selectedChoice === index} onClick={() => setSelectedChoice(index)} className={`min-h-12 rounded-xl border px-4 py-3 text-start text-sm font-bold transition ${selectedChoice === index ? 'border-[var(--nile)] bg-[var(--nile)] text-white' : 'border-[var(--border)] bg-[var(--panel)] text-[var(--text)] hover:border-[var(--nile)] hover:bg-[var(--soft)]'}`}><span className="me-2 inline-grid h-6 w-6 place-items-center rounded-full border border-current text-xs">{index + 1}</span>{option}</button>)}</div><button disabled={selectedChoice == null} onClick={() => selectedChoice != null && void runTurn({ answerIndex: selectedChoice })} className="atlas-primary mt-4 min-h-12 w-full justify-center"><Send className="h-4 w-4" />{t.submitChoice}</button></div>
+          : <form onSubmit={answerText} className="mt-5 grid gap-3"><label><span className="mb-1.5 block text-xs font-bold text-[var(--muted)]">{t.yourAnswer}</span><textarea value={freeText} onChange={(event) => setFreeText(event.target.value)} rows={4} placeholder={t.explainPrompt} className="atlas-field min-h-28" /></label><button className="atlas-primary min-h-12 justify-center" disabled={freeText.trim().length < 8}><ShieldCheck className="h-4 w-4" />{t.submit}</button></form>}</section>}
+        {explanation && <section className="mt-6 rounded-3xl border border-[var(--border)] bg-[var(--panel)] p-5 shadow-[var(--shadow-sm)]"><p className="mb-3 flex items-center gap-2 text-xs font-black text-[var(--nile)]"><GraduationCap className="h-4 w-4" />{TOOL_META.explain_concept[language]}</p><RichMessage text={explanation} language={language} /></section>}
+        {phase === 'done' && result?.summary && <section className="mt-6 rounded-3xl border border-[color-mix(in_srgb,var(--success)_40%,var(--border))] bg-[var(--panel)] p-5 shadow-[var(--shadow-sm)]"><p className="flex items-center gap-2 text-xs font-black text-[var(--success)]"><CheckCircle2 className="h-4 w-4" />{t.done}</p><p className="mt-3 whitespace-pre-wrap text-sm font-semibold leading-8 text-[var(--text)]">{result.summary}</p><button onClick={clearSession} className="atlas-secondary mt-4 min-h-11"><RotateCcw className="h-4 w-4" />{t.newRun}</button></section>}
+        {error && <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-[var(--danger)] bg-[color-mix(in_srgb,var(--danger)_8%,var(--panel))] px-4 py-3 text-sm font-bold text-[var(--danger)]" role="alert"><span>{error}</span><button onClick={() => void runTurn(null)} className="atlas-secondary min-h-11 w-fit"><RotateCcw className="h-4 w-4" />{t.retry}</button></div>}
       </section>
-      <div className="mx-auto max-w-7xl px-4 pt-10 sm:px-6 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-[1fr_20rem]">
-          <section aria-label={t.trace} className="min-w-0">
-            {trace.length === 0 && phase === 'idle' ? (
-              <div className="grid min-h-[20rem] place-items-center rounded-2xl border-2 border-dashed border-[var(--border)] bg-[var(--panel)] px-6 py-12 text-center">
-                <div>
-                  <span className="mx-auto grid h-16 w-16 place-items-center rounded-3xl bg-[color-mix(in_srgb,var(--nile)_10%,var(--panel))] text-[var(--nile)]"><Compass className="h-8 w-8" /></span>
-                  <p className="mx-auto mt-5 max-w-md text-base leading-8 text-[var(--muted)]">{t.empty}</p>
-                </div>
-              </div>
-            ) : (
-              <ol className="space-y-3">
-                {trace.map((entry) => {
-                  const meta = TOOL_META[entry.tool] || { ar: entry.tool, en: entry.tool, icon: Activity };
-                  const Icon = meta.icon;
-                  const obs = entry.observation || {};
-                  return (
-                    <li key={`${entry.turn}-${entry.index}-${entry.tool}`} className="rounded-2xl border border-[var(--border)] bg-[var(--panel)] p-4 shadow-[var(--shadow-sm)]">
-                      <div className="flex items-center gap-3">
-                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--soft)] text-[var(--nile)]"><Icon className="h-4 w-4" strokeWidth={1.9} /></span>
-                        <p className="text-sm font-black text-[var(--text)]">{meta[language]}</p>
-                        <span className="ms-auto text-xs font-bold tabular-nums text-[var(--muted)]">#{entry.index}</span>
-                      </div>
-                      {entry.thought && <p className="mt-2 text-xs font-semibold leading-6 text-[var(--muted)]">{entry.thought}</p>}
-                      {'masteryAfter' in obs && <p className="mt-2 text-sm font-bold text-[var(--text)]">{obs.correct ? '✓' : '✗'} {Math.round(Number(obs.masteryBefore) * 100)}% → {Math.round(Number(obs.masteryAfter) * 100)}%</p>}
-                      {'label' in obs && !('masteryAfter' in obs) && <p className="mt-2 text-sm font-bold text-[var(--text)]">{String(obs.label)}</p>}
-                      {'intervalDays' in obs && <p className="mt-2 text-sm font-bold text-[var(--text)]">{Number(obs.intervalDays)} {t.days}</p>}
-                      {'recommendedDifficulty' in obs && <p className="mt-2 text-sm font-bold text-[var(--text)]">{String(obs.recommendedDifficulty)}</p>}
-                    </li>
-                  );
-                })}
-              </ol>
-            )}
 
-            {phase === 'awaiting' && result?.prompt && (
-              <div className="mt-6 rounded-2xl border-s-4 border-[var(--nile)] bg-[color-mix(in_srgb,var(--nile)_7%,var(--panel))] p-5 shadow-[var(--shadow-sm)]">
-                <p className="text-xs font-black text-[var(--nile)]">{t.waiting}</p>
-                <p className="mt-2 whitespace-pre-wrap text-base font-bold leading-8 text-[var(--text)]">{result.prompt}</p>
-                {pending && result.expects === 'choice' ? (
-                  <div className="mt-4 grid gap-2.5">
-                    {pending.options.map((option, index) => (
-                      <button key={index} type="button" onClick={() => answerChoice(index)} className="rounded-xl border border-[var(--border)] bg-[var(--panel)] px-4 py-3 text-start text-sm font-bold text-[var(--text)] transition hover:border-[var(--nile)] hover:bg-[var(--soft)]">{option}</button>
-                    ))}
-                  </div>
-                ) : (
-                  <form onSubmit={answerText} className="mt-4 grid gap-2.5">
-                    <textarea value={freeText} onChange={(e) => setFreeText(e.target.value)} rows={3} placeholder={t.explainPrompt} className="atlas-field" />
-                    <button className="atlas-primary justify-center" disabled={freeText.trim().length < 2}><Send className="h-4 w-4" />{t.submit}</button>
-                  </form>
-                )}
-              </div>
-            )}
-
-            {explanation && (
-              <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--panel)] p-5 shadow-[var(--shadow-sm)]">
-                <p className="flex items-center gap-2 text-xs font-black text-[var(--nile)]"><GraduationCap className="h-4 w-4" />{TOOL_META.explain_concept[language]}</p>
-                <p className="mt-3 whitespace-pre-wrap text-sm font-semibold leading-8 text-[var(--text)]">{explanation}</p>
-              </div>
-            )}
-
-            {phase === 'done' && result?.summary && (
-              <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--panel)] p-5 shadow-[var(--shadow-sm)]">
-                <p className="flex items-center gap-2 text-xs font-black text-[var(--nile)]"><CheckCircle2 className="h-4 w-4" />{t.done}</p>
-                <p className="mt-3 whitespace-pre-wrap text-sm font-semibold leading-8 text-[var(--text)]">{result.summary}</p>
-                <button type="button" onClick={() => { setPhase('idle'); setTrace([]); setResult(null); setExplanation(''); setNextReview(null); turnRef.current = 0; stateRef.current = null; }} className="atlas-secondary mt-4"><TimerReset className="h-4 w-4" />{t.newRun}</button>
-              </div>
-            )}
-            {error && <p className="mt-4 rounded-xl border border-[var(--danger)] bg-[color-mix(in_srgb,var(--danger)_8%,var(--panel))] px-4 py-3 text-sm font-bold text-[var(--danger)]">{error}</p>}
-          </section>{/* LEFT_PLACEHOLDER_END */}
-          <aside aria-label={t.mastery} className="lg:sticky lg:top-[calc(var(--nav-height)+1.25rem)] lg:self-start">
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--panel)] p-5 shadow-[var(--shadow-sm)]">
-              <p className="flex items-center gap-2 text-xs font-black text-[var(--muted)]"><Brain className="h-4 w-4 text-[var(--nile)]" />{t.mastery}</p>
-              <p className="mt-3 flex items-baseline gap-2"><span className="text-4xl font-black tabular-nums text-[var(--text)]">{masteryPct}%</span><span className="text-sm font-bold text-[var(--nile)]">{result ? bktMasteryLabel(result.mastery, rtl) : '—'}</span></p>
-              <span className="mt-3 block h-2 overflow-hidden rounded-full bg-[var(--soft)]"><span className="block h-full rounded-full bg-[var(--nile)] transition-all" style={{ width: `${masteryPct}%` }} /></span>
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                <div className="rounded-xl bg-[var(--soft)] p-3"><p className="text-xs font-bold text-[var(--muted)]">{t.ability}</p><p className="mt-1 text-lg font-black tabular-nums text-[var(--text)]">{result ? (Math.round(result.ability * 100) / 100).toFixed(2) : '—'}</p></div>
-                <div className="rounded-xl bg-[var(--soft)] p-3"><p className="text-xs font-bold text-[var(--muted)]">{t.attempts}</p><p className="mt-1 text-lg font-black tabular-nums text-[var(--text)]">{result?.attempts ?? 0}</p></div>
-              </div>
-              {nextReview && (
-                <div className="mt-4 flex items-center justify-between rounded-xl border border-[var(--border)] px-3 py-2.5">
-                  <span className="flex items-center gap-2 text-xs font-bold text-[var(--muted)]"><TimerReset className="h-4 w-4 text-[var(--saffron)]" />{t.schedule}</span>
-                  <span className="text-sm font-black tabular-nums text-[var(--text)]">{dateFmt.format(new Date(nextReview.nextReviewAt))} · {nextReview.intervalDays}{rtl ? 'ي' : 'd'}</span>
-                </div>
-              )}
-            </div>
-            {result?.state?.sources && result.state.sources.length > 0 && (
-              <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--panel)] p-5 shadow-[var(--shadow-sm)]">
-                <p className="flex items-center gap-2 text-xs font-black text-[var(--muted)]"><FileSearch className="h-4 w-4 text-[var(--nile)]" />{t.sources}</p>
-                <ul className="mt-3 space-y-2">
-                  {result.state.sources.map((source) => (
-                    <li key={source.citationId}><a href={source.url} target="_blank" rel="noreferrer" className="flex items-start gap-2 text-sm font-bold text-[var(--text)] hover:text-[var(--nile)]"><span className="rounded bg-[var(--soft)] px-1.5 text-xs font-black text-[var(--nile)]">{source.citationId}</span><span className="line-clamp-2 leading-6">{source.title}</span></a></li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            <p className="mt-4 rounded-xl bg-[var(--soft)] px-4 py-3 text-xs font-semibold leading-6 text-[var(--muted)]">{t.memory}</p>
-            <p className="mt-2 px-1 text-xs font-semibold leading-6 text-[var(--muted)]">{t.honest}</p>
-          </aside>{/* ASIDE_PLACEHOLDER_END */}
-        </div>
-      </div>
-    </main>
-  );
+      <aside aria-label={t.mastery} className="lg:sticky lg:top-[calc(var(--nav-height)+1.25rem)] lg:self-start"><div className="rounded-3xl border border-[var(--border)] bg-[var(--panel)] p-5 shadow-[var(--shadow-sm)]"><div className="flex items-center justify-between"><p className="flex items-center gap-2 text-xs font-black text-[var(--muted)]"><Brain className="h-4 w-4 text-[var(--nile)]" />{t.mastery}</p><span className="text-xs font-black text-[var(--nile)]">{result ? bktMasteryLabel(result.mastery, rtl) : '—'}</span></div><p className="mt-3 text-4xl font-black tabular-nums text-[var(--text)]">{masteryPct}%</p><Meter value={masteryPct} color="var(--nile)" /><div className="mt-5 border-t border-[var(--border)] pt-4"><div className="flex items-center justify-between text-xs font-black"><span className="flex items-center gap-2 text-[var(--muted)]"><ShieldCheck className="h-4 w-4 text-[var(--saffron-strong)]" />{t.confidence}</span><span className="tabular-nums text-[var(--text)]">{confidencePct}%</span></div><Meter value={confidencePct} color="var(--saffron)" /></div><div className="mt-4 grid grid-cols-2 gap-3"><Metric label={t.ability} value={result ? (Math.round(result.ability * 100) / 100).toFixed(2) : '—'} /><Metric label={t.attempts} value={String(result?.attempts ?? 0)} /></div>{nextReview && <div className="mt-4 flex items-center justify-between rounded-xl border border-[var(--border)] px-3 py-3"><span className="flex items-center gap-2 text-xs font-bold text-[var(--muted)]"><TimerReset className="h-4 w-4 text-[var(--saffron-strong)]" />{t.schedule}</span><span className="text-sm font-black text-[var(--text)]">{dateFmt.format(new Date(nextReview.nextReviewAt))}</span></div>}</div>
+        {result?.state.sources?.length ? <section className="mt-4 rounded-3xl border border-[var(--border)] bg-[var(--panel)] p-5 shadow-[var(--shadow-sm)]"><p className="flex items-center gap-2 text-xs font-black text-[var(--muted)]"><FileSearch className="h-4 w-4 text-[var(--nile)]" />{t.sources}</p><ul className="mt-3 space-y-3">{result.state.sources.map((source) => <li key={source.citationId}><a href={source.url} target="_blank" rel="noreferrer" className="block rounded-xl border border-[var(--border)] p-3 transition hover:border-[var(--nile)] hover:bg-[var(--soft)]"><span className="flex items-center gap-2"><b className="rounded bg-[var(--soft)] px-1.5 py-0.5 text-xs text-[var(--nile)]">{source.citationId}</b><small className="font-bold text-[var(--muted)]">{source.kind === 'topical-reference' ? t.openReference : t.partialSource}</small></span><strong className="mt-2 block text-sm leading-6 text-[var(--text)]">{source.title}</strong>{source.excerpt && <span className="mt-1 line-clamp-3 block text-xs font-semibold leading-6 text-[var(--muted)]">{source.excerpt}</span>}</a></li>)}</ul></section> : null}
+        <p className="mt-4 rounded-2xl bg-[var(--soft)] px-4 py-3 text-xs font-semibold leading-6 text-[var(--muted)]">{t.memory}</p><p className="mt-2 px-1 text-xs font-semibold leading-6 text-[var(--muted)]">{t.honest}</p>
+      </aside></div>
+    </div>
+  </main>;
 }
 
+function Meter({ value, color }: { value: number; color: string }) { return <span className="mt-3 block h-2 overflow-hidden rounded-full bg-[var(--soft)]" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={value}><span className="block h-full rounded-full transition-[width] duration-300" style={{ width: `${value}%`, backgroundColor: color }} /></span>; }
+function Metric({ label, value }: { label: string; value: string }) { return <div className="rounded-xl bg-[var(--soft)] p-3"><p className="text-xs font-bold leading-5 text-[var(--muted)]">{label}</p><p className="mt-1 text-lg font-black tabular-nums text-[var(--text)]">{value}</p></div>; }

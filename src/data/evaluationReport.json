@@ -1,9 +1,9 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "suiteId": "fahim-learning-guard-suite",
   "evaluationKind": "deterministic-contract-coverage",
-  "passed": 12,
-  "total": 12,
+  "passed": 18,
+  "total": 18,
   "score": 100,
   "controls": [
     {
@@ -100,6 +100,54 @@
       "titleAr": "الشهادة مرتبطة بأهلية فعلية دون ادعاء اعتماد",
       "titleEn": "Credentials require eligibility without claiming accreditation",
       "evidence": "credential SQL · Showcase trust boundary",
+      "status": "passed"
+    },
+    {
+      "id": "agent-server-checkpoint",
+      "area": "agent-integrity",
+      "titleAr": "حالة الوكيل مرجعية في الخادم وليست في المتصفح",
+      "titleEn": "Agent checkpoints are server-authoritative",
+      "evidence": "agent handler · agent session integrity SQL",
+      "status": "passed"
+    },
+    {
+      "id": "agent-proof-before-mastery",
+      "area": "pedagogy",
+      "titleAr": "الاختيار الصحيح يتبعه إثبات للفهم",
+      "titleEn": "A correct choice must be followed by an explanation proof",
+      "evidence": "agent policy · explanation assessor",
+      "status": "passed"
+    },
+    {
+      "id": "agent-bounded-policy",
+      "area": "reliability",
+      "titleAr": "مسار تعليمي محدود بحالات وقواعد آمنة",
+      "titleEn": "The learning loop is bounded by a deterministic safety policy",
+      "evidence": "agent orchestrator",
+      "status": "passed"
+    },
+    {
+      "id": "agent-no-chain-of-thought",
+      "area": "safety",
+      "titleAr": "لا يُعرض التفكير الداخلي أو البنية الخفية",
+      "titleEn": "Internal chain-of-thought and infrastructure stay private",
+      "evidence": "agent orchestrator · client · studio",
+      "status": "passed"
+    },
+    {
+      "id": "agent-citation-allowlist",
+      "area": "trust",
+      "titleAr": "الإحالات محصورة في سجل المصادر الفعلي",
+      "titleEn": "Agent citations are allowlisted against the source ledger",
+      "evidence": "agent tools",
+      "status": "passed"
+    },
+    {
+      "id": "agent-resumable-session",
+      "area": "continuity",
+      "titleAr": "الجلسة قابلة للاستكمال دون تخزين الدليل الحساس في الجهاز",
+      "titleEn": "Sessions resume without storing sensitive evidence in the browser",
+      "evidence": "Agent Studio · agent client",
       "status": "passed"
     }
   ],

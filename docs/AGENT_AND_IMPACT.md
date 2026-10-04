@@ -1,6 +1,6 @@
 # Fahim Tutor Agent & SME Business Impact
 
-This document is the reviewer's guide to the agentic layer added for **Agents at Work**, built on top of Fahim's existing verified-learning engine (**GenAI for Education**). One product, two hackathons.
+This document is the reviewer's guide to the agentic layer added for **Agents at Work**, built on top of Fahim's existing verified-learning engine (**GenAI for Education**). One product, two hackathons. The October 2026 implementation audit is in `docs/FAHIM_AGENT_AUDIT_2026.md`.
 
 ## 1. Why this is an agent, not a chatbot
 
@@ -38,10 +38,11 @@ Both decision protocols share the same executor: **native function-calling** (`t
 
 ## 3. Durable memory (Supabase)
 
-Migration `supabase/migrations/20260927000000_agent_memory.sql`:
+Migrations `supabase/migrations/20260927000000_agent_memory.sql` and `supabase/migrations/20261002185911_agent_session_integrity.sql`:
 - `concept_mastery` — server-owned per-learner BKT mastery + IRT ability (unique on `user_id, concept_key`), owner RLS, reader RPC `my_concept_mastery_v1()`.
 - `review_items` gains `stability`, `difficulty`, `last_review_at` so the **full FSRS card** round-trips.
 - `ai_generations.task_type` now allows `'agent'` for metering.
+- `agent_sessions` keeps pending diagnostics and controller checkpoints authoritative on the server; browser roles have no direct table grants.
 
 The server writes these with the service-role client (same pattern as `ai_generations`); learners read their own rows under RLS.
 
@@ -65,7 +66,8 @@ The RPC returns the raw activity counts, the assumptions, and the projection tog
 - Mastery is a revisable **BKT probability**, never a final verdict; misconception categories are unvalidated model labels.
 - The diagnostic answer key is sealed server-side; grading is deterministic and local.
 - Business-impact numbers are transparent projections with editable assumptions, never fabricated results or pilot outcomes.
-- The agent never reveals models, providers, or infrastructure to the learner.
+- The agent never reveals chain-of-thought, models, providers, or infrastructure to the learner. It exposes a short pedagogical reason code instead.
+- A multiple-choice response is not sufficient proof of mastery: the learner must explain and apply the concept, and that explanation is assessed before evidence is recorded.
 
 ## 6. Run & test
 
@@ -75,4 +77,4 @@ npx vitest run tests/agent-orchestrator.test.mjs tests/agent-tools.test.mjs test
 npm run check               # full gate: types + lint + tests + build + secret scan
 ```
 
-Environment: same as the base product (`AI_PROVIDER_ORDER` / provider keys, `QUIZ_TOKEN_SECRET` ≥ 32 chars for sealed diagnostics, Supabase URL + service-role key for durable memory). The agent degrades gracefully to in-memory state when Supabase is not configured.
+Environment: same as the base product (`AI_PROVIDER_ORDER` / provider keys, `QUIZ_TOKEN_SECRET` ≥ 32 chars for sealed diagnostics, Supabase URL + service-role key for durable memory). A configured server-side session store is required so the browser can never become the authority for pending answers or learning checkpoints.

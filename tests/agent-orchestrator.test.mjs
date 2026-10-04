@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { runAgentTurn, parseJsonAction } from '../api/_lib/agent/orchestrator.mjs';
+import { runAgentTurn, parseJsonAction, selectPolicyAction } from '../api/_lib/agent/orchestrator.mjs';
 import { encodeToken } from '../api/quiz.mjs';
 
 const SECRET = 'test-secret-key-that-is-long-enough-32';
@@ -10,7 +10,7 @@ function scriptedDecide(script) {
   return async () => {
     const step = script[Math.min(index, script.length - 1)];
     index += 1;
-    return { tool: step.tool, args: step.args || {}, thought: step.thought || '', usage: { inputTokens: 1, outputTokens: 1 } };
+    return { tool: step.tool, args: step.args || {}, reasonCode: step.reasonCode || 'model_fallback', usage: { inputTokens: 1, outputTokens: 1 } };
   };
 }
 
@@ -78,6 +78,42 @@ describe('agent orchestrator loop', () => {
     });
     expect(result.terminalTool).toBe('finish');
     expect(result.steps.length).toBe(3);
+  });
+});
+
+describe('deterministic learning policy', () => {
+  const base = {
+    conceptKey: 'fractions', mastery: 0.2, attempts: 0, ability: 0,
+    memoryLoaded: true, sources: [{ citationId: 'E1' }], pendingItem: null,
+    inputConsumed: false, lastInputKind: null, lastCorrect: null,
+    reviewScheduled: false, evidenceAttempted: false,
+  };
+
+  it('loads memory and evidence before generating an assessment', () => {
+    expect(selectPolicyAction({ language: 'en', state: { ...base, memoryLoaded: false }, learnerInput: null }).tool).toBe('get_learner_state');
+    expect(selectPolicyAction({ language: 'en', state: { ...base, sources: null }, learnerInput: null }).tool).toBe('search_verified_sources');
+    expect(selectPolicyAction({ language: 'en', state: base, learnerInput: null }).tool).toBe('generate_diagnostic');
+  });
+
+  it('requires explanation evidence after a multiple-choice attempt', () => {
+    const grade = selectPolicyAction({ language: 'en', state: { ...base, pendingItem: { token: 'server-only' } }, learnerInput: { answerIndex: 1 } });
+    expect(grade).toMatchObject({ tool: 'assess_answer', reasonCode: 'grade_attempt' });
+    const prove = selectPolicyAction({ language: 'en', state: { ...base, lastInputKind: 'choice', lastCorrect: true }, learnerInput: null });
+    expect(prove).toMatchObject({ tool: 'ask_learner', reasonCode: 'request_reasoning' });
+    expect(prove.args.expects).toBe('text');
+  });
+
+  it('schedules recall and records evidence only after reasoning is assessed', () => {
+    const assessed = { ...base, lastInputKind: 'text', reasoningScore: 0.84 };
+    expect(selectPolicyAction({ language: 'en', state: assessed, learnerInput: null }).tool).toBe('schedule_review');
+    expect(selectPolicyAction({ language: 'en', state: { ...assessed, reviewScheduled: true }, learnerInput: null }).tool).toBe('record_evidence');
+    expect(selectPolicyAction({ language: 'en', state: { ...assessed, reviewScheduled: true, evidenceAttempted: true }, learnerInput: null }).tool).toBe('finish');
+  });
+
+  it('repairs weak reasoning before asking the learner to prove again', () => {
+    const weak = { ...base, lastInputKind: 'text', reasoningScore: 0.35, remediationCount: 0 };
+    expect(selectPolicyAction({ language: 'en', state: weak, learnerInput: null }).tool).toBe('explain_concept');
+    expect(selectPolicyAction({ language: 'en', state: { ...weak, remediationDelivered: true }, learnerInput: null })).toMatchObject({ tool: 'ask_learner', reasonCode: 'retry_reasoning' });
   });
 });
 

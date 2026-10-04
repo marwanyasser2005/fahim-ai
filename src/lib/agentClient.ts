@@ -1,14 +1,13 @@
 import { authenticatedFetch } from '@/lib/supabase/client';
 
-export interface AgentSource { citationId: string; title: string; authority?: string; url?: string; }
-export interface AgentPendingItem { token: string; skill?: string; difficulty?: 'easy' | 'medium' | 'hard'; }
+export type AgentStage = 'discover' | 'diagnose' | 'teach' | 'prove' | 'remember' | 'complete';
+export interface AgentSource { citationId: string; title: string; authority?: string; kind?: string; excerpt?: string; owner?: string; verifiedAt?: string | null; url?: string; }
 export interface AgentState {
   conceptKey: string;
-  pendingItem?: AgentPendingItem | null;
   sources?: AgentSource[] | null;
   misconception?: { category: string; label: string } | null;
 }
-export interface AgentLearnerInput { itemToken?: string; answerIndex?: number; text?: string; }
+export interface AgentLearnerInput { answerIndex?: number; text?: string; reasoning?: string; }
 
 export interface AgentRequest {
   goal: string;
@@ -16,28 +15,31 @@ export interface AgentRequest {
   subject?: string;
   grade?: string;
   language: 'ar' | 'en';
+  sessionId?: string | null;
   learnerInput?: AgentLearnerInput | null;
-  priorState?: AgentState | null;
 }
 
-export interface AgentStepEvent { index: number; thought?: string; tool: string; args: Record<string, unknown>; }
-export interface AgentObservationEvent { index: number; tool: string; observation: Record<string, unknown>; }
+export interface AgentStepEvent { index: number; reasonCode?: string; phase?: AgentStage; tool: string; args: Record<string, unknown>; }
+export interface AgentObservationEvent { index: number; phase?: AgentStage; tool: string; observation: Record<string, unknown>; }
 export interface AgentResult {
+  sessionId: string;
   conceptKey: string;
   awaiting: boolean;
   prompt: string | null;
   expects: 'choice' | 'text' | null;
-  item: { token: string } | null;
+  item: { skill?: string; difficulty?: 'easy' | 'medium' | 'hard' } | null;
   summary: string | null;
   mastery: number;
   masteryLabel: string;
   ability: number;
   attempts: number;
+  stage: AgentStage;
+  confidence: number;
   state: AgentState;
 }
 
 export type AgentStreamEvent =
-  | { type: 'meta'; generationId: string; conceptKey: string }
+  | { type: 'meta'; generationId: string; sessionId: string; conceptKey: string }
   | ({ type: 'step' } & AgentStepEvent)
   | ({ type: 'observation' } & AgentObservationEvent)
   | { type: 'result'; result: AgentResult }
@@ -45,7 +47,7 @@ export type AgentStreamEvent =
   | { type: 'error'; error: string };
 
 export interface AgentHandlers {
-  onMeta?: (generationId: string, conceptKey: string) => void;
+  onMeta?: (generationId: string, sessionId: string, conceptKey: string) => void;
   onStep?: (step: AgentStepEvent) => void;
   onObservation?: (observation: AgentObservationEvent) => void;
   onResult?: (result: AgentResult) => void;
@@ -69,6 +71,15 @@ export async function streamAgent(request: AgentRequest, handlers: AgentHandlers
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
+  const dispatch = (line: string) => {
+    if (!line.trim()) return;
+    const event = JSON.parse(line) as AgentStreamEvent;
+    if (event.type === 'meta') handlers.onMeta?.(event.generationId, event.sessionId, event.conceptKey);
+    else if (event.type === 'step') handlers.onStep?.(event);
+    else if (event.type === 'observation') handlers.onObservation?.(event);
+    else if (event.type === 'result') handlers.onResult?.(event.result);
+    else if (event.type === 'error') throw new Error(event.error);
+  };
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
@@ -76,13 +87,9 @@ export async function streamAgent(request: AgentRequest, handlers: AgentHandlers
     const lines = buffer.split('\n');
     buffer = lines.pop() || '';
     for (const line of lines) {
-      if (!line.trim()) continue;
-      const event = JSON.parse(line) as AgentStreamEvent;
-      if (event.type === 'meta') handlers.onMeta?.(event.generationId, event.conceptKey);
-      else if (event.type === 'step') handlers.onStep?.(event);
-      else if (event.type === 'observation') handlers.onObservation?.(event);
-      else if (event.type === 'result') handlers.onResult?.(event.result);
-      else if (event.type === 'error') throw new Error(event.error);
+      dispatch(line);
     }
   }
+  buffer += decoder.decode();
+  if (buffer.trim()) dispatch(buffer);
 }

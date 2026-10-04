@@ -22,6 +22,89 @@ export function normalizeConceptKey(value) {
     .slice(0, 120) || 'general-concept';
 }
 
+const AGENT_STAGES = new Set(['discover', 'diagnose', 'teach', 'prove', 'remember', 'complete']);
+
+/** Create a private, server-authoritative checkpoint for a tutoring journey. */
+export async function createAgentSession(admin, userId, {
+  conceptKey,
+  goal,
+  subject = '',
+  grade = '',
+  language = 'ar',
+} = {}) {
+  if (!admin || !userId) return null;
+  try {
+    const { data, error } = await admin.from('agent_sessions').insert({
+      user_id: userId,
+      concept_key: normalizeConceptKey(conceptKey || goal),
+      goal: String(goal || conceptKey || '').trim().slice(0, 400),
+      subject: String(subject || '').trim().slice(0, 80) || null,
+      grade: String(grade || '').trim().slice(0, 80) || null,
+      language: language === 'en' ? 'en' : 'ar',
+      status: 'active',
+      stage: 'discover',
+      state: {},
+    }).select('id,concept_key,goal,subject,grade,language,status,stage,state,mastery,turn_count').single();
+    return error ? null : data;
+  } catch {
+    return null;
+  }
+}
+
+/** Load a checkpoint only when it belongs to the authenticated learner. */
+export async function loadAgentSession(admin, userId, sessionId) {
+  if (!admin || !userId || !sessionId) return null;
+  try {
+    const { data, error } = await admin.from('agent_sessions')
+      .select('id,concept_key,goal,subject,grade,language,status,stage,state,mastery,turn_count')
+      .eq('id', sessionId)
+      .eq('user_id', userId)
+      .maybeSingle();
+    return error ? null : data;
+  } catch {
+    return null;
+  }
+}
+
+/** Persist the minimal controller state needed to resume safely on another device. */
+export async function saveAgentSession(admin, userId, sessionId, {
+  state,
+  stage = 'discover',
+  status = 'active',
+  mastery = BKT_DEFAULTS.p0,
+  generationId = null,
+  completed = false,
+} = {}) {
+  if (!admin || !userId || !sessionId) return { persisted: false };
+  const safeStage = AGENT_STAGES.has(stage) ? stage : 'discover';
+  const safeStatus = ['active', 'awaiting', 'completed', 'abandoned'].includes(status) ? status : 'active';
+  try {
+    const row = {
+      state: state && typeof state === 'object' ? state : {},
+      stage: safeStage,
+      status: safeStatus,
+      mastery: Math.round(clamp01(mastery) * 1000) / 1000,
+      last_generation_id: generationId || null,
+      updated_at: new Date().toISOString(),
+      ...(completed ? { completed_at: new Date().toISOString() } : {}),
+    };
+    const { data, error } = await admin.from('agent_sessions')
+      .update(row)
+      .eq('id', sessionId)
+      .eq('user_id', userId)
+      .select('id,turn_count')
+      .maybeSingle();
+    if (error) return { persisted: false };
+    // Increment separately so older PostgREST deployments do not need an RPC.
+    await admin.from('agent_sessions').update({ turn_count: (Number(data?.turn_count) || 0) + 1 })
+      .eq('id', sessionId)
+      .eq('user_id', userId);
+    return { persisted: true };
+  } catch {
+    return { persisted: false };
+  }
+}
+
 /** Read the learner's durable state for one concept: mastery, ability, and due reviews. */
 export async function loadLearnerState(admin, userId, conceptKey) {
   const key = normalizeConceptKey(conceptKey);
