@@ -65,6 +65,9 @@ describe('agent endpoint wiring (zero new Vercel functions)', () => {
     expect(handler).not.toContain('body.priorState');
     expect(agentClient).toContain('sessionId?: string | null');
     expect(agentClient).not.toContain('priorState');
+    expect(handler).toContain("if (event.type === 'result') return");
+    expect(handler.indexOf('saveAgentSession')).toBeLessThan(handler.lastIndexOf("type: 'result'"));
+    expect(handler).toContain('checkpointSave?.persisted');
   });
 
   it('keeps the agent authenticated, same-origin, and metered like chat', () => {

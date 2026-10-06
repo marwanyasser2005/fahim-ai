@@ -139,13 +139,16 @@ export default async function agentHandler(request, response) {
       learnerInput,
       priorState,
       deadlineAt,
-      emit: stream ? (event) => ndjson(response, event.type === 'result'
-        ? { ...event, result: { ...event.result, sessionId: session.id } }
-        : event) : undefined,
+      // A result makes the UI interactive. Hold it until the encrypted checkpoint has been
+      // durably saved, otherwise a fast learner answer can race the database write.
+      emit: stream ? (event) => {
+        if (event.type === 'result') return;
+        ndjson(response, event);
+      } : undefined,
     });
 
     const usage = result.usage || { inputTokens: 0, outputTokens: 0 };
-    await Promise.all([
+    const [, checkpointSave] = await Promise.all([
       admin.from('ai_generations').update({
         status: 'complete',
         model: 'agent-loop',
@@ -165,9 +168,22 @@ export default async function agentHandler(request, response) {
       }),
     ]);
 
+    if (!checkpointSave?.persisted) {
+      await refundAiSession(auth.client, auth.user.id, gate.metered);
+      if (stream) {
+        ndjson(response, { type: 'error', error: language === 'ar' ? 'تعذّر حفظ حالة الجلسة بأمان. أعد المحاولة دون فقد أي رصيد.' : 'The session could not be saved safely. Try again; no allowance was consumed.' });
+        return response.end();
+      }
+      return send(response, 503, { error: 'The secure agent checkpoint could not be saved. Please try again.' });
+    }
+
     logEvent('agent_turn', { requestId, steps: result.steps?.length || 0, awaiting: result.awaiting, terminal: result.terminalTool, mastery: Math.round(result.mastery * 100) });
 
     if (stream) {
+      ndjson(response, {
+        type: 'result',
+        result: { ...result, steps: undefined, checkpoint: undefined, sessionId: session.id },
+      });
       ndjson(response, { type: 'done' });
       return response.end();
     }

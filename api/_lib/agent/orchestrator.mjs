@@ -50,7 +50,7 @@ If your environment cannot call tools directly, reply with ONE JSON object only:
 
 function stateSummary(state) {
   return [
-    `concept: ${state.conceptKey}`,
+    `concept: ${state.conceptLabel || state.conceptKey}`,
     `mastery: ${Math.round(state.mastery * 100)}% (${state.masteryLabel})`,
     `attempts: ${state.attempts}, ability(theta): ${Math.round(state.ability * 100) / 100}`,
     `pendingDiagnostic: ${state.pendingItem ? 'yes (awaiting learner answer)' : 'no'}`,
@@ -76,7 +76,7 @@ function proofPrompt(language, conceptKey) {
  */
 export function selectPolicyAction({ language, state, learnerInput }) {
   if (!state.memoryLoaded) return { tool: 'get_learner_state', args: { concept: state.conceptKey }, reasonCode: POLICY_REASON.memory_first };
-  if (!Array.isArray(state.sources) || !state.sources.length) return { tool: 'search_verified_sources', args: { query: state.conceptKey }, reasonCode: POLICY_REASON.evidence_first };
+  if (!Array.isArray(state.sources) || !state.sources.length) return { tool: 'search_verified_sources', args: { query: state.conceptLabel || state.conceptKey }, reasonCode: POLICY_REASON.evidence_first };
 
   if (learnerInput && !state.inputConsumed) {
     if (Number.isInteger(learnerInput.answerIndex)) return { tool: 'assess_answer', args: {}, reasonCode: POLICY_REASON.grade_attempt };
@@ -88,25 +88,25 @@ export function selectPolicyAction({ language, state, learnerInput }) {
       return { tool: 'diagnose_misconception', args: { evidence: state.lastMisconceptionEvidence || '' }, reasonCode: POLICY_REASON.target_misconception };
     }
     if (state.lastCorrect === false && !state.lastExplanation) {
-      return { tool: 'explain_concept', args: { concept: state.conceptKey, focus: state.misconception?.label || state.lastMisconceptionEvidence || '' }, reasonCode: POLICY_REASON.teach_gap };
+      return { tool: 'explain_concept', args: { concept: state.conceptLabel || state.conceptKey, focus: state.misconception?.label || state.lastMisconceptionEvidence || '' }, reasonCode: POLICY_REASON.teach_gap };
     }
-    return { tool: 'ask_learner', args: { prompt: proofPrompt(language, state.conceptKey), expects: 'text' }, reasonCode: POLICY_REASON.request_reasoning };
+    return { tool: 'ask_learner', args: { prompt: proofPrompt(language, state.conceptLabel || state.conceptKey), expects: 'text' }, reasonCode: POLICY_REASON.request_reasoning };
   }
 
   if (state.lastInputKind === 'text') {
     if ((Number(state.reasoningScore) || 0) < 0.6 && (Number(state.remediationCount) || 0) < 2) {
       if (!state.remediationDelivered) {
-        return { tool: 'explain_concept', args: { concept: state.conceptKey, focus: state.reasoningGap || state.misconception?.label || '' }, reasonCode: POLICY_REASON.teach_gap };
+        return { tool: 'explain_concept', args: { concept: state.conceptLabel || state.conceptKey, focus: state.reasoningGap || state.misconception?.label || '' }, reasonCode: POLICY_REASON.teach_gap };
       }
-      return { tool: 'ask_learner', args: { prompt: proofPrompt(language, state.conceptKey), expects: 'text' }, reasonCode: POLICY_REASON.retry_reasoning };
+      return { tool: 'ask_learner', args: { prompt: proofPrompt(language, state.conceptLabel || state.conceptKey), expects: 'text' }, reasonCode: POLICY_REASON.retry_reasoning };
     }
     if (!state.reviewScheduled) return { tool: 'schedule_review', args: {}, reasonCode: POLICY_REASON.schedule_recall };
     if (!state.evidenceAttempted) return { tool: 'record_evidence', args: { evidenceType: 'assessment', note: state.evidenceSummary || '' }, reasonCode: POLICY_REASON.record_learning };
     return {
       tool: 'finish',
       args: { summary: (Number(state.reasoningScore) || 0) >= 0.6
-        ? (language === 'ar' ? `أثبتَّ فهمًا قابلًا للمراجعة في ${state.conceptKey}. تم حفظ الدليل وتحديد موعد الاسترجاع التالي.` : `You demonstrated revisable understanding of ${state.conceptKey}. The evidence and next recall are saved.`)
-        : (language === 'ar' ? `سجّلنا تقدّمك في ${state.conceptKey}، لكن الدليل لم يصل بعد إلى حد الإتقان. ستعود الفكرة في مراجعة قصيرة.` : `We recorded progress in ${state.conceptKey}, but the evidence is not yet strong enough for mastery. A short review is scheduled.`) },
+        ? (language === 'ar' ? `أثبتَّ فهمًا قابلًا للمراجعة في ${state.conceptLabel || state.conceptKey}. تم حفظ الدليل وتحديد موعد الاسترجاع التالي.` : `You demonstrated revisable understanding of ${state.conceptLabel || state.conceptKey}. The evidence and next recall are saved.`)
+        : (language === 'ar' ? `سجّلنا تقدّمك في ${state.conceptLabel || state.conceptKey}، لكن الدليل لم يصل بعد إلى حد الإتقان. ستعود الفكرة في مراجعة قصيرة.` : `We recorded progress in ${state.conceptLabel || state.conceptKey}, but the evidence is not yet strong enough for mastery. A short review is scheduled.`) },
       reasonCode: POLICY_REASON.goal_complete,
     };
   }
@@ -114,7 +114,19 @@ export function selectPolicyAction({ language, state, learnerInput }) {
   if (state.pendingItem) {
     return { tool: 'ask_learner', args: { prompt: state.pendingItem.question || (language === 'ar' ? 'اختر الإجابة الأقرب لفهمك.' : 'Choose the answer that best reflects your understanding.'), expects: 'choice' }, reasonCode: POLICY_REASON.present_diagnostic };
   }
-  return { tool: 'generate_diagnostic', args: { concept: state.conceptKey }, reasonCode: POLICY_REASON.diagnostic_needed };
+  return { tool: 'generate_diagnostic', args: { concept: state.conceptLabel || state.conceptKey }, reasonCode: POLICY_REASON.diagnostic_needed };
+}
+
+function recoveryObservation(language, conceptLabel) {
+  return {
+    awaiting: true,
+    prompt: language === 'ar'
+      ? `تعذّر إكمال الخطوة الآلية بأمان. اشرح ما تعرفه الآن عن ${conceptLabel}، واذكر النقطة التي ما زالت غير واضحة، وسأبني التدخل التالي على إجابتك.`
+      : `The automated step could not be completed safely. Explain what you understand about ${conceptLabel} and name what is still unclear; I will build the next intervention from your answer.`,
+    expects: 'text',
+    item: null,
+    recovered: true,
+  };
 }
 
 function parseJsonAction(text) {
@@ -197,6 +209,7 @@ export async function runAgentTurn({
   decide = null,
 } = {}) {
   const conceptKey = normalizeConceptKey(concept || goal);
+  const conceptLabel = String(goal || priorState?.conceptLabel || concept || conceptKey).trim().slice(0, 400) || conceptKey;
   const loaded = priorState || await loadLearnerState(admin, userId, conceptKey);
   const ctx = {
     admin,
@@ -209,6 +222,7 @@ export async function runAgentTurn({
     learnerInput,
     state: {
       conceptKey,
+      conceptLabel,
       mastery: Number.isFinite(Number(loaded.mastery)) ? Number(loaded.mastery) : 0.2,
       masteryLabel: loaded.masteryLabel || masteryLabel(Number.isFinite(Number(loaded.mastery)) ? Number(loaded.mastery) : 0.2, true),
       attempts: loaded.attempts || 0,
@@ -245,9 +259,9 @@ export async function runAgentTurn({
     let decision;
     try {
       decision = decide
-        ? await decide({ language, goal: goal || conceptKey, state: ctx.state, steps, learnerInput, deadlineAt })
-        : selectPolicyAction({ language, goal: goal || conceptKey, state: ctx.state, steps, learnerInput })
-          || await decideNextAction({ language, goal: goal || conceptKey, state: ctx.state, steps, learnerInput, deadlineAt });
+        ? await decide({ language, goal: conceptLabel, state: ctx.state, steps, learnerInput, deadlineAt })
+        : selectPolicyAction({ language, goal: conceptLabel, state: ctx.state, steps, learnerInput })
+          || await decideNextAction({ language, goal: conceptLabel, state: ctx.state, steps, learnerInput, deadlineAt });
     } catch {
       break;
     }
@@ -259,9 +273,12 @@ export async function runAgentTurn({
     const phase = TOOL_PHASE[decision.tool] || 'discover';
     emit({ type: 'step', index: index + 1, reasonCode: decision.reasonCode || POLICY_REASON.model_fallback, phase, tool: decision.tool, args: decision.args });
     if (!tool) {
-      steps.push({ tool: decision.tool, args: decision.args, observation: { error: 'unknown_tool' } });
-      emit({ type: 'observation', index: index + 1, tool: decision.tool, observation: { error: 'unknown_tool' } });
-      continue;
+      const observation = { error: 'unknown_tool' };
+      steps.push({ tool: decision.tool, args: decision.args, observation });
+      emit({ type: 'observation', index: index + 1, tool: decision.tool, observation });
+      terminal = { tool: 'ask_learner', observation: recoveryObservation(language, conceptLabel) };
+      emit({ type: 'observation', index: index + 2, phase: 'prove', tool: 'ask_learner', observation: terminal.observation });
+      break;
     }
     let observation;
     try {
@@ -274,18 +291,8 @@ export async function runAgentTurn({
       ? Object.fromEntries(Object.entries(observation).filter(([key]) => !['token', 'correctAnswer'].includes(key)))
       : observation;
     emit({ type: 'observation', index: index + 1, phase, tool: decision.tool, observation: publicObservation });
-    if (decision.tool === 'generate_diagnostic' && observation?.error) {
-      terminal = {
-        tool: 'ask_learner',
-        observation: {
-          awaiting: true,
-          prompt: language === 'ar'
-            ? `اشرح ما تعرفه الآن عن ${conceptKey}، واذكر النقطة التي تبدو لك غير واضحة.`
-            : `Explain what you currently understand about ${conceptKey}, and name the point that still feels unclear.`,
-          expects: 'text',
-          item: null,
-        },
-      };
+    if (observation?.error) {
+      terminal = { tool: 'ask_learner', observation: recoveryObservation(language, conceptLabel) };
       emit({ type: 'observation', index: index + 2, phase: 'prove', tool: 'ask_learner', observation: terminal.observation });
       break;
     }
@@ -296,13 +303,14 @@ export async function runAgentTurn({
   }
 
   if (!terminal) {
-    terminal = { tool: 'finish', observation: { done: true, summary: ctx.state.lastExplanation || (language === 'ar' ? 'تم إحراز تقدم في هذا المفهوم.' : 'Progress was made on this concept.'), mastery: ctx.state.mastery, masteryLabel: ctx.state.masteryLabel } };
-    emit({ type: 'observation', index: steps.length + 1, tool: 'finish', observation: terminal.observation });
+    terminal = { tool: 'ask_learner', observation: recoveryObservation(language, conceptLabel) };
+    emit({ type: 'observation', index: steps.length + 1, phase: 'prove', tool: 'ask_learner', observation: terminal.observation });
   }
 
   const awaiting = terminal.tool === 'ask_learner';
   const checkpoint = {
     conceptKey,
+    conceptLabel,
     mastery: ctx.state.mastery,
     masteryLabel: ctx.state.masteryLabel,
     attempts: ctx.state.attempts,
@@ -330,6 +338,7 @@ export async function runAgentTurn({
   const stage = TOOL_PHASE[terminal.tool] || (awaiting ? 'prove' : 'complete');
   const result = {
     conceptKey,
+    conceptLabel,
     terminalTool: terminal.tool,
     awaiting,
     prompt: awaiting ? terminal.observation.prompt : null,
@@ -348,6 +357,7 @@ export async function runAgentTurn({
     // Public state never contains the encrypted answer token; the server checkpoint is authoritative.
     state: {
       conceptKey,
+      conceptLabel,
       sources: ctx.state.sources,
       misconception: ctx.state.misconception || null,
     },

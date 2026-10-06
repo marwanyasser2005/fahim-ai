@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { readAgentResponse, requestLearningAI } from '../api/_lib/ai-routing.mjs';
 import {
-  AGENT_TOOLS, AGENT_TOOL_MAP, buildTopicalSearchSeeds, citedSourceIds,
-  classifyMisconception, rankTopicalPages, toolSchemas,
+  AGENT_TOOLS, AGENT_TOOL_MAP, buildScholarlySearchSeed, buildTopicalSearchSeeds, citedSourceIds,
+  classifyMisconception, rankScholarlyWorks, rankTopicalPages, toolSchemas, validateDiagnosticItem,
 } from '../api/_lib/agent/tools.mjs';
 
 afterEach(() => {
@@ -34,8 +34,16 @@ describe('agent tool registry', () => {
   });
 
   it('accepts only citations present in the server source ledger', () => {
-    const sources = [{ citationId: 'E1' }, { citationId: 'R1' }];
-    expect(citedSourceIds('Supported [E1] and [R1], invented [E9] and [R7].', sources)).toEqual(['E1', 'R1']);
+    const sources = [{ citationId: 'E1' }, { citationId: 'R1' }, { citationId: 'S1' }];
+    expect(citedSourceIds('Supported [E1], [R1] and [S1], invented [E9] and [R7].', sources)).toEqual(['E1', 'R1', 'S1']);
+  });
+
+  it('turns an Arabic physics goal into a focused bilingual scholarly query', () => {
+    const seed = buildScholarlySearchSeed('لماذا تتناسب القوة مع التسارع وفقًا لقانون نيوتن الثاني؟', 'الفيزياء');
+    expect(seed).toContain('force');
+    expect(seed).toContain('acceleration');
+    expect(seed).toContain('Newton');
+    expect(seed).toContain('physics');
   });
 
   it('builds focused topical searches from a natural-language learning goal', () => {
@@ -61,6 +69,22 @@ describe('agent tool registry', () => {
     });
     expect(ranked.map((source) => source.title)).toEqual(['متوسط (إحصاء)', 'وسيط (إحصاء)']);
     expect(ranked.map((source) => source.citationId)).toEqual(['R1', 'R2']);
+  });
+
+  it('keeps only relevant open scholarly records', () => {
+    const ranked = rankScholarlyWorks([
+      { id: 'w1', display_name: 'Newton second law: force and acceleration in mechanics', open_access: { is_oa: true }, cited_by_count: 12, publication_year: 2024, type: 'article', primary_location: { landing_page_url: 'https://example.test/w1' } },
+      { id: 'w2', display_name: 'Newton second law in classroom mechanics', open_access: { is_oa: false }, cited_by_count: 40 },
+      { id: 'w3', display_name: 'Mediterranean trade history', open_access: { is_oa: true }, cited_by_count: 90 },
+    ], 'Newton force acceleration physics');
+    expect(ranked).toHaveLength(1);
+    expect(ranked[0]).toMatchObject({ citationId: 'S1', title: 'Newton second law: force and acceleration in mechanics' });
+  });
+
+  it('rejects placeholder diagnostics and accepts four meaningful choices', () => {
+    const base = { question: 'لماذا يزداد التسارع عند زيادة القوة مع ثبات الكتلة؟', correctIndex: 0, explanation: 'لأن التسارع يتناسب طرديًا مع القوة وفق قانون نيوتن الثاني.', misconception: 'الاعتقاد بأن القوة تغيّر السرعة فورًا دون تسارع', skill: 'قانون نيوتن الثاني' };
+    expect(validateDiagnosticItem({ ...base, options: ['a', 'b', 'c', 'd'] }, 'medium', 'نيوتن')).toBeNull();
+    expect(validateDiagnosticItem({ ...base, options: ['لأن التسارع يتناسب طرديًا مع القوة', 'لأن الكتلة تختفي من المعادلة', 'لأن السرعة تساوي القوة دائمًا', 'لأن الزمن يصبح صفرًا'] }, 'medium', 'نيوتن')).toMatchObject({ correctIndex: 0, difficulty: 'medium' });
   });
 });
 

@@ -70,20 +70,35 @@ describe('agent orchestrator loop', () => {
     expect(schedule.observation.nextReviewAt).toBeTruthy();
   });
 
-  it('synthesizes a finish when the step budget is exhausted without a terminal tool', async () => {
+  it('asks for recoverable learner input when the step budget is exhausted', async () => {
     const result = await runAgentTurn({
       admin: null, userId: 'user-1', language: 'en', secret: SECRET, goal: 'loops', maxSteps: 3,
       decide: scriptedDecide([{ tool: 'get_learner_state', args: { concept: 'loops' } }]),
       emit: () => {},
     });
-    expect(result.terminalTool).toBe('finish');
+    expect(result.terminalTool).toBe('ask_learner');
+    expect(result.awaiting).toBe(true);
+    expect(result.expects).toBe('text');
     expect(result.steps.length).toBe(3);
+  });
+
+  it('stops after one failed assessment instead of repeating the same tool', async () => {
+    const result = await runAgentTurn({
+      admin: null, userId: 'user-1', language: 'ar', secret: SECRET,
+      goal: 'لماذا تتناسب القوة مع التسارع؟', learnerInput: { answerIndex: 1 },
+      decide: scriptedDecide([{ tool: 'assess_answer', args: {} }]),
+      emit: () => {},
+    });
+    expect(result.steps).toHaveLength(1);
+    expect(result.steps[0].observation.error).toBe('no_pending_answer');
+    expect(result.terminalTool).toBe('ask_learner');
+    expect(result.prompt).toContain('القوة مع التسارع');
   });
 });
 
 describe('deterministic learning policy', () => {
   const base = {
-    conceptKey: 'fractions', mastery: 0.2, attempts: 0, ability: 0,
+    conceptKey: 'fractions', conceptLabel: 'Why fractions represent parts of a whole', mastery: 0.2, attempts: 0, ability: 0,
     memoryLoaded: true, sources: [{ citationId: 'E1' }], pendingItem: null,
     inputConsumed: false, lastInputKind: null, lastCorrect: null,
     reviewScheduled: false, evidenceAttempted: false,
@@ -93,6 +108,7 @@ describe('deterministic learning policy', () => {
     expect(selectPolicyAction({ language: 'en', state: { ...base, memoryLoaded: false }, learnerInput: null }).tool).toBe('get_learner_state');
     expect(selectPolicyAction({ language: 'en', state: { ...base, sources: null }, learnerInput: null }).tool).toBe('search_verified_sources');
     expect(selectPolicyAction({ language: 'en', state: base, learnerInput: null }).tool).toBe('generate_diagnostic');
+    expect(selectPolicyAction({ language: 'en', state: base, learnerInput: null }).args.concept).toBe(base.conceptLabel);
   });
 
   it('requires explanation evidence after a multiple-choice attempt', () => {
