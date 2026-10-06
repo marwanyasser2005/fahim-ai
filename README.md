@@ -13,7 +13,7 @@
   </p>
 </div>
 
-![CI](https://img.shields.io/badge/quality%20gate-200%20tests-0f766e)
+![CI](https://img.shields.io/badge/quality%20gate-206%20tests-0f766e)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-173f5f)
 ![Supabase](https://img.shields.io/badge/Supabase-RLS-3ecf8e)
 ![Arabic first](https://img.shields.io/badge/UX-Arabic--first-f2b84b)
@@ -155,7 +155,7 @@ npm run smoke:production   # public route/API smoke test
 npm run load:test          # controlled API load probe
 ```
 
-The repository currently contains 200 automated tests across 40 files, 33 Supabase migrations, 39 page components, and 12 top-level server API modules. Counts are implementation inventory—not claims of user impact.
+The repository currently contains 206 automated tests across 40 files, 33 Supabase migrations, 39 page components, and 12 top-level server API modules. Counts are implementation inventory—not claims of user impact.
 
 The suite mixes runtime behavior tests (routing, deadline budgets, session integrity, server grading, rate limits, spaced repetition, credentials, and agent policy) with source-contract checks. **There is no committed component or browser E2E suite**—manual browser verification complements, but does not replace, this automated gap. The `evaluation:check` controls are deterministic engineering guards, not evidence of learner impact.
 
