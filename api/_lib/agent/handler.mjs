@@ -106,7 +106,7 @@ export default async function agentHandler(request, response) {
   const deadlineAt = Date.now() + 45_000;
 
   const generationId = randomUUID();
-  await admin.from('ai_generations').insert({
+  const { error: generationInsertError } = await admin.from('ai_generations').insert({
     id: generationId,
     user_id: auth.user.id,
     task_type: 'agent',
@@ -114,7 +114,11 @@ export default async function agentHandler(request, response) {
     model: 'agent-loop',
     prompt_text: goal.slice(0, 12000),
     status: stream ? 'streaming' : 'pending',
-  }).then(() => {}, () => {});
+  }).then((result) => result, () => ({ error: new Error('generation_insert_failed') }));
+  // The learning checkpoint is authoritative; observability must never break resumability.
+  // Only attach the FK when the optional generation log row was actually accepted.
+  const persistedGenerationId = generationInsertError ? null : generationId;
+  if (generationInsertError) logEvent('agent_generation_log_skipped', { requestId, code: generationInsertError.code || 'insert_failed' });
 
   if (stream) {
     response.writeHead(200, {
@@ -163,7 +167,7 @@ export default async function agentHandler(request, response) {
         stage: result.stage,
         status: result.awaiting ? 'awaiting' : 'completed',
         mastery: result.mastery,
-        generationId,
+        generationId: persistedGenerationId,
         completed: !result.awaiting,
       }),
     ]);
