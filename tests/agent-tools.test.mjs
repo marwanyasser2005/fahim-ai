@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { readAgentResponse, requestLearningAI } from '../api/_lib/ai-routing.mjs';
-import { AGENT_TOOLS, AGENT_TOOL_MAP, citedSourceIds, classifyMisconception, toolSchemas } from '../api/_lib/agent/tools.mjs';
+import {
+  AGENT_TOOLS, AGENT_TOOL_MAP, buildTopicalSearchSeeds, citedSourceIds,
+  classifyMisconception, rankTopicalPages, toolSchemas,
+} from '../api/_lib/agent/tools.mjs';
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -33,6 +36,31 @@ describe('agent tool registry', () => {
   it('accepts only citations present in the server source ledger', () => {
     const sources = [{ citationId: 'E1' }, { citationId: 'R1' }];
     expect(citedSourceIds('Supported [E1] and [R1], invented [E9] and [R7].', sources)).toEqual(['E1', 'R1']);
+  });
+
+  it('builds focused topical searches from a natural-language learning goal', () => {
+    const seeds = buildTopicalSearchSeeds(
+      'أريد فهم الفرق بين المتوسط والوسيط وتطبيقه على بيانات متجر صغير',
+      'الإحصاء وتحليل البيانات',
+    );
+    expect(seeds.length).toBeGreaterThan(1);
+    expect(seeds.every((seed) => seed.includes('الاحصاء'))).toBe(true);
+    expect(seeds.some((seed) => /المتوسط|الوسيط/.test(seed))).toBe(true);
+    expect(seeds.join(' ')).not.toContain('اريد');
+  });
+
+  it('rejects unrelated open references and keeps only concept-relevant pages', () => {
+    const ranked = rankTopicalPages([
+      { key: 'Yemenite_Jews', title: 'يهود اليمن', description: 'مجموعة عرقية', excerpt: 'تاريخ جماعة في جنوب شبه الجزيرة العربية' },
+      { key: 'Mediterranean_Sea', title: 'البحر الأبيض المتوسط', description: 'بحر بين قارات', excerpt: 'جغرافيا وملاحة' },
+      { key: 'Mean_(statistics)', title: 'متوسط (إحصاء)', description: 'مقياس إحصائي', excerpt: 'قيمة مركزية تستخدم في تحليل البيانات' },
+      { key: 'Median_(statistics)', title: 'وسيط (إحصاء)', description: 'الكمية المتوسطة لمجموعة البيانات', excerpt: 'مقياس للنزعة المركزية في الإحصاء' },
+    ], {
+      query: 'أريد فهم الفرق بين المتوسط والوسيط وتطبيقه على بيانات متجر صغير',
+      subject: 'الإحصاء وتحليل البيانات',
+    });
+    expect(ranked.map((source) => source.title)).toEqual(['متوسط (إحصاء)', 'وسيط (إحصاء)']);
+    expect(ranked.map((source) => source.citationId)).toEqual(['R1', 'R2']);
   });
 });
 

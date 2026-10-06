@@ -14,32 +14,116 @@
 
 import { requestLearningAI, readLearningAIResponse } from '../ai-routing.mjs';
 import { bktObserve, masteryLabel, selectNextItem, irtObserve, fsrsSchedule, fsrsIsDue } from '../learning.mjs';
-import { rankVerifiedSources } from '../source-ranking.mjs';
+import { normalizeSearchText, rankVerifiedSources } from '../source-ranking.mjs';
 import { encodeToken, gradeAnswer } from '../../quiz.mjs';
 import { loadLearnerState, saveConceptMastery, saveReviewSchedule, recordEvidence } from './memory.mjs';
 
 const round3 = (value) => Math.round((Number.isFinite(Number(value)) ? Number(value) : 0) * 1000) / 1000;
 const DIFFICULTY_BY_ABILITY = [{ max: -0.6, difficulty: 'easy' }, { max: 0.6, difficulty: 'medium' }, { max: Infinity, difficulty: 'hard' }];
 const cleanText = (value = '') => String(value).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+const TOPIC_STOPWORDS = new Set([
+  'اريد', 'أريد', 'افهم', 'فهم', 'اشرح', 'شرح', 'تعلم', 'الفرق', 'بين', 'عن', 'علي', 'على', 'في', 'من', 'الي', 'إلى',
+  'تطبيق', 'تطبيقه', 'مثال', 'امثله', 'أمثلة', 'صغير', 'صغيره', 'كبير', 'كيف', 'ما', 'ماذا', 'لماذا', 'هذا', 'هذه',
+  'want', 'understand', 'explain', 'learn', 'difference', 'between', 'about', 'with', 'from', 'into', 'using', 'example', 'examples', 'how', 'what', 'why',
+].map((token) => normalizeSearchText(token)));
 
-async function topicalReferences(query, language) {
-  const host = language === 'ar' ? 'ar.wikipedia.org' : 'en.wikipedia.org';
-  try {
-    const response = await fetch(`https://${host}/w/rest.php/v1/search/page?q=${encodeURIComponent(query)}&limit=3`, {
-      headers: { Accept: 'application/json', 'User-Agent': 'FahimAI/4.0 tutor-agent' },
-      signal: AbortSignal.timeout(3_500),
-    });
-    if (!response.ok) return [];
-    const data = await response.json();
-    return (data.pages || []).slice(0, 2).map((page, index) => ({
+function lexicalToken(token) {
+  let value = normalizeSearchText(token);
+  if (/^و[\p{L}]/u.test(value) && value.length > 4) value = value.slice(1);
+  return value;
+}
+
+function contentTokens(value) {
+  return [...new Set(normalizeSearchText(value)
+    .split(' ')
+    .map(lexicalToken)
+    .filter((token) => token.length > 2 && !TOPIC_STOPWORDS.has(token)))];
+}
+
+function tokenForms(token) {
+  const forms = new Set([token]);
+  if (token.startsWith('ال') && token.length > 4) forms.add(token.slice(2));
+  return forms;
+}
+
+function tokenMatches(haystackTokens, token) {
+  const haystack = new Set(haystackTokens.flatMap((item) => [...tokenForms(item)]));
+  return [...tokenForms(token)].some((form) => haystack.has(form));
+}
+
+export function buildTopicalSearchSeeds(query, subject = '') {
+  const subjectTokens = contentTokens(subject).slice(0, 2);
+  const subjectSet = new Set(subjectTokens.flatMap((token) => [...tokenForms(token)]));
+  const queryTokens = contentTokens(query)
+    .filter((token) => ![...tokenForms(token)].some((form) => subjectSet.has(form)))
+    .slice(0, 4);
+  const anchor = subjectTokens.join(' ');
+  const focused = queryTokens.slice(0, 3).map((token) => `${token} ${anchor}`.trim());
+  if (queryTokens.length > 1) focused.unshift(`${queryTokens.slice(0, 3).join(' ')} ${anchor}`.trim());
+  return [...new Set(focused.filter(Boolean))].slice(0, 3);
+}
+
+export function rankTopicalPages(pages, { query = '', subject = '', limit = 2 } = {}) {
+  const queryTokens = contentTokens(query);
+  const subjectTokens = contentTokens(subject);
+  const seen = new Set();
+
+  return (pages || [])
+    .map((page) => {
+      const title = cleanText(page.title);
+      const excerpt = cleanText(`${page.description || ''}. ${page.excerpt || ''}`);
+      const titleTokens = contentTokens(title);
+      const bodyTokens = contentTokens(`${title} ${excerpt}`);
+      const queryTitleHits = queryTokens.filter((token) => tokenMatches(titleTokens, token)).length;
+      const queryBodyHits = queryTokens.filter((token) => tokenMatches(bodyTokens, token)).length;
+      const subjectTitleHits = subjectTokens.filter((token) => tokenMatches(titleTokens, token)).length;
+      const subjectBodyHits = subjectTokens.filter((token) => tokenMatches(bodyTokens, token)).length;
+      const disambiguation = /توضيح|disambiguation|ويكيميديا|wikimedia/i.test(`${page.description || ''} ${page.excerpt || ''}`);
+      const relevant = !disambiguation && queryTitleHits > 0
+        && (queryTitleHits > 1 || queryBodyHits > 1 || subjectTitleHits > 0 || subjectBodyHits > 0);
+      return {
+        page, title, excerpt, relevant,
+        score: queryTitleHits * 10 + subjectTitleHits * 6 + queryBodyHits * 2 + subjectBodyHits,
+      };
+    })
+    .filter((item) => item.relevant && item.title && item.excerpt)
+    .sort((a, b) => b.score - a.score || a.title.localeCompare(b.title))
+    .filter((item) => {
+      const key = String(item.page.key || item.page.id || item.title).toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, Math.max(0, Math.min(3, Number(limit) || 2)))
+    .map((item, index) => ({
       citationId: `R${index + 1}`,
-      title: cleanText(page.title),
+      title: item.title,
       authority: 'open-reference',
       kind: 'topical-reference',
-      excerpt: cleanText(`${page.description || ''}. ${page.excerpt || ''}`).slice(0, 700),
-      url: `https://${host}/wiki/${encodeURIComponent(page.key)}`,
+      excerpt: item.excerpt.slice(0, 700),
+      key: item.page.key,
       verifiedAt: null,
-    })).filter((source) => source.title && source.excerpt);
+    }));
+}
+
+async function topicalReferences(query, subject, language) {
+  const host = language === 'ar' ? 'ar.wikipedia.org' : 'en.wikipedia.org';
+  try {
+    const seeds = buildTopicalSearchSeeds(query, subject);
+    const responses = await Promise.allSettled(seeds.map(async (seed) => {
+      const response = await fetch(`https://${host}/w/rest.php/v1/search/page?q=${encodeURIComponent(seed)}&limit=4`, {
+        headers: { Accept: 'application/json', 'User-Agent': 'FahimAI/4.1 relevance-gated-tutor' },
+        signal: AbortSignal.timeout(3_500),
+      });
+      if (!response.ok) return [];
+      const data = await response.json();
+      return data.pages || [];
+    }));
+    const pages = responses.flatMap((result) => result.status === 'fulfilled' ? result.value : []);
+    return rankTopicalPages(pages, { query, subject, limit: 2 }).map(({ key, ...source }) => ({
+      ...source,
+      url: `https://${host}/wiki/${encodeURIComponent(key)}`,
+    }));
   } catch {
     return [];
   }
@@ -147,7 +231,7 @@ export const AGENT_TOOLS = [
     parameters: { type: 'object', properties: { query: { type: 'string' } }, required: ['query'] },
     async execute(args, ctx) {
       const query = args.query || ctx.state.conceptKey;
-      const [references] = await Promise.all([topicalReferences(query, ctx.language)]);
+      const [references] = await Promise.all([topicalReferences(query, ctx.subject, ctx.language)]);
       const official = rankVerifiedSources({ question: query, subject: ctx.subject, grade: ctx.grade, language: ctx.language, limit: 3 })
         .map((source) => ({
           citationId: source.citationId,
