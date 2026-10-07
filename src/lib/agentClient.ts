@@ -19,6 +19,7 @@ export interface AgentRequest {
   language: 'ar' | 'en';
   sessionId?: string | null;
   learnerInput?: AgentLearnerInput | null;
+  sourceContext?: { id: string; title: string; text: string }[];
 }
 
 export interface AgentStepEvent { index: number; reasonCode?: string; phase?: AgentStage; tool: string; args: Record<string, unknown>; }

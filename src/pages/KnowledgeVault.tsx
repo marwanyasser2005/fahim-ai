@@ -30,10 +30,10 @@ import {
 const copy = {
   ar: {
     eyebrow: "خزانة المعرفة",
-    title: "مادتك الدراسية تبقى عندك، والبحث يوضح لماذا وجدها.",
-    body: "ارفع PDF أو نصًا أو Markdown أو CSV. يستخرج فَهيم النص داخل المتصفح، يقسمه إلى مقاطع، ويرتّب الدليل باستخدام BM25 وتغطية المصطلحات والجسر العربي/الإنجليزي دون رفع الملف إلى خادم.",
+    title: "ملفاتك عندك، وفَهيم يلاقي الجزء اللي محتاجه.",
+    body: "ضيف كتاب PDF، ملف نصّي، أو ترجمة فيديو SRT وVTT. فَهيم بيقرأ النص على جهازك ويلاقي المقاطع الأقرب لسؤالك بالعربي والإنجليزي. الملف نفسه مش بيترفع للخادم.",
     upload: "أضف مصادر",
-    supported: "PDF · TXT · MD · CSV · JSON · HTML، حتى 15MB",
+    supported: "PDF · TXT · MD · CSV · JSON · HTML · SRT · VTT، حتى 15MB",
     privacy: "معالجة محلية وIndexedDB. لا ترفع الملفات إلى فَهيم في هذا الإصدار.",
     search: "ابحث داخل مصادرك",
     placeholder: "ما الفرق بين الانقسام المتساوي والمنصف؟",
@@ -52,14 +52,14 @@ const copy = {
     localRag: "استرجاع محلي قابل للتفسير",
     result: "أدلة مسترجعة",
     characters: "حرف",
-    askHint: "الثقة هنا تصف قوة المطابقة، وليست حكمًا على صحة المحتوى.",
+    askHint: "المطابقة مش ضمان لصحة المحتوى. لما تختار اسأل فَهيم أو جلسة فهم، المقاطع المختارة بس بتتبعت للـAI؛ الوكيل بيحفظها في سجل الجلسة، مش الملف كله.",
   },
   en: {
     eyebrow: "Knowledge vault",
     title: "Your study material stays with you, and retrieval explains why it matched.",
-    body: "Upload PDF, text, Markdown, CSV, JSON, or HTML. Fahim extracts text in the browser and ranks evidence with BM25, term coverage, and an Arabic/English concept bridge without uploading the file.",
+    body: "Add a PDF, text document, or SRT/VTT video captions. Fahim reads it on your device and finds passages relevant to your question in Arabic or English. The file itself is not uploaded.",
     upload: "Add sources",
-    supported: "PDF · TXT · MD · CSV · JSON · HTML, up to 15MB",
+    supported: "PDF · TXT · MD · CSV · JSON · HTML · SRT · VTT, up to 15MB",
     privacy: "Local processing and IndexedDB. Files are not uploaded to Fahim in this release.",
     search: "Search your sources",
     placeholder: "What is the difference between mitosis and meiosis?",
@@ -78,7 +78,7 @@ const copy = {
     localRag: "Explainable local retrieval",
     result: "Retrieved evidence",
     characters: "characters",
-    askHint: "Confidence describes retrieval strength, not the truth of the source.",
+    askHint: "Match strength does not certify the content. Choosing Ask Fahim or a learning session sends only selected excerpts to the AI. The agent saves those excerpts in the session, not the whole file.",
   },
 } as const;
 
@@ -150,7 +150,7 @@ export default function KnowledgeVault({ language }: { language: "ar" | "en" }) 
     setHits(searchVault(sources, query));
   };
 
-  const ask = () => {
+  const ask = (agent = false) => {
     const context = hits.slice(0, 5).map((hit, index) => ({
       id: hit.chunk.sourceId,
       citationId: `U${index + 1}`,
@@ -158,7 +158,7 @@ export default function KnowledgeVault({ language }: { language: "ar" | "en" }) 
       text: hit.chunk.text.slice(0, 900),
     }));
     sessionStorage.setItem("fahim-vault-handoff", JSON.stringify(context));
-    navigate(`/ask-fahim?vault=1&q=${encodeURIComponent(query)}`);
+    navigate(agent ? `/agent?vault=1&goal=${encodeURIComponent(query)}` : `/ask-fahim?vault=1&q=${encodeURIComponent(query)}`);
   };
 
   const remove = async (id: string) => {
@@ -209,7 +209,7 @@ export default function KnowledgeVault({ language }: { language: "ar" | "en" }) 
               <input
                 type="file"
                 multiple
-                accept=".pdf,.txt,.md,.csv,.json,.html,.htm"
+                accept=".pdf,.txt,.md,.csv,.json,.html,.htm,.srt,.vtt"
                 onChange={upload}
                 className="sr-only"
               />
@@ -341,13 +341,14 @@ export default function KnowledgeVault({ language }: { language: "ar" | "en" }) 
                 </div>
                 <button
                   type="button"
-                  onClick={ask}
+                  onClick={() => ask()}
                   className="inline-flex min-h-12 items-center gap-2.5 rounded-xl bg-[#173F5F] px-5 py-3.5 text-sm font-black text-white transition hover:bg-[#0F766E] sm:shadow-[3px_3px_0_#F2B84B]"
                 >
                   <BrainCircuit className="h-[1.125rem] w-[1.125rem]" />
                   {t.ask}
                   <Arrow className="h-4 w-4" />
                 </button>
+                <button type="button" onClick={() => ask(true)} className="atlas-secondary min-h-12"><BookOpenCheck className="h-4 w-4" />{rtl ? 'ابدأ جلسة فهم بالمقاطع دي' : 'Learn with these excerpts'}</button>
               </div>
 
               <div className="divide-y divide-[var(--border)]">

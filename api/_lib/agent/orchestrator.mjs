@@ -203,6 +203,7 @@ export async function runAgentTurn({
   concept,
   learnerInput = null,
   priorState = null,
+  uploadedReferences = [],
   deadlineAt = Date.now() + 40_000,
   maxSteps = MAX_STEPS_DEFAULT,
   emit = () => {},
@@ -220,6 +221,7 @@ export async function runAgentTurn({
     secret,
     deadlineAt,
     learnerInput,
+    uploadedReferences,
     state: {
       conceptKey,
       conceptLabel,

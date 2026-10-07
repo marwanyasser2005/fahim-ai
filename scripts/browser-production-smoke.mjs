@@ -12,7 +12,7 @@ try {
     const page = await context.newPage();
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
-    for (const route of ['/agent', '/personal-paths', '/ai-quality']) {
+    for (const route of ['/agent', '/personal-paths', '/ai-quality', '/knowledge-vault']) {
       const response = await page.goto('https://fahim-ai-egypt.vercel.app' + route, { waitUntil: 'networkidle', timeout: 30_000 });
       assert.equal(response.status(), 200);
       await page.locator('h1').first().waitFor();

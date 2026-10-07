@@ -20,6 +20,7 @@ import {
   RequestBodyError,
 } from '../security.mjs';
 import { runAgentTurn } from './orchestrator.mjs';
+import { normalizeLearnerSources } from '../learner-sources.mjs';
 import { createAgentSession, loadAgentSession, saveAgentSession } from './memory.mjs';
 import { consumeAiSession, refundAiSession } from '../entitlements.mjs';
 
@@ -142,6 +143,7 @@ export default async function agentHandler(request, response) {
       concept,
       learnerInput,
       priorState,
+      uploadedReferences: priorState ? [] : normalizeLearnerSources(body.sourceContext, language),
       deadlineAt,
       // A result makes the UI interactive. Hold it until the encrypted checkpoint has been
       // durably saved, otherwise a fast learner answer can race the database write.

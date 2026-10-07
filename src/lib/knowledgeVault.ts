@@ -16,6 +16,29 @@ const DB_NAME = 'fahim-knowledge-v1';
 const STORE = 'sources';
 const MAX_FILE_SIZE = 15 * 1024 * 1024;
 const MAX_CHARACTERS = 600_000;
+
+/** Import learner-supplied captions; never implies access to an online video's transcript. */
+export function parseTranscriptText(input: string): string {
+  const blocks = input.replace(/^\uFEFF/, '').replace(/\r/g, '').slice(0, MAX_CHARACTERS).split(/\n\s*\n/);
+  const cues: string[] = [];
+  const timeMs = (time: string) => {
+    const parts = time.replace(',', '.').split(':').map(Number);
+    const seconds = parts.pop() || 0; const minutes = parts.pop() || 0; const hours = parts.pop() || 0;
+    return minutes < 60 && seconds < 60 ? ((hours * 60 + minutes) * 60 + seconds) * 1000 : NaN;
+  };
+  for (const block of blocks) {
+    if (/^(NOTE|STYLE|REGION)(?:\s|$)/.test(block.trim())) continue;
+    const lines = block.split('\n');
+    const index = lines.findIndex(line => line.includes('-->'));
+    if (index < 0) continue;
+    const match = lines[index].match(/^\s*((?:\d{2}:)?\d{2}:\d{2}[.,]\d{3})\s+-->\s+((?:\d{2}:)?\d{2}:\d{2}[.,]\d{3})(?:\s.*)?$/);
+    if (!match || !Number.isFinite(timeMs(match[1])) || !Number.isFinite(timeMs(match[2])) || timeMs(match[2]) <= timeMs(match[1])) continue;
+    const text = lines.slice(index + 1).join(' ').replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ').trim();
+    if (text) cues.push(`[Time ${match[1].replace(',', '.')}] ${text}`);
+  }
+  if (!cues.length) throw new Error('empty-transcript');
+  return cues.join('\n\n').slice(0, MAX_CHARACTERS);
+}
 const ARABIC_DIACRITICS = /[\u0610-\u061a\u064b-\u065f\u0670\u06d6-\u06ed]/g;
 const CONCEPT_BRIDGES: Record<string, string[]> = {
   acceleration: ['التسارع', 'العجلة'],
@@ -45,7 +68,7 @@ export function normalizeVaultText(value: string) {
 
 const tokenize = (value: string) => normalizeVaultText(value).split(' ').filter((token) => token.length > 1);
 
-function buildChunks(sourceId: string, sourceName: string, text: string): VaultChunk[] {
+export function buildVaultChunks(sourceId: string, sourceName: string, text: string): VaultChunk[] {
   const clean = text.replace(/\r/g, '').replace(/\n{3,}/g, '\n\n').trim().slice(0, MAX_CHARACTERS);
   const chunks: VaultChunk[] = [];
   let cursor = 0;
@@ -57,6 +80,7 @@ function buildChunks(sourceId: string, sourceName: string, text: string): VaultC
     }
     const value = clean.slice(cursor, end).trim();
     if (value.length > 60) chunks.push({ id: `${sourceId}-${chunks.length}`, sourceId, sourceName, index: chunks.length, text: value, tokens: tokenize(value) });
+    if (end === clean.length) break;
     cursor = Math.max(end - 140, cursor + 1);
   }
   return chunks.slice(0, 800);
@@ -84,13 +108,14 @@ async function extractPdf(file: File) {
 export async function importVaultFile(file: File): Promise<VaultSource> {
   if (file.size > MAX_FILE_SIZE) throw new Error('file-too-large');
   const extension = file.name.split('.').pop()?.toLowerCase();
-  const supported = ['pdf', 'txt', 'md', 'csv', 'json', 'html', 'htm'];
+  const supported = ['pdf', 'txt', 'md', 'csv', 'json', 'html', 'htm', 'srt', 'vtt'];
   if (!extension || !supported.includes(extension)) throw new Error('unsupported-file');
-  const text = extension === 'pdf' ? await extractPdf(file) : await file.text();
+  const raw = extension === 'pdf' ? await extractPdf(file) : await file.text();
+  const text = ['srt', 'vtt'].includes(extension) ? parseTranscriptText(raw) : raw;
   const clean = text.trim().slice(0, MAX_CHARACTERS);
   if (clean.length < 80) throw new Error('empty-file');
   const id = crypto.randomUUID();
-  const source: VaultSource = { id, name: file.name.slice(0, 140), mimeType: file.type || extension, size: file.size, createdAt: new Date().toISOString(), characterCount: clean.length, chunks: buildChunks(id, file.name, clean) };
+  const source: VaultSource = { id, name: file.name.slice(0, 140), mimeType: file.type || extension, size: file.size, createdAt: new Date().toISOString(), characterCount: clean.length, chunks: buildVaultChunks(id, file.name, clean) };
   const database = await openDatabase();
   await new Promise<void>((resolve, reject) => { const request = database.transaction(STORE, 'readwrite').objectStore(STORE).put(source); request.onsuccess = () => resolve(); request.onerror = () => reject(request.error); });
   database.close();
@@ -133,6 +158,8 @@ function fuzzyTermMatch(term: string, candidate: string) {
 
 function pageLocation(value: string, index: number) {
   const match = value.match(/^\[Page (\d+)]/);
+  const timestamp = value.match(/\[Time ([\d:.]+)]/);
+  if (timestamp) return `Transcript ${timestamp[1]} (within chunk)`;
   return match ? `Page ${match[1]}` : `Chunk ${index + 1}`;
 }
 

@@ -17,13 +17,18 @@ async function request(path, body, timeoutMs = 58_000) {
   results.push({ endpoint: path.split('?')[0], status: response.status, latencyMs: Date.now() - begin });
   return value;
 }
-const start = await request('/api/agent', { goal: 'ليه القوة المحصلة بتتناسب مع التسارع عند ثبات الكتلة؟', subject: 'physics', grade: 'secondary', language: 'ar', stream: false });
+const sourceContext = process.argv.includes('--sources') ? [{ id: 'synthetic-caption-file', title: 'Synthetic physics transcript · 00:01', text: 'القوة المحصلة تساوي الكتلة مضروبة في التسارع. عند ثبات الكتلة، مضاعفة القوة المحصلة تضاعف التسارع. لا يعني هذا أن السرعة تتضاعف لحظيًا. مثال: كتلة 2 كجم وقوة 6 نيوتن ينتج عنهما تسارع 3 متر لكل ثانية تربيع.' }] : [];
+const start = await request('/api/agent', { goal: 'ليه القوة المحصلة بتتناسب مع التسارع عند ثبات الكتلة؟', subject: 'physics', grade: 'secondary', language: 'ar', stream: false, sourceContext });
 assert.equal(start.expects, 'choice');
 assert.equal(start.item.options.length, 4);
 assert(start.item.options.every(option => option.trim().length > 3));
 const resumed = await request('/api/agent', { sessionId: start.sessionId, stream: false });
 assert.deepEqual(resumed.item.options, start.item.options);
 assert.equal(resumed.attempts, start.attempts);
+if (sourceContext.length) {
+  assert.equal(start.state.sources.find(source => source.citationId === 'U1')?.sourceType, 'uploaded-source');
+  assert.equal(resumed.state.sources.find(source => source.citationId === 'U1')?.excerpt, sourceContext[0].text);
+}
 const attempt = await request('/api/agent', { sessionId: start.sessionId, learnerInput: { answerIndex: 0 }, stream: false });
 assert.equal(attempt.expects, 'text');
 assert.equal(attempt.attempts, start.attempts + 1);

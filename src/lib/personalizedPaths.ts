@@ -32,7 +32,7 @@ export type PersonalizedPath = {
   createdAt: string;
   version?: number;
   versionHistory?: { version: number; weeklyMinutes: number; changedAt: string; reason: string }[];
-  adaptivePlan?: { nextLessonId: string | null; remainingLessons: number; estimatedWeeksRemaining: number; reviewMinutesPerWeek: number; reason: string };
+  adaptivePlan?: { nextLessonId: string | null; remainingLessons: number; estimatedWeeksRemaining: number; reviewMinutesPerWeek: number; reason: string; warmup?: { concept: string; lessonId: string; attempts: number; minutes: number; provisional: boolean } | null };
   sources?: { citationId: string; title: string; url: string; excerpt?: string }[];
   workflow?: { phases: string[]; totalMinutes: number; blueprint?: { measurableGoal?: string; prerequisites?: string[]; assumptions?: string[] } };
   lessonCount?: number;

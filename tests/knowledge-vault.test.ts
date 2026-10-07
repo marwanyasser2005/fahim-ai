@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeVaultText, searchVault, type VaultSource } from '../src/lib/knowledgeVault';
+import { buildVaultChunks, normalizeVaultText, parseTranscriptText, searchVault, type VaultSource } from '../src/lib/knowledgeVault';
 
 const source: VaultSource = {
   id: 'biology-book',
@@ -15,6 +15,25 @@ const source: VaultSource = {
 };
 
 describe('local knowledge retrieval', () => {
+  it('stops at the end of short and long files without repeatedly indexing the tail', () => {
+    const short = 'Net force determines acceleration at constant mass. '.repeat(4);
+    expect(buildVaultChunks('file', 'physics.srt', short)).toHaveLength(1);
+    const long = 'Scientific explanation with a worked example. '.repeat(60);
+    const chunks = buildVaultChunks('file', 'physics.txt', long);
+    expect(chunks.length).toBeGreaterThan(1);
+    expect(chunks.length).toBeLessThan(6);
+    expect(chunks.at(-1)?.text.endsWith('example.')).toBe(true);
+  });
+  it('imports SRT and VTT cue text with timestamps, not cue settings', () => {
+    const srt = '1\n00:00:01,000 --> 00:00:04,000\nالقوة المحصلة بتحدد التسارع.\n\n2\n00:00:04,000 --> 00:00:07,000\nعند ثبات الكتلة، القوة المضاعفة بتضاعف التسارع.';
+    expect(parseTranscriptText(srt)).toContain('[Time 00:00:01.000] القوة المحصلة');
+    expect(parseTranscriptText('WEBVTT\n\n00:01.000 --> 00:04.000 align:start\n<v Teacher>Net force determines acceleration.</v>')).toContain('[Time 00:01.000] Net force');
+  });
+  it('rejects non-caption files and invalid cue durations', () => {
+    expect(() => parseTranscriptText('No timestamps here')).toThrow('empty-transcript');
+    expect(() => parseTranscriptText('00:00:04,000 --> 00:00:01,000\nWrong duration')).toThrow('empty-transcript');
+    expect(() => parseTranscriptText('00:00:04,000 --> 00:00:99,000\nInvalid end')).toThrow('empty-transcript');
+  });
   it('normalizes common Arabic spelling and diacritics consistently', () => {
     expect(normalizeVaultText('إِجَابَة إلى مُشكلة')).toBe('اجابه الي مشكله');
   });

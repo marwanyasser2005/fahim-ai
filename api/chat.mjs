@@ -1,6 +1,7 @@
 import { rankVerifiedSources } from './_lib/source-ranking.mjs';
 import { topicalReferences } from './_lib/agent/tools.mjs';
 import { inspectAnswer } from './_lib/ai-quality.mjs';
+import { normalizeLearnerSources } from './_lib/learner-sources.mjs';
 import { readLearnerProfile } from './_lib/learner-profile.mjs';
 import { markUnverifiedCitations, verifyCitationSupport } from './_lib/citation-verifier.mjs';
 import { createHash, randomUUID } from 'node:crypto';
@@ -207,15 +208,7 @@ export default async function handler(request, response) {
     role: item?.role === 'assistant' ? 'assistant' : 'user',
     text: String(item?.text || '').slice(0, 2400),
   })).filter((item) => item.text.length > 1) : [];
-  const uploadedReferences = Array.isArray(body.sourceContext) ? body.sourceContext.slice(0, 6).map((item, index) => ({
-    citationId: `U${index + 1}`,
-    title: String(item?.title || `Uploaded source ${index + 1}`).slice(0, 160),
-    description: language === 'ar' ? 'مقتطف من مصدر رفعه المتعلم ويُعالج محليًا' : 'Excerpt from a learner-provided source processed locally',
-    excerpt: String(item?.text || '').replace(/<[^>]+>/g, ' ').slice(0, 1200),
-    url: `/knowledge-vault?source=${encodeURIComponent(String(item?.id || 'local'))}`,
-    authority: 'learner-provided',
-    sourceType: 'uploaded-source',
-  })).filter((item) => item.excerpt.length > 20) : [];
+  const uploadedReferences = normalizeLearnerSources(body.sourceContext, language);
   if (question.length < 3 || question.length > 4000) return send(response, 400, { error: 'Question must be between 3 and 4000 characters.' });
 
   const conversationId = typeof body.conversationId === 'string' && /^[0-9a-f-]{36}$/i.test(body.conversationId) ? body.conversationId : null;

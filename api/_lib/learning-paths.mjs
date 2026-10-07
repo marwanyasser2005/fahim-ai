@@ -127,7 +127,7 @@ async function listPaths(admin, userId, pathId) {
   return {
     path: {
       ...publicCourse(course),
-      adaptivePlan: adaptPathSchedule(lessons, completedIds, course.metadata?.weeklyMinutes, profile.dueReviews),
+      adaptivePlan: adaptPathSchedule(lessons, completedIds, course.metadata?.weeklyMinutes, profile.dueReviews, profile.concepts),
       modules: Object.values((lessons || []).reduce((groups, lesson) => {
         const metadata = lesson.metadata && typeof lesson.metadata === 'object' ? lesson.metadata : {};
         const moduleIndex = boundedNumber(metadata.moduleIndex, 0, 20, 0);

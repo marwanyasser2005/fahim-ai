@@ -67,6 +67,37 @@ test('new browser context does not inherit an unfinished session', async ({ page
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBeTruthy();
 });
 
+test('learner caption excerpts reach the agent only after explicit handoff', async ({ page }) => {
+  await fixtures(page); await agentFixture(page);
+  const excerpt = { id: 'caption-file', title: 'Physics captions · 00:01', text: 'Net force equals mass multiplied by acceleration. At constant mass, doubling net force doubles acceleration.' };
+  await page.addInitScript(data => sessionStorage.setItem('fahim-vault-handoff', JSON.stringify([data])), excerpt);
+  await page.goto('/agent?vault=1&goal=ليه%20القوة%20بتغيّر%20التسارع');
+  await expect(page.getByText('المقاطع بس بتتبعت للـAI', { exact: false })).toBeVisible();
+  const request = page.waitForRequest(req => req.url().endsWith('/api/agent'));
+  await page.getByRole('button', { name: 'ابدأ جلسة موثّقة' }).click();
+  expect((await request).postDataJSON().sourceContext).toEqual([excerpt]);
+  await expect(page.getByRole('button', { name: /القوة المحصلة مقسومة/ })).toBeVisible();
+});
+
+test('caption file is indexed locally and its retrieved passage starts an agent session', async ({ page }) => {
+  await fixtures(page); await agentFixture(page);
+  await page.goto('/knowledge-vault');
+  const captions = '1\n00:00:01,000 --> 00:00:12,000\nNet force equals mass multiplied by acceleration. At constant mass, doubling net force doubles acceleration. A two kilogram object under six newtons accelerates at three metres per second squared.\n';
+  await page.locator('input[type=file]').setInputFiles({ name: 'physics.srt', mimeType: 'text/plain', buffer: Buffer.from(captions) });
+  await expect(page.getByText('physics.srt', { exact: true })).toBeVisible();
+  await page.getByPlaceholder('ما الفرق بين الانقسام المتساوي والمنصف؟').fill('net force acceleration');
+  await page.getByRole('button', { name: 'ابحث داخل مصادرك' }).click();
+  await page.getByRole('button', { name: 'ابدأ جلسة فهم بالمقاطع دي' }).click();
+  await expect(page.getByText('المقاطع بس بتتبعت للـAI', { exact: false })).toBeVisible();
+  const pending = page.waitForRequest(req => req.url().endsWith('/api/agent'));
+  await page.getByRole('button', { name: 'ابدأ جلسة موثّقة' }).click();
+  const excerpts = (await pending).postDataJSON().sourceContext;
+  expect(excerpts).toHaveLength(1);
+  expect(excerpts[0].title).toContain('physics.srt');
+  expect(excerpts[0].text).toContain('[Time 00:00:01');
+  expect(excerpts[0].text).toContain('Net force equals mass');
+});
+
 test('personal path uses saved progress, retries failures, replans and grades server-side', async ({ page }) => {
   await fixtures(page);
   const pathId = '00000000-0000-4000-8000-000000000003';
