@@ -226,6 +226,33 @@ async function fetchScholarlyWorks(searchSeed) {
 }
 
 const referenceCache = new Map();
+/** Crossref supplies deposited metadata/abstracts, not access to the full paper. */
+export function rankCrossrefWorks(works, searchSeed, limit = 1) {
+  const tokens = contentTokens(searchSeed);
+  const seen = new Set();
+  return (works || []).map(work => {
+    const title = cleanText(work.title?.[0]);
+    const excerpt = cleanText(work.abstract).slice(0, 1800);
+    const titleTokens = contentTokens(title);
+    const hits = tokens.filter(token => tokenMatches(titleTokens, token)).length;
+    const retracted = (work['update-to'] || []).some(update => /retract|withdraw/i.test(String(update.type || '')));
+    return { work, title, excerpt, hits, retracted };
+  }).filter(item => item.hits >= 2 && item.excerpt.length >= 80 && /^10\.\d{4,9}\//.test(String(item.work.DOI || '')) && !item.retracted)
+    .sort((a, b) => b.hits - a.hits)
+    .filter(item => { const key = item.work.DOI.toLowerCase(); if (seen.has(key)) return false; seen.add(key); return true; })
+    .slice(0, Math.max(0, Math.min(2, Number(limit) || 1)))
+    .map(item => ({ title: item.title, excerpt: item.excerpt, authority: 'scholarly-index', kind: 'scholarly-reference', description: 'Crossref · deposited abstract only; full-text access not checked', url: `https://doi.org/${encodeURIComponent(item.work.DOI)}`, verifiedAt: null }));
+}
+
+async function fetchCrossrefWorks(searchSeed) {
+  if (!searchSeed) return [];
+  const url = new URL('https://api.crossref.org/works');
+  url.search = new URLSearchParams({ 'query.bibliographic': searchSeed, rows: '5', filter: 'has-abstract:true', select: 'DOI,title,abstract,update-to' }).toString();
+  const response = await fetch(url, { headers: { Accept: 'application/json', 'User-Agent': 'FahimAI/4.4 (+https://fahim-ai-egypt.vercel.app) evidence-aware-tutor' }, signal: AbortSignal.timeout(4_000) });
+  if (!response.ok) return [];
+  return rankCrossrefWorks((await response.json())?.message?.items || [], searchSeed);
+}
+
 export async function topicalReferences(query, subject, language) {
   const host = language === 'ar' ? 'ar.wikipedia.org' : 'en.wikipedia.org';
   const cacheKey = `${language}:${String(subject).slice(0, 120)}:${String(query).slice(0, 700)}`;
@@ -234,10 +261,11 @@ export async function topicalReferences(query, subject, language) {
   try {
     const seeds = buildTopicalSearchSeeds(query, subject);
     const scholarlySeed = buildScholarlySearchSeed(query, subject);
-    const [wikiResults, scholarlyResult, englishPages] = await Promise.all([
+    const [wikiResults, scholarlyResult, englishPages, crossrefResult] = await Promise.all([
       Promise.allSettled(seeds.map((seed) => fetchWikipediaPages(host, seed, language))),
       fetchScholarlyWorks(scholarlySeed).catch(() => []),
       language === 'ar' && /[a-z]/i.test(scholarlySeed) ? fetchWikipediaPages('en.wikipedia.org', scholarlySeed, 'en').catch(() => []) : Promise.resolve([]),
+      fetchCrossrefWorks(scholarlySeed).catch(() => []),
     ]);
     const pages = wikiResults.flatMap((result) => result.status === 'fulfilled' ? result.value : []);
     const topical = rankTopicalPages(pages, { query, subject, limit: 2 }).map(({ key, ...source }) => ({
@@ -245,7 +273,9 @@ export async function topicalReferences(query, subject, language) {
       url: `https://${host}/wiki/${encodeURIComponent(key)}`,
     }));
     const englishSources = rankTopicalPages(englishPages, { query: scholarlySeed, subject: '', limit: 1 }).map(({ key, ...source }, index) => ({ ...source, citationId: `R${topical.length + index + 1}`, url: `https://en.wikipedia.org/wiki/${encodeURIComponent(key)}` }));
-    const sources = [...topical, ...englishSources, ...scholarlyResult];
+    const scholarlyTitles = new Set(scholarlyResult.map(source => normalizeSearchText(source.title)));
+    const crossrefSources = crossrefResult.filter(source => !scholarlyTitles.has(normalizeSearchText(source.title))).map((source, index) => ({ ...source, citationId: `S${scholarlyResult.length + index + 1}` }));
+    const sources = [...topical, ...englishSources, ...scholarlyResult, ...crossrefSources];
     // Cache successful retrieval only. This is process-local and never stores learner identity.
     if (sources.length) {
       if (referenceCache.size >= 100) referenceCache.delete(referenceCache.keys().next().value);
