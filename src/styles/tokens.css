@@ -61,7 +61,7 @@
   --font-display-ar: "Cairo", "Noto Kufi Arabic", Tahoma, sans-serif;
   --font-body-ar: "Cairo", Tahoma, sans-serif;
   --font-display-en: "Cairo", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
-  --font-body-en: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --font-body-en: "Cairo", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
   --radius-control: 8px;
   --radius-input: 10px;
   --radius-button: 1rem;

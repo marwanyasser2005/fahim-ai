@@ -15,7 +15,7 @@ const copy = {
     retry: 'أعد المحاولة',
     attempt: 'المحاولة',
     unavailable: 'لا يوجد تقييم منشور لهذا المسار بعد.',
-    needsSignIn: 'سجّل الدخول لتقديم التقييم. التصحيح والحفظ يتمّان على الخادم.',
+    needsSignIn: 'اختار إجاباتك، وفَهيم يصحّح ويحفظ النتيجة في جلستك المفتوحة. مش محتاج تسجيل دخول.',
     feedback: 'الشرح',
   },
   en: {
@@ -29,7 +29,7 @@ const copy = {
     retry: 'Try again',
     attempt: 'Attempt',
     unavailable: 'This path has no published assessment yet.',
-    needsSignIn: 'Sign in to submit. Grading and recording both happen on the server.',
+    needsSignIn: 'Choose your answers. Grading and saving use your open session; no sign-in is required.',
     feedback: 'Explanation',
   },
 } as const;

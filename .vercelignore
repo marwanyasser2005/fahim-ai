@@ -3,6 +3,10 @@
 /public/brand/explorations/
 /.bolt/
 /tests/
+/e2e/
+/test-results/
+/playwright-report/
+/playwright.config.mjs
 /docs/
 /design-system/
 /supabase/

@@ -174,7 +174,7 @@ export default function Navbar({
             <FahimBrand language={language} />
           </Link>
           <div className="ms-6 hidden items-center lg:flex">
-            {items.map((item) => (
+            {(appReady ? items.slice(0, 4) : items).map((item) => (
               <NavLink key={item.to} to={item.to} className={linkClass}>
                 {item.label}
               </NavLink>
@@ -319,7 +319,7 @@ export default function Navbar({
             )}
             <button
               type="button"
-              className="icon-button lg:hidden"
+              className={`icon-button ${appReady ? "" : "lg:hidden"}`}
               aria-expanded={open}
               aria-label={t.menu}
               onClick={() => setOpen((value) => !value)}
@@ -329,7 +329,7 @@ export default function Navbar({
           </div>
         </nav>
         {open && (
-          <div className="border-t border-[var(--border)] bg-[var(--paper)] px-4 py-4 lg:hidden">
+          <div className={`border-t border-[var(--border)] bg-[var(--paper)] px-4 py-4 ${appReady ? "" : "lg:hidden"}`}>
             <div className="mx-auto grid max-w-7xl gap-1 sm:grid-cols-2">
               {items.map((item) => (
                 <NavLink

@@ -814,6 +814,10 @@ export default function AiTutor({ language }: { language: Language }) {
           </div>
           <div className="chat-composer-dock">
             <div className="chat-composer-inner">
+              {!freshConversation && <div className="mb-3 flex flex-wrap gap-2">
+                <Link className="atlas-secondary min-h-11 text-xs" to={`/agent?goal=${encodeURIComponent((active.messages.filter((message) => message.role === "user").slice(-1)[0]?.text || "").slice(0, 700))}`}>{language === "ar" ? "جرّب فهمك في جلسة مع فَهيم" : "Check your understanding with Fahim"}</Link>
+                <Link className="atlas-secondary min-h-11 text-xs" to={`/personal-paths?goal=${encodeURIComponent((active.messages.filter((message) => message.role === "user").slice(-1)[0]?.text || "").slice(0, 700))}`}>{language === "ar" ? "حوّل هدفك لمسار تعلّم" : "Build a path for this goal"}</Link>
+              </div>}
               <div className="chat-mode-row" aria-label={language === "ar" ? "نمط المساعدة" : "Tutor mode"}>
                 {MODES.map((item) => (
                   <button

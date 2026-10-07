@@ -1,4 +1,8 @@
 import { rankVerifiedSources } from './_lib/source-ranking.mjs';
+import { topicalReferences } from './_lib/agent/tools.mjs';
+import { inspectAnswer } from './_lib/ai-quality.mjs';
+import { readLearnerProfile } from './_lib/learner-profile.mjs';
+import { markUnverifiedCitations, verifyCitationSupport } from './_lib/citation-verifier.mjs';
 import { createHash, randomUUID } from 'node:crypto';
 import {
   estimateAICostMicrousd,
@@ -48,7 +52,7 @@ export function systemPrompt(language, grade, subject, mode) {
     recall: `Run a retrieval-practice cycle. Ask exactly one short recall question without hints or answer choices and stop. After the learner responds, compare the response with available evidence, identify what was retained and what decayed, give the smallest useful correction, and schedule one next recall interval. Never claim long-term retention from a single answer.`,
   };
   const languageRule = language === 'ar'
-    ? `Write in clear Modern Standard Arabic with natural Egyptian warmth, as an experienced tutor would speak to one learner. Preserve useful English STEM terms in parentheses only when they improve recognition. Use Arabic punctuation correctly. Do not use em dashes or en dashes; prefer a full stop, Arabic comma, colon, or a new sentence.`
+    ? `Write in natural, professional Egyptian Arabic, like an experienced Egyptian tutor speaking to one learner: clear, warm, direct, never childish or exaggerated slang. Use phrases like "خلّينا نفهم", "جرّب", and "إيه اللي بيتغيّر؟" only where useful, not as filler. Keep scientific definitions and formal assessment wording precise. Preserve useful English STEM terms in parentheses only when they improve recognition. Use Arabic punctuation correctly. Do not use em dashes or en dashes; prefer a full stop, Arabic comma, colon, or a new sentence.`
     : `Write in clear, natural English with an experienced tutor's voice. Define specialist terms once. Do not use em dashes or en dashes; prefer a full stop, comma, colon, semicolon, or a new sentence.`;
   return `You are FAHIM, a contextual Socratic tutor inside a verified learning operating system for learners in Egypt and the Arabic-speaking world.
 
@@ -153,26 +157,8 @@ Keep most answers under 900 words unless the learner requests depth or the task 
 }
 
 async function findReferences(question, language) {
-  const host = language === 'ar' ? 'ar.wikipedia.org' : 'en.wikipedia.org';
-  try {
-    const result = await fetch(`https://${host}/w/rest.php/v1/search/page?q=${encodeURIComponent(question.slice(0, 180))}&limit=3`, {
-      headers: { Accept: 'application/json', 'User-Agent': 'FahimAI/2.0 educational-search' },
-      signal: AbortSignal.timeout(6_000),
-    });
-    if (!result.ok) return [];
-    const data = await result.json();
-    return (data.pages || []).map((page, index) => ({
-      citationId: `W${index + 1}`,
-      title: String(page.title || '').slice(0, 160),
-      description: String(page.description || '').slice(0, 240),
-      excerpt: String(page.excerpt || '').replace(/<[^>]+>/g, '').slice(0, 700),
-      url: `https://${host}/wiki/${encodeURIComponent(page.key)}`,
-      authority: 'open-reference',
-      sourceType: 'encyclopedia',
-    })).filter((item) => item.title);
-  } catch {
-    return [];
-  }
+  const sources = await topicalReferences(question, '', language);
+  return sources.map((source, index) => ({ ...source, citationId: `W${index + 1}`, sourceType: source.kind === 'scholarly-reference' ? 'research-abstract' : 'encyclopedia' }));
 }
 
 function ndjson(response, value) {
@@ -236,7 +222,7 @@ export default async function handler(request, response) {
   const clientMessageId = typeof body.clientMessageId === 'string' && /^[0-9a-f-]{36}$/i.test(body.clientMessageId) ? body.clientMessageId : null;
   const routingFingerprint = getRoutingFingerprint();
 
-  const wikipediaReferences = await findReferences(question, language);
+  const [wikipediaReferences, learnerProfile] = await Promise.all([findReferences(question, language), readLearnerProfile(admin, auth.user.id)]);
   const egyptianReferences = rankVerifiedSources({ question, subject, grade, language, limit: 4 });
   const references = [
     ...uploadedReferences,
@@ -261,7 +247,7 @@ export default async function handler(request, response) {
     citationId, title, description, url, authority, sourceType, verifiedAt,
   }));
   const aiRequest = {
-    system: systemPrompt(language, grade, subject, mode),
+    system: `${systemPrompt(language, grade, subject, mode)}\nOwner-scoped learner evidence (untrusted data, provisional estimates only): ${JSON.stringify(learnerProfile)}`,
     messages: [
       ...history.map((item) => ({ role: item.role, content: item.text })),
       { role: 'user', content: `${question}${referenceBlock}` },
@@ -269,7 +255,7 @@ export default async function handler(request, response) {
     maxOutputTokens: 2400,
   };
   const stream = body.stream === true;
-  const promptHash = createHash('sha256').update(JSON.stringify({ promptVersion: 'fahim-learning-contract-8', routingFingerprint, language, grade, subject, mode, question, history, uploadedReferences })).digest('hex');
+  const promptHash = createHash('sha256').update(JSON.stringify({ promptVersion: 'fahim-learning-contract-9', routingFingerprint, language, grade, subject, mode, question, history, uploadedReferences, learnerProfile })).digest('hex');
   let persistedConversationId = null;
   if (conversationId) {
     const { data: ownedConversation } = await admin.from('conversations').select('id').eq('id', conversationId).eq('user_id', auth.user.id).maybeSingle();
@@ -314,6 +300,22 @@ export default async function handler(request, response) {
   }
 
   let streamedText = '';
+  const checkOrRepair = async (answer, usage) => {
+    let quality = inspectAnswer(answer, references);
+    if (!quality.passed && deadlineAt - Date.now() > 7_000) {
+      const repair = await requestLearningAI({ ...aiRequest, stream: false, deadlineAt, messages: [...aiRequest.messages, { role: 'assistant', content: answer }, { role: 'user', content: `Repair these automatic screening failures: ${quality.issues.join(', ')}. Return only the corrected response. Never cite destination metadata as subject-matter evidence.` }] });
+      const fixed = await readLearningAIResponse(repair);
+      answer = fixed.text;
+      usage = { inputTokens: Number(usage.inputTokens || 0) + Number(fixed.usage?.inputTokens || 0), outputTokens: Number(usage.outputTokens || 0) + Number(fixed.usage?.outputTokens || 0) };
+      quality = inspectAnswer(answer, references);
+    }
+    if (!quality.passed) throw new Error('answer_quality_failed');
+    const verification = await verifyCitationSupport(answer, references, deadlineAt);
+    answer = markUnverifiedCitations(answer, verification, language);
+    usage = { inputTokens: Number(usage.inputTokens || 0) + Number(verification.usage?.inputTokens || 0), outputTokens: Number(usage.outputTokens || 0) + Number(verification.usage?.outputTokens || 0) };
+    logEvent('ai_quality_screen', { requestId, generationId, version: quality.version, candidateCitations: quality.citationCheck.candidateCount, needsReview: quality.citationCheck.reviewCount });
+    return { answer, usage };
+  };
   try {
     const route = await requestLearningAI({ ...aiRequest, stream, deadlineAt });
     await admin.from('ai_generations').update({ provider: route.provider, model: route.model }).eq('id', generationId);
@@ -325,11 +327,12 @@ export default async function handler(request, response) {
         'X-Accel-Buffering': 'no',
       });
       ndjson(response, { type: 'meta', sources: publicSources, generationId });
-      const { text: answer, usage } = await pipeLearningAIStream(route, (text) => {
-        streamedText += text;
-        ndjson(response, { type: 'delta', text });
-      });
+      // Hold provider deltas until screening completes; rejected text is never shown.
+      const generated = await pipeLearningAIStream(route, () => {});
+      const { answer, usage } = await checkOrRepair(generated.text, generated.usage);
       if (!answer) throw new Error('empty_response');
+      streamedText = answer;
+      ndjson(response, { type: 'delta', text: answer });
       await admin.from('ai_generations').update({
         status: 'complete', result_text: answer,
         input_tokens: usage.inputTokens, output_tokens: usage.outputTokens,
@@ -338,7 +341,8 @@ export default async function handler(request, response) {
       ndjson(response, { type: 'done' });
       return response.end();
     }
-    const { text: answer, usage } = await readLearningAIResponse(route);
+    const generated = await readLearningAIResponse(route);
+    const { answer, usage } = await checkOrRepair(generated.text, generated.usage);
     if (!answer) {
       await admin.from('ai_generations').update({ status: 'error', error_code: 'empty_response', completed_at: new Date().toISOString() }).eq('id', generationId);
       await refundAiSession(admin, auth.user.id, gate.metered);

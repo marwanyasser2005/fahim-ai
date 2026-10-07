@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import type { Language } from '@/App';
 import { useAuth } from '@/contexts/AuthContext';
+import LearningContinuity from '@/components/learning/LearningContinuity';
 import LearningEvidencePanel from '@/components/learning/LearningEvidencePanel';
 import MisconceptionMap from '@/components/learning/MisconceptionMap';
 import BadgeTrail from '@/components/badges/BadgeTrail';
@@ -33,8 +34,8 @@ type Props = { language: Language };
 
 const copy = {
   ar: {
-    kicker: 'مساحة التعلّم الشخصية', welcome: 'أهلًا', title: 'ماذا يحتاج فهمك الآن؟',
-    subtitle: 'قرار واحد في الأعلى: راجع ما استحق، أو أكمل حلقة فهم، أو ابدأ خط أساس جديد.',
+    kicker: 'مساحة التعلّم الشخصية', welcome: 'أهلًا', title: 'إيه الخطوة اللي تفرق معاك النهارده؟',
+    subtitle: 'كمّل من آخر خطوة، راجع اللي محتاج مراجعة، أو جرّب فهمك في فكرة جديدة.',
     startAssessment: 'ابدأ تقييمًا تشخيصيًا', continueAssessment: 'أكمل حلقة الفهم', askFahim: 'اسأل فَهيم عن مفهوم', agentCta: 'ابدأ مع الوكيل المعلّم',
     reviewToday: 'مراجعتك اليوم', reviewCount: 'بطاقة مستحقة الآن', reviewBody: 'حان موعد استرجاع هذه المفاهيم من الذاكرة قبل موعد النسيان.', startReview: 'ابدأ المراجعة',
     nextTitle: 'الخطوة التالية المقترحة', nextNewTitle: 'ابدأ بخط أساس قصير',
@@ -210,7 +211,8 @@ export default function Dashboard({ language }: Props) {
 
         <div className="learning-intelligence-grid">
           <MisconceptionMap sessions={sessions} language={language} />
-          <LearningEvidencePanel session={latest} language={language} />
+          <LearningContinuity language={language} />
+              <LearningEvidencePanel session={latest} language={language} />
         </div>
 
         <section className="learning-panel recent-learning" aria-labelledby="recent-title">

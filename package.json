@@ -11,12 +11,15 @@
     "preview": "vite preview",
     "brand:render": "node scripts/render-brand-assets.mjs",
     "evaluation:check": "node scripts/evaluate-learning-guards.mjs",
+    "ai:benchmark": "node scripts/ai-benchmark.mjs",
+    "ai:benchmark:live": "node --env-file=.env.local scripts/ai-live-benchmark.mjs",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "load:test": "node scripts/load-test.mjs",
     "smoke:production": "node scripts/production-smoke.mjs",
     "security:check": "node scripts/security-check.mjs",
     "audit:production": "npm audit --omit=dev --audit-level=high",
-    "check": "npm run brand:render && npm run evaluation:check && tsc -p tsconfig.app.json --noEmit && npm run lint && npm run test && npm run build && npm run security:check"
+    "check": "npm run brand:render && npm run evaluation:check && npm run ai:benchmark && tsc -p tsconfig.app.json --noEmit && npm run lint && npm run test && npm run build && npm run security:check"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -50,6 +53,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
+    "@playwright/test": "^1.63.0",
     "@resvg/resvg-js": "^2.6.2",
     "@types/qrcode": "^1.5.5",
     "@types/react": "^18.3.5",

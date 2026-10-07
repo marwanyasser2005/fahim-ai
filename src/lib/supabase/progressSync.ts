@@ -43,17 +43,17 @@ export async function recordLessonCompletion(input: LessonCompletionInput) {
 }
 
 /** Loads the lessons the learner has already completed for a course, from the database. */
-export async function loadCompletedLessons(courseId: string): Promise<string[]> {
-  if (!supabase) return [];
+export async function loadCompletedLessons(courseId: string, options: { strict?: boolean } = {}): Promise<string[]> {
+  if (!supabase) { if (options.strict) throw new Error('Progress storage is unavailable.'); return []; }
   const fresh = await getFreshSession();
   const session = fresh.session;
-  if (!session) return [];
+  if (!session) { if (options.strict) throw new Error('Your open session needs to reconnect.'); return []; }
   const { data, error } = await supabase
     .from('progress')
     .select('lesson_id, status, completion_percentage')
     .eq('user_id', session.user.id)
     .eq('course_id', courseId);
-  if (error || !data) return [];
+  if (error || !data) { if (options.strict) throw new Error('Saved progress could not be loaded.'); return []; }
   return data
     .filter((row) => row.status === 'completed' || Number(row.completion_percentage) === 100)
     .map((row) => row.lesson_id as string)

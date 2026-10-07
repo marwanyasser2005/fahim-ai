@@ -238,6 +238,8 @@ export async function runAgentTurn({
       lastCorrect: typeof priorState?.lastCorrect === 'boolean' ? priorState.lastCorrect : null,
       lastMisconceptionEvidence: priorState?.lastMisconceptionEvidence || '',
       lastExplanation: priorState?.lastExplanation || '',
+      intervention: priorState?.intervention || null,
+      answerQuality: priorState?.answerQuality || null,
       reasoningScore: Number(priorState?.reasoningScore) || 0,
       reasoningGap: priorState?.reasoningGap || '',
       remediationCount: Number(priorState?.remediationCount) || 0,
@@ -326,6 +328,8 @@ export async function runAgentTurn({
     lastCorrect: ctx.state.lastCorrect,
     lastMisconceptionEvidence: ctx.state.lastMisconceptionEvidence || '',
     lastExplanation: ctx.state.lastExplanation || '',
+    intervention: ctx.state.intervention || null,
+    answerQuality: ctx.state.answerQuality || null,
     reasoningScore: ctx.state.reasoningScore || 0,
     reasoningGap: ctx.state.reasoningGap || '',
     remediationCount: ctx.state.remediationCount || 0,
@@ -360,6 +364,10 @@ export async function runAgentTurn({
       conceptLabel,
       sources: ctx.state.sources,
       misconception: ctx.state.misconception || null,
+      explanation: ctx.state.lastExplanation || '',
+      review: ctx.state.reviewCard || null,
+      intervention: ctx.state.intervention || null,
+      answerQuality: ctx.state.answerQuality || null,
     },
   };
   emit({ type: 'result', result: { ...result, steps: undefined, checkpoint: undefined } });

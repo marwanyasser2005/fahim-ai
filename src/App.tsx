@@ -47,6 +47,7 @@ const TrustCenter = lazy(() => import('@/pages/TrustCenter'));
 const PersonalPathBuilder = lazy(() => import('@/pages/PersonalPathBuilder'));
 const PersonalPathDetail = lazy(() => import('@/pages/PersonalPathDetail'));
 const AgentStudio = lazy(() => import('@/pages/AgentStudio'));
+const AIQuality = lazy(() => import('@/pages/AIQuality'));
 
 export default function App() {
   const [language, setLanguage] = useState<Language>(() => localStorage.getItem('fahim-language') === 'en' ? 'en' : 'ar');
@@ -87,7 +88,7 @@ export default function App() {
 function AppShell({ language, setLanguage, theme, setTheme, lowBandwidth, setLowBandwidth }: { language: Language; setLanguage: (language: Language) => void; theme: Theme; setTheme: (theme: Theme) => void; lowBandwidth: boolean; setLowBandwidth: (value: boolean) => void }) {
   const location = useLocation();
   const { user } = useAuth();
-  const product = Boolean(user && /^\/(dashboard|workspace|ask-fahim|agent|review|passport|knowledge-vault|library|teacher|admin|profile|support|quiz-lab|learning|course\/|personal-paths|personal-path\/|certificates|videos|studio|generation\/)/.test(location.pathname));
+  const product = Boolean(user && /^\/(dashboard|workspace|ask-fahim|agent|ai-quality|review|passport|knowledge-vault|library|teacher|admin|profile|support|quiz-lab|learning|course\/|personal-paths|personal-path\/|certificates|videos|studio|generation\/)/.test(location.pathname));
   const showcaseMode = location.pathname === '/showcase';
   const immersive = location.pathname === '/ask-fahim' || showcaseMode;
   useEffect(() => { if (!immersive) window.scrollTo({ top: 0, behavior: 'auto' }); }, [immersive, location.pathname]);
@@ -108,6 +109,7 @@ function AppShell({ language, setLanguage, theme, setTheme, lowBandwidth, setLow
               <Route path="/about" element={<About language={language} />} />
               <Route path="/showcase" element={<Showcase language={language} setLanguage={setLanguage} theme={theme} setTheme={setTheme} />} />
               <Route path="/evidence" element={<EvidenceRoom language={language} />} />
+              <Route path="/ai-quality" element={<AIQuality language={language} />} />
               <Route path="/demo" element={<Navigate to="/showcase" replace />} />
               <Route path="/verify/:certificateId" element={<CertificateVerify language={language} />} />
               <Route path="/certificates" element={<ProtectedRoute><CertificateCenter language={language} /></ProtectedRoute>} />

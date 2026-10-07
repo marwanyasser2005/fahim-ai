@@ -1,0 +1,1156 @@
+{
+  "version": "fahim-quality-1",
+  "generatedAt": "2026-10-07T08:36:17.566Z",
+  "mode": "synthetic-contract-screening",
+  "total": 120,
+  "passed": 120,
+  "providerCalls": 0,
+  "humanParticipants": 0,
+  "limitations": [
+    "Does not measure scientific correctness, live model performance, learning gains, cost savings, or semantic entailment.",
+    "Six subjects, two languages, ten structural/citation variants; not 120 independently authored questions.",
+    "Source URLs are synthetic fixtures and were not fetched."
+  ],
+  "unmeasuredRubric": [
+    "scientific-accuracy",
+    "diagnosis",
+    "level-fit",
+    "question-quality",
+    "citation-support",
+    "groundedness",
+    "guessing-awareness",
+    "calibrated-confidence",
+    "language",
+    "application"
+  ],
+  "results": [
+    {
+      "id": "physics-ar-valid-explanation",
+      "subject": "physics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "physics-ar-invented-reference",
+      "subject": "physics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "invented-citation"
+      ]
+    },
+    {
+      "id": "physics-ar-portal-is-not-evidence",
+      "subject": "physics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "metadata-as-evidence"
+      ]
+    },
+    {
+      "id": "physics-ar-placeholder",
+      "subject": "physics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "placeholder"
+      ]
+    },
+    {
+      "id": "physics-ar-empty",
+      "subject": "physics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "too-short"
+      ]
+    },
+    {
+      "id": "physics-ar-short",
+      "subject": "physics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "too-short"
+      ]
+    },
+    {
+      "id": "physics-ar-duplicate-paragraph",
+      "subject": "physics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "repeated-paragraph"
+      ]
+    },
+    {
+      "id": "physics-ar-real-excerpt-citation",
+      "subject": "physics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "physics-ar-unsafe-reference-url",
+      "subject": "physics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "invented-citation"
+      ]
+    },
+    {
+      "id": "physics-ar-local-upload-citation",
+      "subject": "physics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "physics-en-valid-explanation",
+      "subject": "physics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "physics-en-invented-reference",
+      "subject": "physics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "invented-citation"
+      ]
+    },
+    {
+      "id": "physics-en-portal-is-not-evidence",
+      "subject": "physics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "metadata-as-evidence"
+      ]
+    },
+    {
+      "id": "physics-en-placeholder",
+      "subject": "physics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "placeholder"
+      ]
+    },
+    {
+      "id": "physics-en-empty",
+      "subject": "physics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "too-short"
+      ]
+    },
+    {
+      "id": "physics-en-short",
+      "subject": "physics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "too-short"
+      ]
+    },
+    {
+      "id": "physics-en-duplicate-paragraph",
+      "subject": "physics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "repeated-paragraph"
+      ]
+    },
+    {
+      "id": "physics-en-real-excerpt-citation",
+      "subject": "physics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "physics-en-unsafe-reference-url",
+      "subject": "physics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "invented-citation"
+      ]
+    },
+    {
+      "id": "physics-en-local-upload-citation",
+      "subject": "physics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "mathematics-ar-valid-explanation",
+      "subject": "mathematics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "mathematics-ar-invented-reference",
+      "subject": "mathematics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "invented-citation"
+      ]
+    },
+    {
+      "id": "mathematics-ar-portal-is-not-evidence",
+      "subject": "mathematics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "metadata-as-evidence"
+      ]
+    },
+    {
+      "id": "mathematics-ar-placeholder",
+      "subject": "mathematics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "placeholder"
+      ]
+    },
+    {
+      "id": "mathematics-ar-empty",
+      "subject": "mathematics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "too-short"
+      ]
+    },
+    {
+      "id": "mathematics-ar-short",
+      "subject": "mathematics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "too-short"
+      ]
+    },
+    {
+      "id": "mathematics-ar-duplicate-paragraph",
+      "subject": "mathematics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "repeated-paragraph"
+      ]
+    },
+    {
+      "id": "mathematics-ar-real-excerpt-citation",
+      "subject": "mathematics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "mathematics-ar-unsafe-reference-url",
+      "subject": "mathematics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "invented-citation"
+      ]
+    },
+    {
+      "id": "mathematics-ar-local-upload-citation",
+      "subject": "mathematics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "mathematics-en-valid-explanation",
+      "subject": "mathematics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "mathematics-en-invented-reference",
+      "subject": "mathematics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "invented-citation"
+      ]
+    },
+    {
+      "id": "mathematics-en-portal-is-not-evidence",
+      "subject": "mathematics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "metadata-as-evidence"
+      ]
+    },
+    {
+      "id": "mathematics-en-placeholder",
+      "subject": "mathematics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "placeholder"
+      ]
+    },
+    {
+      "id": "mathematics-en-empty",
+      "subject": "mathematics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "too-short"
+      ]
+    },
+    {
+      "id": "mathematics-en-short",
+      "subject": "mathematics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "too-short"
+      ]
+    },
+    {
+      "id": "mathematics-en-duplicate-paragraph",
+      "subject": "mathematics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "repeated-paragraph"
+      ]
+    },
+    {
+      "id": "mathematics-en-real-excerpt-citation",
+      "subject": "mathematics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "mathematics-en-unsafe-reference-url",
+      "subject": "mathematics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "invented-citation"
+      ]
+    },
+    {
+      "id": "mathematics-en-local-upload-citation",
+      "subject": "mathematics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "biology-ar-valid-explanation",
+      "subject": "biology",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "biology-ar-invented-reference",
+      "subject": "biology",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "invented-citation"
+      ]
+    },
+    {
+      "id": "biology-ar-portal-is-not-evidence",
+      "subject": "biology",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "metadata-as-evidence"
+      ]
+    },
+    {
+      "id": "biology-ar-placeholder",
+      "subject": "biology",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "placeholder"
+      ]
+    },
+    {
+      "id": "biology-ar-empty",
+      "subject": "biology",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "too-short"
+      ]
+    },
+    {
+      "id": "biology-ar-short",
+      "subject": "biology",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "too-short"
+      ]
+    },
+    {
+      "id": "biology-ar-duplicate-paragraph",
+      "subject": "biology",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "repeated-paragraph"
+      ]
+    },
+    {
+      "id": "biology-ar-real-excerpt-citation",
+      "subject": "biology",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "biology-ar-unsafe-reference-url",
+      "subject": "biology",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "invented-citation"
+      ]
+    },
+    {
+      "id": "biology-ar-local-upload-citation",
+      "subject": "biology",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "biology-en-valid-explanation",
+      "subject": "biology",
+      "language": "en",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "biology-en-invented-reference",
+      "subject": "biology",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "invented-citation"
+      ]
+    },
+    {
+      "id": "biology-en-portal-is-not-evidence",
+      "subject": "biology",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "metadata-as-evidence"
+      ]
+    },
+    {
+      "id": "biology-en-placeholder",
+      "subject": "biology",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "placeholder"
+      ]
+    },
+    {
+      "id": "biology-en-empty",
+      "subject": "biology",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "too-short"
+      ]
+    },
+    {
+      "id": "biology-en-short",
+      "subject": "biology",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "too-short"
+      ]
+    },
+    {
+      "id": "biology-en-duplicate-paragraph",
+      "subject": "biology",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "repeated-paragraph"
+      ]
+    },
+    {
+      "id": "biology-en-real-excerpt-citation",
+      "subject": "biology",
+      "language": "en",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "biology-en-unsafe-reference-url",
+      "subject": "biology",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "invented-citation"
+      ]
+    },
+    {
+      "id": "biology-en-local-upload-citation",
+      "subject": "biology",
+      "language": "en",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "programming-ar-valid-explanation",
+      "subject": "programming",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "programming-ar-invented-reference",
+      "subject": "programming",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "invented-citation"
+      ]
+    },
+    {
+      "id": "programming-ar-portal-is-not-evidence",
+      "subject": "programming",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "metadata-as-evidence"
+      ]
+    },
+    {
+      "id": "programming-ar-placeholder",
+      "subject": "programming",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "placeholder"
+      ]
+    },
+    {
+      "id": "programming-ar-empty",
+      "subject": "programming",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "too-short"
+      ]
+    },
+    {
+      "id": "programming-ar-short",
+      "subject": "programming",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "too-short"
+      ]
+    },
+    {
+      "id": "programming-ar-duplicate-paragraph",
+      "subject": "programming",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "repeated-paragraph"
+      ]
+    },
+    {
+      "id": "programming-ar-real-excerpt-citation",
+      "subject": "programming",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "programming-ar-unsafe-reference-url",
+      "subject": "programming",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "invented-citation"
+      ]
+    },
+    {
+      "id": "programming-ar-local-upload-citation",
+      "subject": "programming",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "programming-en-valid-explanation",
+      "subject": "programming",
+      "language": "en",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "programming-en-invented-reference",
+      "subject": "programming",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "invented-citation"
+      ]
+    },
+    {
+      "id": "programming-en-portal-is-not-evidence",
+      "subject": "programming",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "metadata-as-evidence"
+      ]
+    },
+    {
+      "id": "programming-en-placeholder",
+      "subject": "programming",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "placeholder"
+      ]
+    },
+    {
+      "id": "programming-en-empty",
+      "subject": "programming",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "too-short"
+      ]
+    },
+    {
+      "id": "programming-en-short",
+      "subject": "programming",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "too-short"
+      ]
+    },
+    {
+      "id": "programming-en-duplicate-paragraph",
+      "subject": "programming",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "repeated-paragraph"
+      ]
+    },
+    {
+      "id": "programming-en-real-excerpt-citation",
+      "subject": "programming",
+      "language": "en",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "programming-en-unsafe-reference-url",
+      "subject": "programming",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "invented-citation"
+      ]
+    },
+    {
+      "id": "programming-en-local-upload-citation",
+      "subject": "programming",
+      "language": "en",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "statistics-ar-valid-explanation",
+      "subject": "statistics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "statistics-ar-invented-reference",
+      "subject": "statistics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "invented-citation"
+      ]
+    },
+    {
+      "id": "statistics-ar-portal-is-not-evidence",
+      "subject": "statistics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "metadata-as-evidence"
+      ]
+    },
+    {
+      "id": "statistics-ar-placeholder",
+      "subject": "statistics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "placeholder"
+      ]
+    },
+    {
+      "id": "statistics-ar-empty",
+      "subject": "statistics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "too-short"
+      ]
+    },
+    {
+      "id": "statistics-ar-short",
+      "subject": "statistics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "too-short"
+      ]
+    },
+    {
+      "id": "statistics-ar-duplicate-paragraph",
+      "subject": "statistics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "repeated-paragraph"
+      ]
+    },
+    {
+      "id": "statistics-ar-real-excerpt-citation",
+      "subject": "statistics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "statistics-ar-unsafe-reference-url",
+      "subject": "statistics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "invented-citation"
+      ]
+    },
+    {
+      "id": "statistics-ar-local-upload-citation",
+      "subject": "statistics",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "statistics-en-valid-explanation",
+      "subject": "statistics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "statistics-en-invented-reference",
+      "subject": "statistics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "invented-citation"
+      ]
+    },
+    {
+      "id": "statistics-en-portal-is-not-evidence",
+      "subject": "statistics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "metadata-as-evidence"
+      ]
+    },
+    {
+      "id": "statistics-en-placeholder",
+      "subject": "statistics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "placeholder"
+      ]
+    },
+    {
+      "id": "statistics-en-empty",
+      "subject": "statistics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "too-short"
+      ]
+    },
+    {
+      "id": "statistics-en-short",
+      "subject": "statistics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "too-short"
+      ]
+    },
+    {
+      "id": "statistics-en-duplicate-paragraph",
+      "subject": "statistics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "repeated-paragraph"
+      ]
+    },
+    {
+      "id": "statistics-en-real-excerpt-citation",
+      "subject": "statistics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "statistics-en-unsafe-reference-url",
+      "subject": "statistics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "invented-citation"
+      ]
+    },
+    {
+      "id": "statistics-en-local-upload-citation",
+      "subject": "statistics",
+      "language": "en",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "entrepreneurship-ar-valid-explanation",
+      "subject": "entrepreneurship",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "entrepreneurship-ar-invented-reference",
+      "subject": "entrepreneurship",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "invented-citation"
+      ]
+    },
+    {
+      "id": "entrepreneurship-ar-portal-is-not-evidence",
+      "subject": "entrepreneurship",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "metadata-as-evidence"
+      ]
+    },
+    {
+      "id": "entrepreneurship-ar-placeholder",
+      "subject": "entrepreneurship",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "placeholder"
+      ]
+    },
+    {
+      "id": "entrepreneurship-ar-empty",
+      "subject": "entrepreneurship",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "too-short"
+      ]
+    },
+    {
+      "id": "entrepreneurship-ar-short",
+      "subject": "entrepreneurship",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "too-short"
+      ]
+    },
+    {
+      "id": "entrepreneurship-ar-duplicate-paragraph",
+      "subject": "entrepreneurship",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "repeated-paragraph"
+      ]
+    },
+    {
+      "id": "entrepreneurship-ar-real-excerpt-citation",
+      "subject": "entrepreneurship",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "entrepreneurship-ar-unsafe-reference-url",
+      "subject": "entrepreneurship",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "invented-citation"
+      ]
+    },
+    {
+      "id": "entrepreneurship-ar-local-upload-citation",
+      "subject": "entrepreneurship",
+      "language": "ar",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "entrepreneurship-en-valid-explanation",
+      "subject": "entrepreneurship",
+      "language": "en",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "entrepreneurship-en-invented-reference",
+      "subject": "entrepreneurship",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "invented-citation"
+      ]
+    },
+    {
+      "id": "entrepreneurship-en-portal-is-not-evidence",
+      "subject": "entrepreneurship",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "metadata-as-evidence"
+      ]
+    },
+    {
+      "id": "entrepreneurship-en-placeholder",
+      "subject": "entrepreneurship",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "placeholder"
+      ]
+    },
+    {
+      "id": "entrepreneurship-en-empty",
+      "subject": "entrepreneurship",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "too-short"
+      ]
+    },
+    {
+      "id": "entrepreneurship-en-short",
+      "subject": "entrepreneurship",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "too-short"
+      ]
+    },
+    {
+      "id": "entrepreneurship-en-duplicate-paragraph",
+      "subject": "entrepreneurship",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "repeated-paragraph"
+      ]
+    },
+    {
+      "id": "entrepreneurship-en-real-excerpt-citation",
+      "subject": "entrepreneurship",
+      "language": "en",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    },
+    {
+      "id": "entrepreneurship-en-unsafe-reference-url",
+      "subject": "entrepreneurship",
+      "language": "en",
+      "passed": true,
+      "expectedPass": false,
+      "issues": [
+        "invented-citation"
+      ]
+    },
+    {
+      "id": "entrepreneurship-en-local-upload-citation",
+      "subject": "entrepreneurship",
+      "language": "en",
+      "passed": true,
+      "expectedPass": true,
+      "issues": []
+    }
+  ]
+}

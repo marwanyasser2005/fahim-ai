@@ -28,6 +28,11 @@ export type PersonalizedPath = {
   durationWeeks: number;
   weeklyMinutes: number;
   createdAt: string;
+  version?: number;
+  versionHistory?: { version: number; weeklyMinutes: number; changedAt: string; reason: string }[];
+  adaptivePlan?: { nextLessonId: string | null; remainingLessons: number; estimatedWeeksRemaining: number; reviewMinutesPerWeek: number; reason: string };
+  sources?: { citationId: string; title: string; url: string; excerpt?: string }[];
+  workflow?: { phases: string[]; totalMinutes: number; blueprint?: { measurableGoal?: string; prerequisites?: string[]; assumptions?: string[] } };
   lessonCount?: number;
   moduleCount?: number;
   modules?: PersonalizedModule[];
@@ -68,4 +73,9 @@ export async function generatePersonalizedPath(input: PathGenerationInput): Prom
   });
   const payload = await responseJson<{ path: PersonalizedPath }>(response);
   return payload.path;
+}
+
+export async function replanPersonalizedPath(path: PersonalizedPath, weeklyMinutes: number): Promise<PersonalizedPath> {
+  const response = await authenticatedFetch('/api/learning-paths', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'replan', pathId: path.id, weeklyMinutes, expectedVersion: path.version || 1 }) });
+  return (await responseJson<{ path: PersonalizedPath }>(response)).path;
 }

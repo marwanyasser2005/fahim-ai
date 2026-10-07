@@ -6,6 +6,8 @@ export interface AgentState {
   conceptKey: string;
   sources?: AgentSource[] | null;
   misconception?: { category: string; label: string } | null;
+  explanation?: string;
+  review?: { due?: string; nextReviewAt?: string; intervalDays?: number } | null;
 }
 export interface AgentLearnerInput { answerIndex?: number; text?: string; reasoning?: string; }
 
@@ -27,7 +29,7 @@ export interface AgentResult {
   awaiting: boolean;
   prompt: string | null;
   expects: 'choice' | 'text' | null;
-  item: { skill?: string; difficulty?: 'easy' | 'medium' | 'hard' } | null;
+  item: { question?: string; options?: string[]; skill?: string; difficulty?: 'easy' | 'medium' | 'hard' } | null;
   summary: string | null;
   mastery: number;
   masteryLabel: string;

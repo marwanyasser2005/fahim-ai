@@ -204,7 +204,9 @@
   text-rendering: auto;
   font-kerning: normal;
 }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-height, 4.75rem) + 1.5rem); }
+button, input, textarea, select, [tabindex] { scroll-margin-block: calc(var(--nav-height, 4.75rem) + 1rem) 1.5rem; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 /* Dark-mode shadow uplift for the evidence-room hero is token-owned; this
    block is intentionally a no-op so index.css no longer re-declares the
    palette. */

@@ -16,7 +16,7 @@ const validPlan = {
     title: local(`Module ${module + 1}`),
     lessons: [0, 1].map((lesson) => ({ title: local(`Lesson ${lesson + 1}`), summary: local('Summary'), practice: local('Practice'), type: lesson ? 'practice' : 'concept', durationMinutes: 25 })),
   })),
-  assessment: [0, 1, 2, 3, 4].map((index) => ({ prompt: local(`Question ${index + 1}`), choices: { ar: ['A', 'B', 'C', 'D'], en: ['A', 'B', 'C', 'D'] }, correctIndex: 1, explanation: local('Because evidence') })),
+  assessment: [0, 1, 2, 3, 4].map((index) => ({ prompt: local(`Question ${index + 1}`), choices: { ar: ['المتوسط الحسابي', 'الوسيط', 'المنوال', 'المدى'], en: ['Arithmetic mean', 'Median', 'Mode', 'Range'] }, correctIndex: 1, explanation: local('Because evidence') })),
 };
 
 describe('personalized learning-path agent', () => {
@@ -49,7 +49,7 @@ describe('personalized learning-path agent', () => {
   });
 
   it('merges server progress and exposes evidence-backed assessment and exports', () => {
-    expect(detail).toContain('loadCompletedLessons(id)');
+    expect(detail).toContain('loadCompletedLessons(id, { strict: true })');
     expect(detail).toContain('recordLessonCompletion');
     expect(detail).toContain('<CourseAssessment');
     expect(certificate).toContain('Download evidence JSON');

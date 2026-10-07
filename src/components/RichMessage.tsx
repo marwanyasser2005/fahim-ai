@@ -1,20 +1,14 @@
-import { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
+import { lazy, Suspense, useState } from 'react';
+import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
 import { Check, Copy, ExternalLink, Quote } from 'lucide-react';
 import { polishGeneratedText } from '@/lib/editorialText';
-import 'katex/dist/katex.min.css';
+const MathMarkdown = lazy(() => import('@/components/MathMarkdown'));
 
 export default function RichMessage({ text, language }: { text: string; language?: 'ar' | 'en' }) {
   const polished = polishGeneratedText(text);
   const resolvedLanguage = language || (/[؀-ۿ]/.test(polished) ? 'ar' : 'en');
-  return <div className="prose-fahim" lang={resolvedLanguage} dir={resolvedLanguage === 'ar' ? 'rtl' : 'ltr'}>
-    <ReactMarkdown
-      remarkPlugins={[remarkGfm, remarkMath]}
-      rehypePlugins={[rehypeKatex]}
-      components={{
+  const components: Components = {
         a: ({ children, href }) => <a href={href} target="_blank" rel="noreferrer">{children}<ExternalLink aria-hidden="true" /></a>,
         blockquote: ({ children }) => <blockquote><Quote aria-hidden="true" /> <div>{children}</div></blockquote>,
         code: ({ children, className, ...props }) => {
@@ -23,8 +17,11 @@ export default function RichMessage({ text, language }: { text: string; language
         },
         table: ({ children }) => <div className="table-scroll" tabIndex={0} role="region" aria-label={resolvedLanguage === 'ar' ? 'جدول قابل للتمرير' : 'Scrollable table'}><table>{children}</table></div>,
         hr: () => null,
-      }}
-    >{polished}</ReactMarkdown>
+      };
+  const basic = <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>{polished}</ReactMarkdown>;
+  const hasMath = /\$[^$\n]+\$|\$\$[\s\S]+?\$\$/.test(polished);
+  return <div className="prose-fahim" lang={resolvedLanguage} dir={resolvedLanguage === 'ar' ? 'rtl' : 'ltr'}>
+    {hasMath ? <Suspense fallback={basic}><MathMarkdown text={polished} components={components} /></Suspense> : basic}
   </div>;
 }
 

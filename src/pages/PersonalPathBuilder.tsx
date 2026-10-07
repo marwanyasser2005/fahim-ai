@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, ArrowRight, BrainCircuit, Check, Clock3, Loader2, Route, ShieldCheck, Sparkles, Target } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import type { Language } from '@/App';
 import { generatePersonalizedPath, listPersonalizedPaths, type PathGenerationInput, type PersonalizedPath } from '@/lib/personalizedPaths';
 
@@ -8,15 +8,15 @@ const DRAFT_KEY = 'fahim-personal-path-draft-v1';
 
 const copy = {
   ar: {
-    eyebrow: 'وكيل بناء المسارات', title: 'قل لفَهيم ماذا تريد أن تتقن.',
+    eyebrow: 'وكيل بناء المسارات', title: 'قول لفَهيم عايز توصل لإيه.',
     body: 'يحوّل وكيل GenAI هدفك إلى مسار خاص كامل: وحدات، دروس قصيرة، تطبيقات، تقييم نهائي، وتقدم محفوظ حتى شهادة الإتمام.',
-    goal: 'ما الهدف الذي تريد الوصول إليه؟', goalHint: 'مثال: أريد تعلّم تحليل البيانات ببايثون لبناء مشروع يعرضه ملفي المهني.',
-    level: 'مستواك الحالي', beginner: 'أبدأ من الصفر', intermediate: 'لدي أساسيات', advanced: 'أريد مستوى متقدم',
+    goal: 'إيه اللي عايز تعرف تعمله في نهاية المسار؟', goalHint: 'مثال: أريد تعلّم تحليل البيانات ببايثون لبناء مشروع يعرضه ملفي المهني.',
+    level: 'مستواك الحالي', beginner: 'أبدأ من الصفر', intermediate: 'عندي الأساسيات', advanced: 'عايز أتعمّق أكتر',
     weeks: 'مدة المسار', weekly: 'الوقت الأسبوعي', preferences: 'تفضيلات أو قيود', preferencesHint: 'مثال: أفضل المشاريع العملية، وشرح عربي مع المصطلحات الإنجليزية.',
-    generate: 'ابنِ مساري الآن', generating: 'الوكيل يبني الوحدات والتقييم ويحفظ المسار…',
-    safety: 'التوليد لا يمنح شهادة تلقائيًا. الشهادة لا تصدر إلا بعد إكمال الدروس واجتياز التقييم المسجل.',
+    generate: 'ابنِ مساري الآن', generating: 'فَهيم بيخطط الهدف، ويرتب الدروس والتقييم…',
+    safety: 'إنشاء المسار مش معناه الحصول على شهادة. لازم تكمّل الدروس وتنجح في التقييم المسجّل. الشهادة إتمام من فَهيم، مش اعتماد حكومي.',
     existing: 'مساراتك الشخصية', empty: 'لم تنشئ مسارًا شخصيًا بعد.', open: 'تابع المسار', lessons: 'دروس',
-    saved: 'مسودة النموذج محفوظة تلقائيًا على هذا الجهاز.', error: 'تعذر إنشاء المسار. راجع الهدف وحاول مرة أخرى.',
+    saved: 'اللي كتبته بيتحفظ تلقائيًا على الجهاز ده.', error: 'تعذر إنشاء المسار. راجع الهدف وحاول مرة أخرى.',
   },
   en: {
     eyebrow: 'Path-building agent', title: 'Tell Fahim what you want to master.',
@@ -35,10 +35,11 @@ const initialDraft: PathGenerationInput = { goal: '', level: 'beginner', duratio
 
 export default function PersonalPathBuilder({ language }: { language: Language }) {
   const t = copy[language];
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const Arrow = language === 'ar' ? ArrowLeft : ArrowRight;
   const [form, setForm] = useState<PathGenerationInput>(() => {
-    try { return { ...initialDraft, ...JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}'), language }; }
+    try { return { ...initialDraft, ...JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}'), ...(searchParams.get('goal') ? { goal: searchParams.get('goal')!.slice(0, 700) } : {}), language }; }
     catch { return { ...initialDraft, language }; }
   });
   const [paths, setPaths] = useState<PersonalizedPath[]>([]);
