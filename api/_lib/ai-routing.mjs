@@ -272,7 +272,7 @@ export async function requestHFEmbeddings(inputs, { deadlineAt = Number.POSITIVE
   return { vectors, provider: 'hf', model };
 }
 
-export async function requestLearningAI({ system, messages, maxOutputTokens = 2400, structured = false, stream = false, deadlineAt = Number.POSITIVE_INFINITY, tools = null, toolChoice = null }) {
+export async function requestLearningAI({ system, messages, maxOutputTokens = 2400, structured = false, stream = false, deadlineAt = Number.POSITIVE_INFINITY, tools = null, toolChoice = null, attemptTimeoutMs = null }) {
   const routes = routeCandidates();
   if (!routes.length) throw new AIProviderExhaustedError([{ provider: 'none', status: 503 }]);
   const attempts = [];
@@ -281,7 +281,8 @@ export async function requestLearningAI({ system, messages, maxOutputTokens = 24
     for (let index = 0; index < models.length; index += 1) {
       const remainingMs = deadlineAt - Date.now();
       if (remainingMs <= 750) break providerLoop;
-      const timeoutMs = Math.max(500, Math.min(stream ? 30_000 : 24_000, remainingMs - 250));
+      const perAttemptLimit = Number.isFinite(attemptTimeoutMs) ? Math.max(5_000, Math.min(60_000, attemptTimeoutMs)) : stream ? 30_000 : 24_000;
+      const timeoutMs = Math.max(500, Math.min(perAttemptLimit, remainingMs - 250));
       const model = models[index];
       try {
         const response = provider === 'agent-router'

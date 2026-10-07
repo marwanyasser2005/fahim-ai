@@ -163,6 +163,7 @@ export default async function agentHandler(request, response) {
         completed_at: new Date().toISOString(),
       }).eq('id', generationId).then(() => {}, () => {}),
       saveAgentSession(admin, auth.user.id, session.id, {
+        expectedTurnCount: Number(session.turn_count) || 0,
         state: result.checkpoint,
         stage: result.stage,
         status: result.awaiting ? 'awaiting' : 'completed',

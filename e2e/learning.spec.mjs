@@ -77,6 +77,11 @@ test('personal path uses saved progress, retries failures, replans and grades se
   await page.route('**/api/learning-paths**', async route => {
     if (route.request().method() === 'POST') {
       const body = route.request().postDataJSON();
+      if (body.action === 'lesson-content') {
+        const lesson = { text: '## مثال عملي\nجسم كتلته 2 كجم وقوة محصلة 6 نيوتن: التسارع 3 متر لكل ثانية تربيع.\n\nجرّب بنفسك: لو القوة اتضاعفت، إيه اللي يتغيّر؟', generatedAt: new Date().toISOString(), qualityVersion: 'fixture', sourceCheck: 'not-checked' };
+        path.modules[0].lessons[0].teaching = { ar: lesson };
+        await route.fulfill({ json: { lesson } }); return;
+      }
       if (body.action === 'replan') { path.weeklyMinutes = body.weeklyMinutes; path.version += 1; }
     }
     path.adaptivePlan.remainingLessons = saved ? 0 : 1;
@@ -95,6 +100,9 @@ test('personal path uses saved progress, retries failures, replans and grades se
   await page.goto('/personal-paths?goal=عايز%20أطبق%20قانون%20نيوتن%20بمثال%20عملي');
   await page.getByRole('button', { name: 'ابنِ مساري الآن' }).click();
   await expect(page.getByRole('heading', { name: text.ar }).first()).toBeVisible();
+  await page.getByRole('button', { name: 'افتح شرح الدرس والمثال' }).click();
+  await expect(page.getByRole('heading', { name: 'مثال عملي' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'إلغاء الاكتمال' })).toHaveCount(0);
   await page.getByRole('button', { name: 'أكملت الدرس', exact: true }).click();
   await expect(page.getByRole('alert')).toBeVisible();
   await expect(page.getByRole('button', { name: 'إلغاء الاكتمال' })).toHaveCount(0);

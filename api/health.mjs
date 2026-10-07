@@ -1,7 +1,7 @@
 import { applyApiHeaders, isSameOrigin, logEvent } from './_lib/security.mjs';
 import { getAIStatus } from './_lib/ai-routing.mjs';
 
-const RELEASE = 'fahim-verified-learning-os-8';
+const RELEASE = 'fahim-verified-learning-os-9';
 
 /**
  * Two probes, because one endpoint cannot answer both questions.

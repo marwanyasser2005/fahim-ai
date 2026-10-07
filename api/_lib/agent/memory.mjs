@@ -74,6 +74,7 @@ export async function saveAgentSession(admin, userId, sessionId, {
   mastery = BKT_DEFAULTS.p0,
   generationId = null,
   completed = false,
+  expectedTurnCount = null,
 } = {}) {
   if (!admin || !userId || !sessionId) return { persisted: false };
   const safeStage = AGENT_STAGES.has(stage) ? stage : 'discover';
@@ -86,19 +87,16 @@ export async function saveAgentSession(admin, userId, sessionId, {
       mastery: Math.round(clamp01(mastery) * 1000) / 1000,
       last_generation_id: generationId || null,
       updated_at: new Date().toISOString(),
+      ...(Number.isInteger(expectedTurnCount) ? { turn_count: expectedTurnCount + 1 } : {}),
       ...(completed ? { completed_at: new Date().toISOString() } : {}),
     };
-    const { data, error } = await admin.from('agent_sessions')
+    let update = admin.from('agent_sessions')
       .update(row)
       .eq('id', sessionId)
-      .eq('user_id', userId)
-      .select('id,turn_count')
-      .maybeSingle();
-    if (error) return { persisted: false };
-    // Increment separately so older PostgREST deployments do not need an RPC.
-    await admin.from('agent_sessions').update({ turn_count: (Number(data?.turn_count) || 0) + 1 })
-      .eq('id', sessionId)
       .eq('user_id', userId);
+    if (Number.isInteger(expectedTurnCount)) update = update.eq('turn_count', expectedTurnCount);
+    const { data, error } = await update.select('id,turn_count').maybeSingle();
+    if (error || !data) return { persisted: false, conflict: !error };
     return { persisted: true };
   } catch {
     return { persisted: false };

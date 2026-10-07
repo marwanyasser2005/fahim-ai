@@ -3,7 +3,8 @@
   "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "functions": { "api/*.mjs": { "maxDuration": 60 } },
+  "fluid": true,
+  "functions": { "api/*.mjs": { "maxDuration": 180 } },
   "rewrites": [
     { "source": "/api/learning-paths", "destination": "/api/ai?route=learning-paths" },
     { "source": "/api/agent", "destination": "/api/ai?route=agent" },

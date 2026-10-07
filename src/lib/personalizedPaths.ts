@@ -10,7 +10,9 @@ export type PersonalizedLesson = {
   type: 'concept' | 'practice' | 'project';
   durationMinutes: number;
   position: number;
+  teaching?: Partial<Record<'ar' | 'en', PathLessonTeaching>>;
 };
+export type PathLessonTeaching = { text: string; generatedAt: string; qualityVersion: string; sourceCheck: string };
 
 export type PersonalizedModule = {
   index: number;
@@ -78,4 +80,9 @@ export async function generatePersonalizedPath(input: PathGenerationInput): Prom
 export async function replanPersonalizedPath(path: PersonalizedPath, weeklyMinutes: number): Promise<PersonalizedPath> {
   const response = await authenticatedFetch('/api/learning-paths', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'replan', pathId: path.id, weeklyMinutes, expectedVersion: path.version || 1 }) });
   return (await responseJson<{ path: PersonalizedPath }>(response)).path;
+}
+
+export async function loadPathLessonTeaching(pathId: string, lessonId: string, language: 'ar' | 'en'): Promise<PathLessonTeaching> {
+  const response = await authenticatedFetch('/api/learning-paths', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'lesson-content', pathId, lessonId, language }) });
+  return (await responseJson<{ lesson: PathLessonTeaching }>(response)).lesson;
 }
